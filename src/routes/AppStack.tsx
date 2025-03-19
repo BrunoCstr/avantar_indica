@@ -11,7 +11,7 @@ export function AppStack() {
   return (
     <ThemeProvider theme={theme}>
       <Stack.Navigator>
-      <Stack.Screen name="HomeScreen" component={HomeScreen} />
+      <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: false }}/>
     </Stack.Navigator>
     </ThemeProvider>
   );

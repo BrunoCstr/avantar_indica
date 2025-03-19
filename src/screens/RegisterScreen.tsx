@@ -12,7 +12,7 @@ export function RegisterScreen() {
 
   return (
     <Box>
-        <Text>Register Screen</Text>
+        <Text style={{color: "black"}}>Register Screen</Text>
     </Box>
   );
 }

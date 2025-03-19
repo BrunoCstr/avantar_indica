@@ -12,7 +12,7 @@ export function HomeScreen() {
 
   return (
     <Box>
-        <Text>Home Screen</Text>
+        <Text style={{color: "black"}}>Home Screen</Text>
     </Box>
   );
 }
