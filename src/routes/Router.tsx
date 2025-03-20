@@ -1,7 +1,6 @@
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {ThemeProvider} from '@shopify/restyle';
-import BootSplash from 'react-native-bootsplash'
 
 // import {useAuth} from '../contexts/Auth';
 import {theme} from '../theme';
@@ -15,7 +14,7 @@ export function Router() {
 
   return (
     <ThemeProvider theme={theme}>
-      <NavigationContainer onReady={() => BootSplash.hide({fade: true})}>
+      <NavigationContainer>
         {auth ? <AppStack /> : <AuthStack />}
       </NavigationContainer>
     </ThemeProvider>
