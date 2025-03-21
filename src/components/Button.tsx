@@ -1,25 +1,21 @@
 import { TouchableOpacity } from "react-native";
 import {createText} from '@shopify/restyle';
 import {ThemeProps} from '../theme';
-import { useNavigation } from "@react-navigation/native";
 
 const Text = createText<ThemeProps>();
 
 interface ButtonProps {
-    navigateTo: string;
-    opacity: number;
     text: string;
     backgroundColor: string;
+    onPress: () => void;
   }
 
-export function Button( {navigateTo, opacity, text, backgroundColor}: ButtonProps ) {
-    const navigation = useNavigation()
-
+export function Button( { onPress, text, backgroundColor}: ButtonProps ) {
     return(
         <TouchableOpacity 
         style={{ justifyContent:"center", alignItems:"center", backgroundColor: backgroundColor, borderRadius: 50, height: 50 }} 
-        activeOpacity={opacity}
-        onPress={() => navigation.navigate(navigateTo)}
+        activeOpacity={0.9}
+        onPress={onPress}
         >
             <Text>{text}</Text>
         </TouchableOpacity>

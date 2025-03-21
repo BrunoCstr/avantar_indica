@@ -1,12 +1,13 @@
 import React, {useEffect, useState} from 'react';
-import {TouchableOpacity, Picker, Alert} from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import {useForm, Controller} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
-import {signUpSchema, SignUpFormData} from '../schemas/signUpSchema';
+import { signUpSchema, SignUpFormData } from '../schemas/validationSchema';
 import {FormInput} from '../components/FormInput';
 
 import {createBox, createText} from '@shopify/restyle';
 import {ThemeProps} from '../theme';
+import { Button } from '../components/Button';
 const Box = createBox<ThemeProps>();
 const Text = createText<ThemeProps>();
 
@@ -106,7 +107,11 @@ export function SignUpScreen() {
       />
 
       {/* Envio do Formulário de Cadastro */}
-      
+      <Button
+      text='Cadastrar'
+      backgroundColor='purple'
+      onPress={handleSubmit(onSubmit)} 
+      />
     </Box>
   );
 }
