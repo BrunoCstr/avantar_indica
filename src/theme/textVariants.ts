@@ -5,8 +5,9 @@ export const textVariants = {
         color: "white"
     },
     title: {
-        fontSize: 42,
+        fontSize: 30,
         fontFamily: "FamiljenGrotesk-Bold",
-        color: "white",
+        color: "purple",
+        fontWeight: "bold"
     }
 }

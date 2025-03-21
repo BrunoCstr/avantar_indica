@@ -11,7 +11,7 @@ import {AuthStack} from './AuthStack';
 export function Router() {
   // Quando colocar a logica do Firebase no contexto, mudar aqui
   // const {authData} = useAuth()
-  const auth = false;
+  const auth = true;
 
   return (
     <ThemeProvider theme={theme}>

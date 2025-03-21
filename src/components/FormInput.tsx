@@ -14,7 +14,13 @@ interface FormInputProps {
   errorMessage?: string;
 }
 
-export const FormInput = ({ name, placeholder, control, secureTextEntry = false, errorMessage, }: FormInputProps) => (
+export const FormInput = ({
+  name,
+  placeholder,
+  control,
+  secureTextEntry = false,
+  errorMessage,
+}: FormInputProps) => (
   <>
     <Controller
       control={control}
@@ -27,15 +33,15 @@ export const FormInput = ({ name, placeholder, control, secureTextEntry = false,
           secureTextEntry={secureTextEntry}
           style={{
             borderWidth: 1,
-            borderColor: 'gray',
+            borderColor: errorMessage ? 'red' : 'gray',
             marginBottom: 10,
-            padding: 8,
-            borderRadius: 5,
+            height: 45,
+            padding: 10,
+            borderRadius: 5
           }}
         />
       )}
       name={name}
     />
-    {errorMessage && <Text color="red">{errorMessage}</Text>}
   </>
 );

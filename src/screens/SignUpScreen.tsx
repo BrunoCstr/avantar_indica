@@ -1,18 +1,23 @@
 import React, {useEffect, useState} from 'react';
-import { Picker } from '@react-native-picker/picker';
+import {Picker} from '@react-native-picker/picker';
 import {useForm, Controller} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
-import { signUpSchema, SignUpFormData } from '../schemas/validationSchema';
+import {signUpSchema, SignUpFormData} from '../schemas/validationSchema';
 import {FormInput} from '../components/FormInput';
+import Icon from 'react-native-vector-icons/Feather';
 
-import {createBox, createText} from '@shopify/restyle';
+import {createBox} from '@shopify/restyle';
 import {ThemeProps} from '../theme';
-import { Button } from '../components/Button';
+import {Button} from '../components/Button';
+import {TouchableOpacity} from 'react-native';
+
 const Box = createBox<ThemeProps>();
-const Text = createText<ThemeProps>();
+
 
 export function SignUpScreen() {
   const [units, setUnits] = useState<string[]>([]);
+  const [showPassword, setShowPassword] = useState(true);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(true);
 
   useEffect(() => {
     // Pegar as unidades do Firebase
@@ -53,7 +58,7 @@ export function SignUpScreen() {
       justifyContent="center"
       marginLeft="l"
       marginRight="l"
-      backgroundColor="purple">
+      gap="s">
       <FormInput
         name="fullName"
         placeholder="Nome"
@@ -72,46 +77,89 @@ export function SignUpScreen() {
         control={control}
         errorMessage={errors.cpf?.message}
       />
-      <FormInput
-        name="password"
-        placeholder="Senha"
-        secureTextEntry
-        control={control}
-        errorMessage={errors.password?.message}
-      />
-      <FormInput
-        name="confirmPassword"
-        placeholder="Confirmar Senha"
-        secureTextEntry
-        control={control}
-        errorMessage={errors.confirmPassword?.message}
-      />
+
+      <Box>
+        <Box position="relative">
+          <FormInput
+            name="password"
+            placeholder="Senha"
+            secureTextEntry={showPassword}
+            control={control}
+            errorMessage={errors.password?.message}
+          />
+        </Box>
+        <TouchableOpacity
+          style={{position: 'absolute', right: 20, top: '20%'}}
+          onPress={() => {
+            setShowPassword(!showPassword);
+          }}>
+          <Icon
+            name={showPassword ? 'eye-off' : 'eye'}
+            size={22}
+            color="black"
+          />
+        </TouchableOpacity>
+      </Box>
+
+      <Box>
+        <Box position="relative">
+          <FormInput
+            name="confirmPassword"
+            placeholder="Confirmar Senha"
+            secureTextEntry={showConfirmPassword}
+            control={control}
+            errorMessage={errors.confirmPassword?.message}
+          />
+        </Box>
+        <TouchableOpacity
+          style={{position: 'absolute', right: 20, top: '20%'}}
+          onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+          <Icon
+            name={showConfirmPassword ? 'eye-off' : 'eye'}
+            size={22}
+            color="black"
+          />
+        </TouchableOpacity>
+      </Box>
 
       {/* Input de Seleção da Unidade */}
       <Controller
         control={control}
         render={({field: {onChange, value}}) => (
-          <>
-            <Picker selectedValue={value} onValueChange={onChange}>
+          <Box
+            style={{
+              borderWidth: 1,
+              borderColor: errors.affiliated_to ? 'red' : 'gray', // Borda vermelha se houver erro
+              borderRadius: 5,
+              paddingLeft: 8,
+              paddingRight: 8,
+              justifyContent: 'center',
+            }}>
+            <Picker
+              selectedValue={value}
+              onValueChange={onChange}
+              style={{
+                height: 45,
+                width: '100%',
+              }}>
               <Picker.Item label="Selecione uma unidade" value="" />
               {units.map(unit => (
                 <Picker.Item key={unit} label={unit} value={unit} />
               ))}
             </Picker>
-            {errors.affiliated_to && (
-              <Text color="red">{errors.affiliated_to?.message}</Text>
-            )}
-          </>
+          </Box>
         )}
         name="affiliated_to"
       />
 
       {/* Envio do Formulário de Cadastro */}
-      <Button
-      text='Cadastrar'
-      backgroundColor='purple'
-      onPress={handleSubmit(onSubmit)} 
-      />
+      <Box mt='m'>
+        <Button
+          text="CADASTRAR"
+          backgroundColor="purple"
+          onPress={handleSubmit(onSubmit)}
+        />
+      </Box>
     </Box>
   );
 }
