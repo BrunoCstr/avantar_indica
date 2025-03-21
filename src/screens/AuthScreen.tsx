@@ -50,13 +50,13 @@ export function AuthScreen() {
         <Box style={styles.buttonsContainer}>
           <TouchableOpacity
             style={styles.btnStyle}
-            onPress={() => navigation.navigate('RegisterScreen')}
+            onPress={() => navigation.navigate('SignUpScreen')}
             activeOpacity={0.9}>
             <Text>QUERO CRIAR UMA CONTA</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.btnStyle2}
-            onPress={() => navigation.navigate("LoginScreen")}
+            onPress={() => navigation.navigate("SignInScreen")}
             activeOpacity={0.9}>
             <Text>ACESSAR CONTA</Text>
           </TouchableOpacity>
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     marginLeft: 30,
     marginRight: 30,
     justifyContent: 'flex-end',
-    marginBottom: 50,
+    marginBottom: 50
   },
 
   smallText: {

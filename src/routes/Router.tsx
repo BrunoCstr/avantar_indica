@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {ThemeProvider} from '@shopify/restyle';
+import SplashScreen from 'react-native-splash-screen';
 
 // import {useAuth} from '../contexts/Auth';
 import {theme} from '../theme';
@@ -14,7 +15,7 @@ export function Router() {
 
   return (
     <ThemeProvider theme={theme}>
-      <NavigationContainer>
+      <NavigationContainer onReady={() => SplashScreen.hide()}>
         {auth ? <AppStack /> : <AuthStack />}
       </NavigationContainer>
     </ThemeProvider>

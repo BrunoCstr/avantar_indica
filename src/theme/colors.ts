@@ -8,5 +8,7 @@ export const colors = {
     lillac: "#9F8CF2",
     black: "#170138",
     white: "#F6F3FF",
-    gray: "#9093A0"
+    gray: "#9093A0",
+    red: "#FF0000", 
+    transparent: "transparent"
 }

@@ -6,13 +6,13 @@ import {ThemeProps} from '../theme';
 const Box = createBox<ThemeProps>();
 const Text = createText<ThemeProps>();
 
-export function RegisterScreen() {
+export function SignInScreen() {
   // Para usar nos componentes que nao sao do restyle
   const theme = useTheme<ThemeProps>();
 
   return (
     <Box>
-        <Text style={{color: "black"}}>Register Screen</Text>
+        <Text>Login Screen</Text>
     </Box>
   );
 }
