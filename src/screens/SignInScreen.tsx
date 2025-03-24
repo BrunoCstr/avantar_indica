@@ -9,14 +9,12 @@ import {createBox} from '@shopify/restyle';
 import {ThemeProps} from '../theme';
 import {Button} from '../components/Button';
 import {TouchableOpacity} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 
 const Box = createBox<ThemeProps>();
 
 
 export function SignInScreen() {
   const [showPassword, setShowPassword] = useState(true);
-  const navigation = useNavigation()
 
   const {
     control,

@@ -1,22 +1,29 @@
-import React, { useEffect } from 'react';
+import React, {useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {ThemeProvider} from '@shopify/restyle';
 import SplashScreen from 'react-native-splash-screen';
 
-// import {useAuth} from '../contexts/Auth';
 import {theme} from '../theme';
 import {AppStack} from './AppStack';
 import {AuthStack} from './AuthStack';
+import {useAuth} from '../contexts/Auth';
+import {Text, View} from 'react-native';
 
 export function Router() {
-  // Quando colocar a logica do Firebase no contexto, mudar aqui
-  // const {authData} = useAuth()
-  const auth = true;
+  const {authData, isLoading} = useAuth();
+
+  if (isLoading) {
+    return (
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <Text>Carregando...</Text>
+      </View>
+    );
+  }
 
   return (
     <ThemeProvider theme={theme}>
-      <NavigationContainer onReady={() => SplashScreen.hide()}>
-        {auth ? <AppStack /> : <AuthStack />}
+      <NavigationContainer onReady={() => !isLoading && SplashScreen.hide()}>
+        {authData ? <AppStack /> : <AuthStack />}
       </NavigationContainer>
     </ThemeProvider>
   );

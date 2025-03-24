@@ -23,9 +23,9 @@ export function SignUpScreen() {
     // Pegar as unidades do Firebase
     const fetchUnits = async () => {
       const fetchedUnits = [
-        'Unidade de Teste 1',
-        'Unidade de Teste 2',
-        'Unidade de Teste 3',
+        'Avantar São Paulo - SP - Paraíso',
+        'Avantar Belo Horizonte - MG',
+        'Avantar Valparaíso - GO',
       ];
       setUnits(fetchedUnits);
     };
