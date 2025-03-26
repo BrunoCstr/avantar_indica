@@ -11,6 +11,8 @@ import {useAuth} from '../contexts/Auth';
 export function Router() {
   const {userAuthenticated} = useAuth();
 
+  console.log("Usuário autenticado?", userAuthenticated)
+
   return (
     <ThemeProvider theme={theme}>
       <NavigationContainer onReady={() => SplashScreen.hide()}>

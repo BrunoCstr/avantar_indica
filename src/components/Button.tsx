@@ -13,7 +13,7 @@ interface ButtonProps {
 export function Button( { onPress, text, backgroundColor}: ButtonProps ) {
     return(
         <TouchableOpacity 
-        style={{ justifyContent:"center", alignItems:"center", backgroundColor: backgroundColor, borderRadius: 50, height: 50 }} 
+        style={{ justifyContent:"center", alignItems:"center", backgroundColor: backgroundColor, borderRadius: 100, height: 50 }} 
         activeOpacity={0.9}
         onPress={onPress}
         >

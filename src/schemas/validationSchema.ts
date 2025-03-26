@@ -4,7 +4,7 @@ import { z } from 'zod';
 export const signUpSchema = z.object({
   fullName: z.string().min(3, "Nome é obrigatório"),
   email: z.string().email("E-mail inválido"),
-  cpf: z.string().min(11, "Digite um CPF válido!").max(11, "Digite um CPF válido!").regex(/^\d{11}$/, "CPF deve conter apenas números"),
+  cpf: z.string().min(14, "Digite um CPF válido!").max(14, "Digite um CPF válido!").regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, "Formato de CPF inválido!"),
   password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
   confirmPassword: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
   affiliated_to: z.string().min(5, "Selecione uma unidade para se afiliar"),

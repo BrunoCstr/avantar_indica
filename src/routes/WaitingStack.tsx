@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {ThemeProvider} from '@shopify/restyle';
 
@@ -10,12 +10,14 @@ import {useAuth} from '../contexts/Auth';
 const Stack = createNativeStackNavigator();
 
 export function WaitingStack() {
-  const {registrationStaus} = useAuth();
-  const [isRegistred, setIsRegistred] = useState(registrationStaus)
+  const {registrationStatus} = useAuth();
+  const [isRegistred, setIsRegistred] = useState(registrationStatus);
 
   useEffect(() => {
-    setIsRegistred(registrationStaus)
-  }, [registrationStaus])
+    if (registrationStatus) {
+      setIsRegistred(registrationStatus);
+    }
+  }, [registrationStatus]);
 
   return (
     <ThemeProvider theme={theme}>

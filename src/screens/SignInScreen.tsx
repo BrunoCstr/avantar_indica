@@ -9,11 +9,13 @@ import {createBox} from '@shopify/restyle';
 import {ThemeProps} from '../theme';
 import {Button} from '../components/Button';
 import {TouchableOpacity} from 'react-native';
+import { useAuth } from '../contexts/Auth';
 
 const Box = createBox<ThemeProps>();
 
 
 export function SignInScreen() {
+  const {signIn} = useAuth()
   const [showPassword, setShowPassword] = useState(true);
 
   const {
@@ -25,11 +27,11 @@ export function SignInScreen() {
     defaultValues: {
       email: '',
       password: ''
-    },
+    }
   });
 
   const onSubmit = (data: SignInFormData) => {
-    console.log('Usuário autenticado com sucesso!', data);
+    signIn(data.email, data.password)
   };
 
   return (

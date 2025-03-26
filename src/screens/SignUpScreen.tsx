@@ -50,14 +50,16 @@ export function SignUpScreen() {
   });
 
   const onSubmit = (data: SignUpFormData) => {
-    const {confirmPassword, ...dataFiltred} = data;
+    const { confirmPassword, cpf, ...dataFiltred} = data;
+
+    const cleanedCPF = cpf.replace(/\D/g, '');
 
     signUp(
       dataFiltred.fullName,
       dataFiltred.email,
       dataFiltred.password,
-      dataFiltred.cpf,
-      dataFiltred.affiliated_to,
+      cleanedCPF,
+      dataFiltred.affiliated_to
     );
   };
 
@@ -79,12 +81,15 @@ export function SignUpScreen() {
         placeholder="E-mail"
         control={control}
         errorMessage={errors.email?.message}
+
+
       />
       <FormInput
         name="cpf"
         placeholder="CPF"
         control={control}
         errorMessage={errors.cpf?.message}
+        mask={[/\d/, /\d/, /\d/, '.', /\d/, /\d/, /\d/, '.', /\d/, /\d/, /\d/, '-', /\d/, /\d/]}
       />
 
       <Box>

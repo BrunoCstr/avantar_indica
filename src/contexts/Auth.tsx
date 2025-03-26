@@ -34,7 +34,7 @@ interface AuthContextData {
   ) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
-  registrationStaus: boolean;
+  registrationStatus: boolean;
 }
 
 interface AuthProviderProps {
@@ -47,12 +47,13 @@ export const AuthContext = createContext<AuthContextData>(
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const [userAuthenticated, setIsUserAuthenticated] = useState(false);
-  const [registrationStaus, setRegistrationStaus] = useState(false);
+  const [registrationStatus, setregistrationStatus] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user: any) => {
       if (user) {
         try {
+          await user.reload(); // Recarrega pq pode ser que o token esteja armazenado no cache.
           const idTokenResult = await user.getIdTokenResult();
           if (!idTokenResult) {
             throw new Error('Usuário inválido!');
@@ -69,17 +70,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
           querySnapshot.forEach(doc => {
             if (doc.exists) {
               const data = doc.data();
-              setRegistrationStaus(data.registration_status);
+              setregistrationStatus(data.registration_status);
             }
           });
         } catch (err) {
           await signOut(auth);
           setIsUserAuthenticated(false);
-          setRegistrationStaus(false);
+          setregistrationStatus(false);
         }
       } else {
         setIsUserAuthenticated(false);
-        setRegistrationStaus(false);
+        setregistrationStatus(false);
       }
     });
 
@@ -91,7 +92,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     email: string,
     password: string,
     cpf: string,
-    affiliated_to: string,
+    affiliated_to: string
   ) {
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -208,7 +209,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         signUp,
         signIn,
         signOut: handleSignOut,
-        registrationStaus,
+        registrationStatus,
       }}>
       {children}
     </AuthContext.Provider>
