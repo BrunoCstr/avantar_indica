@@ -7,7 +7,7 @@ export const textVariants = {
     title: {
         fontSize: 30,
         fontFamily: "FamiljenGrotesk-Bold",
-        color: "purple",
+        color: "white",
         fontWeight: "bold"
     }
 }

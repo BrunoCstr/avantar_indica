@@ -10,14 +10,15 @@ import {createBox} from '@shopify/restyle';
 import {ThemeProps} from '../theme';
 import {Button} from '../components/Button';
 import {TouchableOpacity} from 'react-native';
+import {useAuth} from '../contexts/Auth';
 
 const Box = createBox<ThemeProps>();
-
 
 export function SignUpScreen() {
   const [units, setUnits] = useState<string[]>([]);
   const [showPassword, setShowPassword] = useState(true);
   const [showConfirmPassword, setShowConfirmPassword] = useState(true);
+  const {signUp} = useAuth();
 
   useEffect(() => {
     // Pegar as unidades do Firebase
@@ -49,7 +50,15 @@ export function SignUpScreen() {
   });
 
   const onSubmit = (data: SignUpFormData) => {
-    console.log('Usuário cadastrado com sucesso!', data);
+    const {confirmPassword, ...dataFiltred} = data;
+
+    signUp(
+      dataFiltred.fullName,
+      dataFiltred.email,
+      dataFiltred.password,
+      dataFiltred.cpf,
+      dataFiltred.affiliated_to,
+    );
   };
 
   return (
@@ -153,7 +162,7 @@ export function SignUpScreen() {
       />
 
       {/* Envio do Formulário de Cadastro */}
-      <Box mt='m'>
+      <Box mt="m">
         <Button
           text="CADASTRAR"
           backgroundColor="purple"

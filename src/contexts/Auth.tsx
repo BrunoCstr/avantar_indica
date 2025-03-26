@@ -1,17 +1,30 @@
 import React, {createContext, useContext, useEffect, useState} from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import auth from '@react-native-firebase/auth';
-import firestore from '@react-native-firebase/firestore';
 import {Alert} from 'react-native';
+import app from '../../firebaseConfig';
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+  deleteUser,
+  signOut,
+  onAuthStateChanged,
+} from '@react-native-firebase/auth';
+import {
+  collection,
+  addDoc,
+  query,
+  where,
+  getDocs,
+  getFirestore,
+  serverTimestamp,
+} from '@react-native-firebase/firestore';
 
-export interface AuthData {
-  uid: string;
-  email: string | null;
-  token: string;
-}
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 interface AuthContextData {
-  authData?: AuthData;
+  userAuthenticated: boolean;
   signUp: (
     fullName: string,
     email: string,
@@ -21,41 +34,57 @@ interface AuthContextData {
   ) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
-  isLoading: boolean;
+  registrationStaus: boolean;
 }
 
 interface AuthProviderProps {
   children: React.ReactNode;
 }
 
-
 export const AuthContext = createContext<AuthContextData>(
   {} as AuthContextData,
 );
 
-
 export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
-  const [authData, setAuthData] = useState<AuthData>();
-  const [isLoading, setIsLoading] = useState(true);
+  const [userAuthenticated, setIsUserAuthenticated] = useState(false);
+  const [registrationStaus, setRegistrationStaus] = useState(false);
 
   useEffect(() => {
-    loadStorageData();
-  }, []);
+    const unsubscribe = onAuthStateChanged(auth, async (user: any) => {
+      if (user) {
+        try {
+          const idTokenResult = await user.getIdTokenResult();
+          if (!idTokenResult) {
+            throw new Error('Usuário inválido!');
+          }
 
-  async function loadStorageData(): Promise<void> {
-    try {
-      // Tenta pegar dado de auth pra manter o usuário autenticado
-      const authDataSerialized = await AsyncStorage.getItem('@AuthData');
-      if (authDataSerialized) {
-        // Converte de volta pra objeto, para armazenar no estado
-        const _authData: AuthData = JSON.parse(authDataSerialized);
-        setAuthData(_authData);
+          setIsUserAuthenticated(true);
+
+          const q = query(
+            collection(db, 'users'),
+            where('uid', '==', user.uid),
+          );
+
+          const querySnapshot = await getDocs(q);
+          querySnapshot.forEach(doc => {
+            if (doc.exists) {
+              const data = doc.data();
+              setRegistrationStaus(data.registration_status);
+            }
+          });
+        } catch (err) {
+          await signOut(auth);
+          setIsUserAuthenticated(false);
+          setRegistrationStaus(false);
+        }
+      } else {
+        setIsUserAuthenticated(false);
+        setRegistrationStaus(false);
       }
-    } catch (error) {
-    } finally {
-      setIsLoading(false);
-    }
-  }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   async function signUp(
     fullName: string,
@@ -65,102 +94,104 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     affiliated_to: string,
   ) {
     try {
-      const userCredential = await auth().createUserWithEmailAndPassword(
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
         email,
         password,
       );
 
-      await userCredential.user.updateProfile({displayName: fullName});
+      const user = userCredential.user;
 
-      await firestore().collection('users').doc(userCredential.user.uid).set({
+      await addDoc(collection(db, 'users'), {
         fullName,
         email,
         cpf,
         affiliated_to,
         registration_status: false,
-        createdAt: firestore.FieldValue.serverTimestamp(),
-      });
+        createdAt: serverTimestamp(),
+        uid: user.uid,
+      })
 
-      // Mandar pra tela de aguardando aprovação e notificar a unidade e mandar os dados para o CRUD dela.
+      await updateProfile(user, {displayName: fullName});
+
     } catch (err: any) {
+      if (auth.currentUser) {
+        await deleteUser(auth.currentUser);
+      }
+
       switch (err.code) {
         case 'auth/email-already-in-use':
-          Alert.alert('E-mail já cadastrado.');
+          Alert.alert('Falha ao cadastrar o usuário', 'E-mail já cadastrado.');
           break;
         case 'auth/invalid-email':
-          Alert.alert('E-mail inválido.');
+          Alert.alert('Falha ao cadastrar o usuário', 'E-mail inválido.');
           break;
         case 'auth/weak-password':
-          Alert.alert('Senha muito fraca.');
+          Alert.alert('Falha ao cadastrar o usuário', 'Senha muito fraca.');
           break;
         case 'auth/operation-not-allowed':
           Alert.alert(
+            'Falha ao cadastrar o usuário',
             'Criação de conta com e-mail e senha não está habilitada.',
           );
           break;
         case 'auth/network-request-failed':
-          Alert.alert('Falha de conexão com a rede.');
+          Alert.alert('Falha ao cadastrar o usuário', 'Falha de conexão com a rede.');
           break;
         default:
-          Alert.alert('Erro desconhecido, entre em contato com o suporte!');
+          Alert.alert(
+            'Falha ao cadastrar o usuário',
+            'Erro desconhecido, entre em contato com o suporte!',
+          );
       }
     }
   }
 
   async function signIn(email: string, password: string) {
     try {
-      const authData = await auth().signInWithEmailAndPassword(email, password);
-
-      const userAuthData: AuthData = {
-        uid: authData.user.uid,
-        email: authData.user.email ?? '',
-        token: await authData.user.getIdToken(),
-      };
-
-      setAuthData(userAuthData);
-      AsyncStorage.setItem('@AuthData', JSON.stringify(authData));
+      await signInWithEmailAndPassword(auth, email, password);
     } catch (err: any) {
       switch (err.code) {
         case 'auth/invalid-email':
-          Alert.alert('E-mail inválido!');
+          Alert.alert('Falha ao realizar o login', 'E-mail inválido!');
           break;
         case 'auth/user-disabled':
-          Alert.alert('Conta desativada.');
+          Alert.alert('Falha ao realizar o login', 'Conta desativada.');
           break;
         case 'auth/user-not-found':
-          Alert.alert('Usuário não encontrado.');
+          Alert.alert('Falha ao realizar o login', 'Usuário não encontrado.');
           break;
         case 'auth/wrong-password':
-          Alert.alert('Senha incorreta.');
+          Alert.alert('Falha ao realizar o login', 'Senha incorreta.');
           break;
         case 'auth/too-many-requests':
-          Alert.alert('Muitas tentativas. Tente novamente mais tarde.');
+          Alert.alert(
+            'Falha ao realizar o login',
+            'Muitas tentativas. Tente novamente mais tarde.',
+          );
           break;
         case 'auth/network-request-failed':
-          Alert.alert('Falha de conexão com a rede.');
+          Alert.alert('Falha ao realizar o login', 'Falha de conexão com a rede.');
           break;
         case 'auth/invalid-credential':
-          Alert.alert('Credenciais inválidas.');
+          Alert.alert('Falha ao realizar o login', 'Credenciais inválidas.');
           break;
         default:
-          Alert.alert('Erro desconhecido, entre em contato com o suporte!');
+          Alert.alert('Erro desconhecido', 'entre em contato com o suporte!');
       }
     }
   }
 
-  async function signOut() {
+  async function handleSignOut() {
     try {
-      await auth().signOut();
-
-      setAuthData(undefined);
-      AsyncStorage.removeItem('@AuthData');
+      await signOut(auth);
     } catch (err: any) {
       switch (err.code) {
         case 'auth/no-current-user':
-          Alert.alert('Nenhum usuário autenticado no momento.');
+          Alert.alert('Falha ao sair','Nenhum usuário autenticado no momento.');
           break;
         case 'auth/network-request-failed':
-          Alert.alert('Falha de conexão com a rede.');
+          Alert.alert('Falha ao sair','Falha de conexão com a rede.');
           break;
         default:
           Alert.alert(
@@ -172,7 +203,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
   return (
     <AuthContext.Provider
-      value={{authData, signUp, signIn, signOut, isLoading}}>
+      value={{
+        userAuthenticated,
+        signUp,
+        signIn,
+        signOut: handleSignOut,
+        registrationStaus,
+      }}>
       {children}
     </AuthContext.Provider>
   );
@@ -180,10 +217,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
 export function useAuth(): AuthContextData {
   const context = useContext(AuthContext);
-
   if (!context) {
     throw new Error('useAuth deve ser usado dentro de um AuthProvider');
   }
-
   return context;
 }
