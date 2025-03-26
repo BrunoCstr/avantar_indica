@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {ThemeProvider} from '@shopify/restyle';
 
@@ -11,11 +11,16 @@ const Stack = createNativeStackNavigator();
 
 export function WaitingStack() {
   const {registrationStaus} = useAuth();
+  const [isRegistred, setIsRegistred] = useState(registrationStaus)
+
+  useEffect(() => {
+    setIsRegistred(registrationStaus)
+  }, [registrationStaus])
 
   return (
     <ThemeProvider theme={theme}>
       <Stack.Navigator>
-        {registrationStaus ? (
+        {isRegistred ? (
           <Stack.Screen
             name="AppStack"
             component={AppStack}
