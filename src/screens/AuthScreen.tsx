@@ -1,114 +1,62 @@
 import React from 'react';
 
-import {createBox, createText, useTheme} from '@shopify/restyle';
-import {ThemeProps} from '../theme';
 import {
   ImageBackground,
-  StyleSheet,
   Image,
   TouchableOpacity,
+  View,
+  Text
 } from 'react-native';
 import images from '../data/images';
 import { useNavigation } from '@react-navigation/native';
-
-const Box = createBox<ThemeProps>();
-const Text = createText<ThemeProps>();
+import gStyles from '../styles/gStyles'; 
 
 export function AuthScreen() {
-  // Para usar nos componentes que nao sao do restyle
-  const theme = useTheme<ThemeProps>();
   const navigation = useNavigation();
 
   return (
     <ImageBackground
       source={images.background}
-      style={styles.background}
+      className='flex-1'
       resizeMode="cover">
-      <Box style={styles.logoContainer}>
+      <View className='mt-10 ml-7 mr-7'>
         <Image source={images.avantar_logo_branca}></Image>
-      </Box>
-      <Box style={styles.mainContainer}>
+      </View>
+      <View className='flex-1 ml-7 mr-7 mb-10 justify-end'>
         {/* Texto */}
-        <Box>
-          <Box>
-            <Text variant="title" style={{marginBottom: -15}}>
+        <View>
+          <View>
+            <Text className='font-semiBold mb-[-12]' style={gStyles.title}>
               Este é o seu
             </Text>
-            <Text variant="title" style={{marginBottom: -15}}>
+            <Text className='font-semiBold mb-[-12]' style={gStyles.title}>
               novo app da
             </Text>
-            <Text variant="title" style={{marginBottom: -15}}>
+            <Text className='font-semiBold mb-[-12]' style={gStyles.title}>
               Avantar
             </Text>
-          </Box>
-          <Box style={styles.smallText}>
-            <Text>onde você indica e ganha</Text>
-            <Text>comissão ou cashback.</Text>
-          </Box>
-        </Box>
+          </View>
+          <View className='mt-5'>
+            <Text style={gStyles.smallText}>onde você indica e ganha</Text>
+            <Text style={gStyles.smallText}>comissão ou cashback.</Text>
+          </View>
+        </View>
         {/* Botões */}
-        <Box style={styles.buttonsContainer}>
+        <View className='gap-5 mt-10'>
           <TouchableOpacity
-            style={styles.btnStyle}
+            style={gStyles.btnStyle}
             onPress={() => navigation.navigate('SignUpScreen')}
             activeOpacity={0.9}>
-            <Text>QUERO CRIAR UMA CONTA</Text>
+            <Text style={gStyles.smallText}>QUERO CRIAR UMA CONTA</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.btnStyle2}
+            style={gStyles.btnStyleTransparent}
             onPress={() => navigation.navigate("SignInScreen")}
             activeOpacity={0.9}>
-            <Text>ACESSAR CONTA</Text>
+            <Text style={gStyles.smallText}>ACESSAR CONTA</Text>
           </TouchableOpacity>
-        </Box>
-      </Box>
+        </View>
+      </View>
     </ImageBackground>
   );
 }
-
-const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-  },
-
-  logoContainer: {
-    marginLeft: 30,
-    marginRight: 30,
-    marginTop: 30,
-  },
-
-  mainContainer: {
-    flex: 1,
-    marginLeft: 30,
-    marginRight: 30,
-    justifyContent: 'flex-end',
-    marginBottom: 50
-  },
-
-  smallText: {
-    marginTop: 25,
-  },
-
-  buttonsContainer: {
-    marginTop: 35,
-    gap: 15,
-  },
-
-  btnStyle: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#3E0085',
-    height: 50,
-    borderRadius: 50,
-  },
-
-  btnStyle2: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-    height: 50,
-    borderWidth: 1,
-    borderColor: 'white',
-    borderRadius: 50,
-  },
-});

@@ -3,7 +3,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {ThemeProvider} from '@shopify/restyle';
 
 import { HomeScreen } from '../screens/HomeScreen';
-import {theme} from '../theme';
+import {theme} from '../styles';
 
 const Stack = createNativeStackNavigator();
 

@@ -4,7 +4,7 @@ import {ThemeProvider} from '@shopify/restyle';
 
 import {WaitingConfirmationScreen} from '../screens/WaitingConfirmationScreen';
 import {AppStack} from './AppStack';
-import {theme} from '../theme';
+import {theme} from '../styles';
 import {useAuth} from '../contexts/Auth';
 
 const Stack = createNativeStackNavigator();

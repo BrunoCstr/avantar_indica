@@ -9,5 +9,15 @@ export const textVariants = {
         fontFamily: "FamiljenGrotesk-Bold",
         color: "white",
         fontWeight: "bold"
+    },
+    anchorLink: {
+        fontSize: 14,
+        fontFamily: "FamiljenGrotesk-Regular",
+        color: "secondary_lillac"
+    },
+    anchorLink_SignUp: {
+        fontSize: 14,
+        fontFamily: "FamiljenGrotesk-Regular",
+        color: "blue"
     }
 }

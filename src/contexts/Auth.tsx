@@ -9,6 +9,7 @@ import {
   deleteUser,
   signOut,
   onAuthStateChanged,
+  sendPasswordResetEmail,
 } from '@react-native-firebase/auth';
 import {
   collection,
@@ -35,6 +36,7 @@ interface AuthContextData {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   registrationStatus: boolean;
+  forgotPassword: (email: string) => Promise<void>;
 }
 
 interface AuthProviderProps {
@@ -92,7 +94,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     email: string,
     password: string,
     cpf: string,
-    affiliated_to: string
+    affiliated_to: string,
   ) {
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -111,10 +113,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         registration_status: false,
         createdAt: serverTimestamp(),
         uid: user.uid,
-      })
+      });
 
       await updateProfile(user, {displayName: fullName});
-
     } catch (err: any) {
       if (auth.currentUser) {
         await deleteUser(auth.currentUser);
@@ -137,7 +138,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
           );
           break;
         case 'auth/network-request-failed':
-          Alert.alert('Falha ao cadastrar o usuário', 'Falha de conexão com a rede.');
+          Alert.alert(
+            'Falha ao cadastrar o usuário',
+            'Falha de conexão com a rede.',
+          );
           break;
         default:
           Alert.alert(
@@ -172,7 +176,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
           );
           break;
         case 'auth/network-request-failed':
-          Alert.alert('Falha ao realizar o login', 'Falha de conexão com a rede.');
+          Alert.alert(
+            'Falha ao realizar o login',
+            'Falha de conexão com a rede.',
+          );
           break;
         case 'auth/invalid-credential':
           Alert.alert('Falha ao realizar o login', 'Credenciais inválidas.');
@@ -189,15 +196,43 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     } catch (err: any) {
       switch (err.code) {
         case 'auth/no-current-user':
-          Alert.alert('Falha ao sair','Nenhum usuário autenticado no momento.');
+          Alert.alert(
+            'Falha ao sair',
+            'Nenhum usuário autenticado no momento.',
+          );
           break;
         case 'auth/network-request-failed':
-          Alert.alert('Falha ao sair','Falha de conexão com a rede.');
+          Alert.alert('Falha ao sair', 'Falha de conexão com a rede.');
           break;
         default:
           Alert.alert(
             'Erro desconhecido ao deslogar, entre em contato com o suporte!',
           );
+      }
+    }
+  }
+
+  async function forgotPassword(email: string) {
+    try {
+      await sendPasswordResetEmail(auth, email)
+      Alert.alert('Enviado!', `enviado o link de redefinição para ${email}`);
+    } catch (err: any) {
+      switch (err.code) {
+        case "auth/user-not-found":
+          Alert.alert('Erro!', 'Usuário não encontrado.');
+        break;
+        case "auth/invalid-email":
+          Alert.alert('Erro!', 'E-mail inválido.');
+        break;
+        case "auth/too-many-requests":
+          Alert.alert('Erro!', 'Muitas tentativas, tente novamente mais tarde.');
+        break;
+        case "auth/internal-error":
+          Alert.alert('Erro!', 'Ocorreu um erro, tente novamente mais tarde.');
+        break;
+        case "auth/user-disabled":
+          Alert.alert('Erro!', 'Usuário desabilitado!');
+        break;
       }
     }
   }
@@ -210,6 +245,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         signIn,
         signOut: handleSignOut,
         registrationStatus,
+        forgotPassword
       }}>
       {children}
     </AuthContext.Provider>

@@ -3,15 +3,13 @@ import {NavigationContainer} from '@react-navigation/native';
 import {ThemeProvider} from '@shopify/restyle';
 import SplashScreen from 'react-native-splash-screen';
 
-import {theme} from '../theme';
+import {theme} from '../styles';
 import {WaitingStack} from './WaitingStack';
 import {AuthStack} from './AuthStack';
 import {useAuth} from '../contexts/Auth';
 
 export function Router() {
   const {userAuthenticated} = useAuth();
-
-  console.log("Usuário autenticado?", userAuthenticated)
 
   return (
     <ThemeProvider theme={theme}>

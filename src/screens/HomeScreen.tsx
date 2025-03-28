@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {createBox, createText, useTheme} from '@shopify/restyle';
-import {ThemeProps} from '../theme';
+import {ThemeProps} from '../styles';
 import {Button} from '../components/Button';
 import { useAuth } from '../contexts/Auth';
 
