@@ -35,6 +35,20 @@ const gStyles = StyleSheet.create({
     color: colors.secondary_purple,
     marginBottom: 80,
     fontWeight: 800
+  },
+  anchorTextSingIn: {
+    color: colors.secondary_lillac,
+    fontWeight: 500,
+    paddingLeft: 10,
+    marginTop: 10
+  },
+  anchorText2SingIn: {
+    color: colors.secondary_lillac,
+    fontWeight: 500,
+  },
+  anchorLinkSingIn: {
+    color: colors.blue,
+    fontWeight: 700,
   }
 });
 

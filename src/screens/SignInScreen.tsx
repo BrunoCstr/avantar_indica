@@ -2,24 +2,26 @@ import React, {useState} from 'react';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import Icon from 'react-native-vector-icons/Feather';
-import {createBox, createText, useTheme} from '@shopify/restyle';
-import {Image, ImageBackground, TouchableOpacity} from 'react-native';
+import {
+  Image,
+  ImageBackground,
+  TouchableOpacity,
+  View,
+  Text,
+} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
 import images from '../data/images';
 import {signInSchema, SignInFormData} from '../schemas/validationSchema';
 import {FormInput} from '../components/FormInput';
-import {ThemeProps} from '../styles';
 import {Button} from '../components/Button';
 import {useAuth} from '../contexts/Auth';
-
-const Box = createBox<ThemeProps>();
-const Text = createText<ThemeProps>();
+import gStyles from '../styles/gStyles';
+import {colors} from '../styles/colors';
 
 export function SignInScreen() {
   const {signIn} = useAuth();
   const [showPassword, setShowPassword] = useState(true);
-  const theme = useTheme<ThemeProps>();
 
   const navigation = useNavigation();
 
@@ -44,13 +46,9 @@ export function SignInScreen() {
       source={images.bg_purple}
       style={{flex: 1}}
       resizeMode="cover">
-      <Box
-        flex={1}
-        justifyContent="center"
-        alignItems="center"
-        marginLeft="l"
-        marginRight="l"
-        gap="s">
+      <View
+        className="flex-1 justify-center items-center ml-10 mr-10"
+        style={{gap: 8}}>
         <Image
           style={{width: '95%', resizeMode: 'contain'}}
           source={images.avantar_voce_a_frente_branca}></Image>
@@ -59,23 +57,27 @@ export function SignInScreen() {
           placeholder="E-mail"
           control={control}
           errorMessage={errors.email?.message}
-          borderColor={theme.colors.blue}
-          backgroundColor={theme.colors.tertiary_purple}
+          borderColor={colors.blue}
+          backgroundColor={colors.tertiary_purple}
+          placeholderColor={colors.secondary_lillac}
+          height={55}
         />
-        <Box width="100%">
-          <Box position="relative">
+        <View className="w-full">
+          <View className="relative">
             <FormInput
               name="password"
               placeholder="Senha"
               secureTextEntry={showPassword}
               control={control}
               errorMessage={errors.password?.message}
-              borderColor={theme.colors.blue}
-              backgroundColor={theme.colors.tertiary_purple}
+              borderColor={colors.blue}
+              backgroundColor={colors.tertiary_purple}
+              placeholderColor={colors.secondary_lillac}
+              height={55}
             />
-          </Box>
+          </View>
           <TouchableOpacity
-            style={{position: 'absolute', right: 20, top: '26%'}}
+            style={{position: 'absolute', right: 20, top: '30%'}}
             onPress={() => {
               setShowPassword(!showPassword);
             }}>
@@ -85,32 +87,36 @@ export function SignInScreen() {
               color="white"
             />
           </TouchableOpacity>
-        </Box>
+        </View>
 
         {/* Envio do Formulário de Cadastro */}
-        <Box mt="m" width="100%">
+        <View className="w-full mt-5">
           <Button
             text="ENTRAR"
             backgroundColor="tertiary_purple"
             onPress={handleSubmit(onSubmit)}
           />
+        </View>
+
+        <View className='w-full'>
           <TouchableOpacity
-            onPress={() => navigation.navigate('ForgotPasswordScreen')}>
-            <Text pt="s" pr="s" textAlign="right" variant="anchorLink">
+            onPress={() => navigation.navigate('ForgotPasswordScreen')}
+            className="w-full">
+            <Text className="text-right" style={gStyles.anchorTextSingIn}>
               Esqueci minha senha!
             </Text>
           </TouchableOpacity>
-        </Box>
+        </View>
 
-        <Box mt="xl">
-          <TouchableOpacity
-            onPress={() => navigation.navigate('SignUpScreen')}>
-            <Text pt="s" pr="s" textAlign="right" variant="anchorLink" mt='xl'>
-              Não tem uma conta? <Text variant='anchorLink_SignUp'>Cadastre aqui</Text>
+        <View style={{height:100, justifyContent:'flex-end'}}>
+          <TouchableOpacity onPress={() => navigation.navigate('SignUpScreen')}>
+            <Text style={gStyles.anchorText2SingIn}>
+              Não tem uma conta?{' '}
+              <Text style={gStyles.anchorLinkSingIn}>Crie aqui</Text>
             </Text>
           </TouchableOpacity>
-        </Box>
-      </Box>
+        </View>
+      </View>
     </ImageBackground>
   );
 }

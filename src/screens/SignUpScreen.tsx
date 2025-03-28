@@ -151,7 +151,7 @@ export function SignUpScreen() {
             <Icon
               name={showPassword ? 'eye-off' : 'eye'}
               size={20}
-              color="black"
+              color={colors.primary_purple}
             />
           </TouchableOpacity>
         </View>
@@ -176,7 +176,7 @@ export function SignUpScreen() {
             <Icon
               name={showConfirmPassword ? 'eye-off' : 'eye'}
               size={20}
-              color="black"
+              color={colors.primary_purple}
             />
           </TouchableOpacity>
         </View>
