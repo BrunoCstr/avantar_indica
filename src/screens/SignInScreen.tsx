@@ -106,7 +106,7 @@ export function SignInScreen() {
           <TouchableOpacity
             onPress={() => navigation.navigate('SignUpScreen')}>
             <Text pt="s" pr="s" textAlign="right" variant="anchorLink" mt='xl'>
-              Não tem uma conta? <Text variant='anchorLink_SignUp'>Cadastre aqui!</Text>
+              Não tem uma conta? <Text variant='anchorLink_SignUp'>Cadastre aqui</Text>
             </Text>
           </TouchableOpacity>
         </Box>

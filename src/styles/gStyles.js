@@ -26,6 +26,16 @@ const gStyles = StyleSheet.create({
     borderColor: 'white',
     borderRadius: 50,
   },
+  anchorTextSingUp: {
+    color: colors.primary_purple,
+    marginBottom: 80,
+    fontWeight: 500
+  },
+  anchorLinkSingUp: {
+    color: colors.secondary_purple,
+    marginBottom: 80,
+    fontWeight: 800
+  }
 });
 
 export default gStyles;

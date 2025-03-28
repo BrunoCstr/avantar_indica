@@ -3,25 +3,30 @@ import {Picker} from '@react-native-picker/picker';
 import {useForm, Controller} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import Icon from 'react-native-vector-icons/Feather';
-import {createBox, useTheme} from '@shopify/restyle';
+import {
+  Image,
+  ImageBackground,
+  TouchableOpacity,
+  View,
+  Text,
+} from 'react-native';
 
 import {signUpSchema, SignUpFormData} from '../schemas/validationSchema';
 import {FormInput} from '../components/FormInput';
 import images from '../data/images';
-import {ThemeProps} from '../styles';
 import {Button} from '../components/Button';
-import {Image, ImageBackground, TouchableOpacity} from 'react-native';
 import {useAuth} from '../contexts/Auth';
-
-const Box = createBox<ThemeProps>();
+import {colors} from '../styles/colors';
+import {useNavigation} from '@react-navigation/native';
+import gStyles from '../styles/gStyles';
 
 export function SignUpScreen() {
   const [units, setUnits] = useState<string[]>([]);
   const [showPassword, setShowPassword] = useState(true);
   const [showConfirmPassword, setShowConfirmPassword] = useState(true);
-  const {signUp} = useAuth();
 
-  const theme = useTheme<ThemeProps>();
+  const {signUp} = useAuth();
+  const navigation = useNavigation();
 
   useEffect(() => {
     // Pegar as unidades do Firebase
@@ -69,27 +74,32 @@ export function SignUpScreen() {
   return (
     <ImageBackground
       source={images.bg_white}
-      style={{flex: 1}}
+      className="flex-1"
       resizeMode="cover">
-      <Box flex={1} justifyContent="center" marginLeft="l" marginRight="l">
+      <View className="flex-1 justify-center ml-10 mr-10">
         <Image
-          style={{width: '95%', resizeMode: 'contain'}}
+          resizeMode="contain"
+          className="w-full"
           source={images.avantar_voce_a_frente_roxo}></Image>
         <FormInput
           name="fullName"
           placeholder="Nome"
           control={control}
           errorMessage={errors.fullName?.message}
-          borderColor={theme.colors.tertiary_purple}
-          backgroundColor={theme.colors.white}
+          borderColor={colors.tertiary_purple}
+          backgroundColor={colors.white}
+          placeholderColor={colors.primary_purple}
+          height={50}
         />
         <FormInput
           name="email"
           placeholder="E-mail"
           control={control}
           errorMessage={errors.email?.message}
-          borderColor={theme.colors.tertiary_purple}
-          backgroundColor={theme.colors.white}
+          borderColor={colors.tertiary_purple}
+          backgroundColor={colors.white}
+          placeholderColor={colors.primary_purple}
+          height={50}
         />
         <FormInput
           name="cpf"
@@ -112,70 +122,78 @@ export function SignUpScreen() {
             /\d/,
             /\d/,
           ]}
-          borderColor={theme.colors.tertiary_purple}
-          backgroundColor={theme.colors.white}
+          borderColor={colors.tertiary_purple}
+          backgroundColor={colors.white}
+          placeholderColor={colors.primary_purple}
+          height={50}
         />
 
-        <Box>
-          <Box position="relative">
+        <View>
+          <View className="relative">
             <FormInput
               name="password"
               placeholder="Senha"
               secureTextEntry={showPassword}
               control={control}
               errorMessage={errors.password?.message}
-              borderColor={theme.colors.tertiary_purple}
-              backgroundColor={theme.colors.white}
+              borderColor={colors.tertiary_purple}
+              backgroundColor={colors.white}
+              placeholderColor={colors.primary_purple}
+              height={50}
             />
-          </Box>
+          </View>
           <TouchableOpacity
-            style={{position: 'absolute', right: 20, top: '20%'}}
+            className="absolute right-5 top-[28%]"
+            // style={{position: 'absolute', right: 20, top: '20%'}}
             onPress={() => {
               setShowPassword(!showPassword);
             }}>
             <Icon
               name={showPassword ? 'eye-off' : 'eye'}
-              size={22}
+              size={20}
               color="black"
             />
           </TouchableOpacity>
-        </Box>
+        </View>
 
-        <Box>
-          <Box position="relative">
+        <View>
+          <View className="relative">
             <FormInput
               name="confirmPassword"
               placeholder="Confirmar Senha"
               secureTextEntry={showConfirmPassword}
               control={control}
               errorMessage={errors.confirmPassword?.message}
-              borderColor={theme.colors.tertiary_purple}
-              backgroundColor={theme.colors.white}
+              borderColor={colors.tertiary_purple}
+              backgroundColor={colors.white}
+              placeholderColor={colors.primary_purple}
+              height={50}
             />
-          </Box>
+          </View>
           <TouchableOpacity
-            style={{position: 'absolute', right: 20, top: '20%'}}
+            className="absolute right-5 top-[28%]"
             onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
             <Icon
               name={showConfirmPassword ? 'eye-off' : 'eye'}
-              size={22}
+              size={20}
               color="black"
             />
           </TouchableOpacity>
-        </Box>
+        </View>
 
         {/* Input de Seleção da Unidade */}
         <Controller
           control={control}
           render={({field: {onChange, value}}) => (
-            <Box
+            <View
+              className={'px-2 justify-center'}
               style={{
-                borderWidth: 1,
-                borderColor: errors.affiliated_to ? 'red' : '#3E0085', // Borda vermelha se houver erro
-                borderRadius: 5,
-                paddingLeft: 8,
-                paddingRight: 8,
-                justifyContent: 'center',
+                borderWidth: 2,
+                borderRadius: 50,
+                backgroundColor: colors.white,
+                borderColor: errors.affiliated_to
+                  ? 'red'
+                  : colors.primary_purple,
               }}>
               <Picker
                 selectedValue={value}
@@ -184,25 +202,39 @@ export function SignUpScreen() {
                   height: 45,
                   width: '100%',
                 }}>
-                <Picker.Item label="Selecione uma unidade" value="" />
+                <Picker.Item
+                  label="Selecione uma unidade"
+                  value=""
+                  style={{
+                    color: errors.affiliated_to ? 'red' : colors.primary_purple,
+                  }}
+                />
                 {units.map(unit => (
                   <Picker.Item key={unit} label={unit} value={unit} />
                 ))}
               </Picker>
-            </Box>
+            </View>
           )}
           name="affiliated_to"
         />
 
         {/* Envio do Formulário de Cadastro */}
-        <Box mt="m">
+        <View className="mt-5">
           <Button
             text="CADASTRAR"
             backgroundColor="tertiary_purple"
             onPress={handleSubmit(onSubmit)}
           />
-        </Box>
-      </Box>
+        </View>
+      </View>
+      <TouchableOpacity
+        onPress={() => navigation.navigate('SignInScreen')}
+        className="items-center">
+        <Text style={gStyles.anchorTextSingUp}>
+          Já tem uma conta?{' '}
+          <Text style={gStyles.anchorLinkSingUp}>Faça Login</Text>
+        </Text>
+      </TouchableOpacity>
     </ImageBackground>
   );
 }

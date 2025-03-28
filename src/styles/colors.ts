@@ -2,6 +2,7 @@ export const colors = {
     primary_purple: "#4A04A5",
     secondary_purple: "#6600CC",
     tertiary_purple: "#3E0085",
+    fourth_purple: "6E06D8",
     pink: "#C352F2",
     blue: "#29F3DF",
     orange: "#E06400",

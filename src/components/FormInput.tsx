@@ -12,6 +12,8 @@ interface FormInputProps {
   mask?: (string | RegExp)[];
   borderColor: string;
   backgroundColor: string;
+  placeholderColor: string;
+  height: number;
 }
 
 export const FormInput = ({
@@ -22,7 +24,9 @@ export const FormInput = ({
   errorMessage,
   mask,
   borderColor,
-  backgroundColor
+  backgroundColor,
+  placeholderColor,
+  height
 }: FormInputProps) => (
   <>
     <Controller
@@ -35,13 +39,16 @@ export const FormInput = ({
             onBlur={onBlur}
             onChangeText={onChange}
             mask={mask} // Aplica a máscara se existir
+            placeholderTextColor= {errorMessage ? 'red' : placeholderColor}
             style={{
-              borderWidth: 1,
+              borderWidth: 2,
               borderColor: errorMessage ? 'red' : borderColor,
-              marginBottom: 10,
-              height: 60,
+              backgroundColor: backgroundColor,
+              marginBottom: 6,
+              height: height,
               width:"100%",
-              padding: 10,
+              padding: 15,
+              paddingLeft: 20,
               borderRadius: 50,
             }}
           />
@@ -53,13 +60,13 @@ export const FormInput = ({
           onChangeText={onChange}
           value={value}
           secureTextEntry={secureTextEntry}
-          placeholderTextColor= '#B270FF'
+          placeholderTextColor= {errorMessage ? 'red' : placeholderColor}
           style={{
             borderWidth: 2,
             borderColor: errorMessage ? 'red' : borderColor,
             backgroundColor: backgroundColor,
-            marginBottom: 10,
-            height: 60,
+            marginBottom: 6,
+            height: height,
             width: '100%',
             padding: 15,
             paddingLeft: 20,
