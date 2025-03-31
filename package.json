@@ -24,6 +24,7 @@
     "react": "19.0.0",
     "react-hook-form": "^7.54.2",
     "react-native": "^0.78.1",
+    "react-native-bootsplash": "^6.3.4",
     "react-native-css-interop": "^0.1.22",
     "react-native-mask-input": "^1.2.3",
     "react-native-safe-area-context": "^5.3.0",
