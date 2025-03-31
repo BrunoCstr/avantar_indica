@@ -49,6 +49,22 @@ const gStyles = StyleSheet.create({
   anchorLinkSingIn: {
     color: colors.blue,
     fontWeight: 700,
+  },
+  titleWaiting: {
+    fontSize: 30,
+    color: colors.secondary_purple,
+    fontWeight: 700
+  },
+  smallTextWaiting: {
+    fontSize: 15,
+    color: colors.black,
+    textAlign: "center",
+    marginTop: 5,
+    paddingLeft: 20,
+    paddingRight: 20,
+  },
+  avantarVoceAFrente: {
+    height: 130
   }
 });
 

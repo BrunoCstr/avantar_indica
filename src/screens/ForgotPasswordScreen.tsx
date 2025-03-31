@@ -1,8 +1,7 @@
 import React from 'react';
-import {Image, ImageBackground} from 'react-native';
+import {Image, ImageBackground, View} from 'react-native';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
-import {createBox, createText, useTheme} from '@shopify/restyle';
 
 import images from '../data/images';
 import {FormInput} from '../components/FormInput';
@@ -10,17 +9,12 @@ import {
   forgotPasswordSchema,
   ForgotPasswordSchema,
 } from '../schemas/validationSchema';
-import {ThemeProps} from '../styles';
 import {Button} from '../components/Button';
 import {useAuth} from '../contexts/Auth';
-
-const Box = createBox<ThemeProps>();
-const Text = createText<ThemeProps>();
+import {colors} from '../styles/colors';
 
 export function ForgotPasswordScreen() {
   const {forgotPassword} = useAuth();
-
-  const theme = useTheme<ThemeProps>();
 
   const {
     control,
@@ -42,12 +36,7 @@ export function ForgotPasswordScreen() {
       source={images.bg_purple}
       style={{flex: 1}}
       resizeMode="cover">
-      <Box
-        flex={1}
-        justifyContent="center"
-        marginLeft="l"
-        marginRight="l"
-        gap="s">
+      <View className="flex-1 justify-center ml-10 mr-10 gap-10">
         <Image
           style={{width: '95%', resizeMode: 'contain'}}
           source={images.avantar_voce_a_frente_branca}></Image>
@@ -56,19 +45,21 @@ export function ForgotPasswordScreen() {
           placeholder="E-mail"
           control={control}
           errorMessage={errors.email?.message}
-          borderColor={theme.colors.blue}
-          backgroundColor={theme.colors.tertiary_purple}
+          borderColor={colors.blue}
+          backgroundColor={colors.tertiary_purple}
+          placeholderColor={colors.secondary_lillac}
+          height={55}
         />
 
         {/* Envio do Formulário de Cadastro */}
-        <Box mt="m">
+        <View className='mt-5'>
           <Button
             text="ENVIAR"
             backgroundColor="tertiary_purple"
             onPress={handleSubmit(onSubmit)}
           />
-        </Box>
-      </Box>
+        </View>
+      </View>
     </ImageBackground>
   );
 }

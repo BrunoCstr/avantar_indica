@@ -50,7 +50,7 @@ export const AuthContext = createContext<AuthContextData>(
 export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const [userAuthenticated, setIsUserAuthenticated] = useState(false);
   const [registrationStatus, setregistrationStatus] = useState(false);
-
+  
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user: any) => {
       if (user) {
