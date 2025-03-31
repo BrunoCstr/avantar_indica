@@ -37,6 +37,7 @@ interface AuthContextData {
   signOut: () => Promise<void>;
   registrationStatus: boolean;
   forgotPassword: (email: string) => Promise<void>;
+  isLoading: boolean;
 }
 
 interface AuthProviderProps {
@@ -50,6 +51,7 @@ export const AuthContext = createContext<AuthContextData>(
 export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const [userAuthenticated, setIsUserAuthenticated] = useState(false);
   const [registrationStatus, setregistrationStatus] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user: any) => {
@@ -84,6 +86,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         setIsUserAuthenticated(false);
         setregistrationStatus(false);
       }
+
+      setIsLoading(false)
     });
 
     return () => unsubscribe();
@@ -245,7 +249,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         signIn,
         signOut: handleSignOut,
         registrationStatus,
-        forgotPassword
+        forgotPassword,
+        isLoading
       }}>
       {children}
     </AuthContext.Provider>

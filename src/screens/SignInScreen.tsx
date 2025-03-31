@@ -8,6 +8,10 @@ import {
   TouchableOpacity,
   View,
   Text,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TouchableWithoutFeedback
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
@@ -42,81 +46,94 @@ export function SignInScreen() {
   };
 
   return (
-    <ImageBackground
-      source={images.bg_purple}
-      style={{flex: 1}}
-      resizeMode="cover">
-      <View
-        className="flex-1 justify-center items-center ml-10 mr-10"
-        style={{gap: 8}}>
-        <Image
-          style={{width: '95%', resizeMode: 'contain'}}
-          source={images.avantar_voce_a_frente_branca}></Image>
-        <FormInput
-          name="email"
-          placeholder="E-mail"
-          control={control}
-          errorMessage={errors.email?.message}
-          borderColor={colors.blue}
-          backgroundColor={colors.tertiary_purple}
-          placeholderColor={colors.secondary_lillac}
-          height={55}
-        />
-        <View className="w-full">
-          <View className="relative">
-            <FormInput
-              name="password"
-              placeholder="Senha"
-              secureTextEntry={showPassword}
-              control={control}
-              errorMessage={errors.password?.message}
-              borderColor={colors.blue}
-              backgroundColor={colors.tertiary_purple}
-              placeholderColor={colors.secondary_lillac}
-              height={55}
-            />
-          </View>
-          <TouchableOpacity
-            style={{position: 'absolute', right: 20, top: '30%'}}
-            onPress={() => {
-              setShowPassword(!showPassword);
-            }}>
-            <Icon
-              name={showPassword ? 'eye-off' : 'eye'}
-              size={20}
-              color="white"
-            />
-          </TouchableOpacity>
-        </View>
+    <KeyboardAvoidingView
+      className="flex-1"
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <TouchableWithoutFeedback>
+        <ScrollView
+          contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}}
+          keyboardShouldPersistTaps="handled">
+          <ImageBackground
+            source={images.bg_purple}
+            style={{flex: 1}}
+            resizeMode="cover">
+            <View
+              className="flex-1 justify-center items-center ml-10 mr-10"
+              style={{gap: 8}}>
+              <Image
+                style={{width: '95%', resizeMode: 'contain'}}
+                source={images.avantar_voce_a_frente_branca}></Image>
+              <FormInput
+                name="email"
+                placeholder="E-mail"
+                control={control}
+                errorMessage={errors.email?.message}
+                borderColor={colors.blue}
+                backgroundColor={colors.tertiary_purple}
+                placeholderColor={colors.secondary_lillac}
+                height={55}
+                color={colors.white}
+              />
+              <View className="w-full">
+                <View className="relative">
+                  <FormInput
+                    name="password"
+                    placeholder="Senha"
+                    secureTextEntry={showPassword}
+                    control={control}
+                    errorMessage={errors.password?.message}
+                    borderColor={colors.blue}
+                    backgroundColor={colors.tertiary_purple}
+                    placeholderColor={colors.secondary_lillac}
+                    height={55}
+                    color={colors.white}
+                  />
+                </View>
+                <TouchableOpacity
+                  style={{position: 'absolute', right: 20, top: '30%'}}
+                  onPress={() => {
+                    setShowPassword(!showPassword);
+                  }}>
+                  <Icon
+                    name={showPassword ? 'eye-off' : 'eye'}
+                    size={20}
+                    color="white"
+                  />
+                </TouchableOpacity>
+              </View>
 
-        {/* Envio do Formulário de Cadastro */}
-        <View className="w-full mt-5">
-          <Button
-            text="ENTRAR"
-            backgroundColor="tertiary_purple"
-            onPress={handleSubmit(onSubmit)}
-          />
-        </View>
+              {/* Envio do Formulário de Cadastro */}
+              <View className="w-full mt-5">
+                <Button
+                  text="ENTRAR"
+                  backgroundColor="tertiary_purple"
+                  onPress={handleSubmit(onSubmit)}
+                />
+              </View>
 
-        <View className='w-full'>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('ForgotPasswordScreen')}
-            className="w-full">
-            <Text className="text-right" style={gStyles.anchorTextSingIn}>
-              Esqueci minha senha!
-            </Text>
-          </TouchableOpacity>
-        </View>
+              <View className="w-full">
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('ForgotPasswordScreen')}
+                  className="w-full">
+                  <Text className="text-right" style={gStyles.anchorTextSingIn}>
+                    Esqueci minha senha!
+                  </Text>
+                </TouchableOpacity>
+              </View>
 
-        <View style={{height:100, justifyContent:'flex-end'}}>
-          <TouchableOpacity onPress={() => navigation.navigate('SignUpScreen')}>
-            <Text style={gStyles.anchorText2SingIn}>
-              Não tem uma conta?{' '}
-              <Text style={gStyles.anchorLinkSingIn}>Crie aqui</Text>
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </ImageBackground>
+              <View style={{height: 100, justifyContent: 'flex-end'}}>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('SignUpScreen')}>
+                  <Text style={gStyles.anchorText2SingIn}>
+                    Não tem uma conta?{' '}
+                    <Text style={gStyles.anchorLinkSingIn}>Crie aqui</Text>
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </ImageBackground>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }

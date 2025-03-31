@@ -14,6 +14,7 @@ interface FormInputProps {
   backgroundColor: string;
   placeholderColor: string;
   height: number;
+  color?: string;
 }
 
 export const FormInput = ({
@@ -26,7 +27,8 @@ export const FormInput = ({
   borderColor,
   backgroundColor,
   placeholderColor,
-  height
+  height,
+  color
 }: FormInputProps) => (
   <>
     <Controller
@@ -50,6 +52,7 @@ export const FormInput = ({
               padding: 15,
               paddingLeft: 20,
               borderRadius: 50,
+              color: color
             }}
           />
         ) :
@@ -71,6 +74,7 @@ export const FormInput = ({
             padding: 15,
             paddingLeft: 20,
             borderRadius: 50,
+            color: color
           }}
         />
       )}

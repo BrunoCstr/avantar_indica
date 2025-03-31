@@ -9,6 +9,10 @@ import {
   TouchableOpacity,
   View,
   Text,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TouchableWithoutFeedback,
 } from 'react-native';
 
 import {signUpSchema, SignUpFormData} from '../schemas/validationSchema';
@@ -72,169 +76,181 @@ export function SignUpScreen() {
   };
 
   return (
-    <ImageBackground
-      source={images.bg_white}
+    <KeyboardAvoidingView
       className="flex-1"
-      resizeMode="cover">
-      <View className="flex-1 justify-center ml-10 mr-10">
-        <Image
-          resizeMode="contain"
-          className="w-full"
-          source={images.avantar_voce_a_frente_roxo}></Image>
-        <FormInput
-          name="fullName"
-          placeholder="Nome"
-          control={control}
-          errorMessage={errors.fullName?.message}
-          borderColor={colors.tertiary_purple}
-          backgroundColor={colors.white}
-          placeholderColor={colors.primary_purple}
-          height={50}
-        />
-        <FormInput
-          name="email"
-          placeholder="E-mail"
-          control={control}
-          errorMessage={errors.email?.message}
-          borderColor={colors.tertiary_purple}
-          backgroundColor={colors.white}
-          placeholderColor={colors.primary_purple}
-          height={50}
-        />
-        <FormInput
-          name="cpf"
-          placeholder="CPF"
-          control={control}
-          errorMessage={errors.cpf?.message}
-          mask={[
-            /\d/,
-            /\d/,
-            /\d/,
-            '.',
-            /\d/,
-            /\d/,
-            /\d/,
-            '.',
-            /\d/,
-            /\d/,
-            /\d/,
-            '-',
-            /\d/,
-            /\d/,
-          ]}
-          borderColor={colors.tertiary_purple}
-          backgroundColor={colors.white}
-          placeholderColor={colors.primary_purple}
-          height={50}
-        />
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <TouchableWithoutFeedback>
+        <ScrollView
+          contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}}
+          keyboardShouldPersistTaps="handled">
+          <ImageBackground
+            source={images.bg_white}
+            className="flex-1"
+            resizeMode="cover">
+            <View className="flex-1 justify-center ml-10 mr-10">
+              <Image
+                resizeMode="contain"
+                className="w-full"
+                source={images.avantar_voce_a_frente_roxo}></Image>
+              <FormInput
+                name="fullName"
+                placeholder="Nome"
+                control={control}
+                errorMessage={errors.fullName?.message}
+                borderColor={colors.tertiary_purple}
+                backgroundColor={colors.white}
+                placeholderColor={colors.primary_purple}
+                height={50}
+              />
+              <FormInput
+                name="email"
+                placeholder="E-mail"
+                control={control}
+                errorMessage={errors.email?.message}
+                borderColor={colors.tertiary_purple}
+                backgroundColor={colors.white}
+                placeholderColor={colors.primary_purple}
+                height={50}
+              />
+              <FormInput
+                name="cpf"
+                placeholder="CPF"
+                control={control}
+                errorMessage={errors.cpf?.message}
+                mask={[
+                  /\d/,
+                  /\d/,
+                  /\d/,
+                  '.',
+                  /\d/,
+                  /\d/,
+                  /\d/,
+                  '.',
+                  /\d/,
+                  /\d/,
+                  /\d/,
+                  '-',
+                  /\d/,
+                  /\d/,
+                ]}
+                borderColor={colors.tertiary_purple}
+                backgroundColor={colors.white}
+                placeholderColor={colors.primary_purple}
+                height={50}
+              />
 
-        <View>
-          <View className="relative">
-            <FormInput
-              name="password"
-              placeholder="Senha"
-              secureTextEntry={showPassword}
-              control={control}
-              errorMessage={errors.password?.message}
-              borderColor={colors.tertiary_purple}
-              backgroundColor={colors.white}
-              placeholderColor={colors.primary_purple}
-              height={50}
-            />
-          </View>
-          <TouchableOpacity
-            className="absolute right-5 top-[28%]"
-            // style={{position: 'absolute', right: 20, top: '20%'}}
-            onPress={() => {
-              setShowPassword(!showPassword);
-            }}>
-            <Icon
-              name={showPassword ? 'eye-off' : 'eye'}
-              size={20}
-              color={colors.primary_purple}
-            />
-          </TouchableOpacity>
-        </View>
+              <View>
+                <View className="relative">
+                  <FormInput
+                    name="password"
+                    placeholder="Senha"
+                    secureTextEntry={showPassword}
+                    control={control}
+                    errorMessage={errors.password?.message}
+                    borderColor={colors.tertiary_purple}
+                    backgroundColor={colors.white}
+                    placeholderColor={colors.primary_purple}
+                    height={50}
+                  />
+                </View>
+                <TouchableOpacity
+                  className="absolute right-5 top-[28%]"
+                  // style={{position: 'absolute', right: 20, top: '20%'}}
+                  onPress={() => {
+                    setShowPassword(!showPassword);
+                  }}>
+                  <Icon
+                    name={showPassword ? 'eye-off' : 'eye'}
+                    size={20}
+                    color={colors.primary_purple}
+                  />
+                </TouchableOpacity>
+              </View>
 
-        <View>
-          <View className="relative">
-            <FormInput
-              name="confirmPassword"
-              placeholder="Confirmar Senha"
-              secureTextEntry={showConfirmPassword}
-              control={control}
-              errorMessage={errors.confirmPassword?.message}
-              borderColor={colors.tertiary_purple}
-              backgroundColor={colors.white}
-              placeholderColor={colors.primary_purple}
-              height={50}
-            />
-          </View>
-          <TouchableOpacity
-            className="absolute right-5 top-[28%]"
-            onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
-            <Icon
-              name={showConfirmPassword ? 'eye-off' : 'eye'}
-              size={20}
-              color={colors.primary_purple}
-            />
-          </TouchableOpacity>
-        </View>
+              <View>
+                <View className="relative">
+                  <FormInput
+                    name="confirmPassword"
+                    placeholder="Confirmar Senha"
+                    secureTextEntry={showConfirmPassword}
+                    control={control}
+                    errorMessage={errors.confirmPassword?.message}
+                    borderColor={colors.tertiary_purple}
+                    backgroundColor={colors.white}
+                    placeholderColor={colors.primary_purple}
+                    height={50}
+                  />
+                </View>
+                <TouchableOpacity
+                  className="absolute right-5 top-[28%]"
+                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                  <Icon
+                    name={showConfirmPassword ? 'eye-off' : 'eye'}
+                    size={20}
+                    color={colors.primary_purple}
+                  />
+                </TouchableOpacity>
+              </View>
 
-        {/* Input de Seleção da Unidade */}
-        <Controller
-          control={control}
-          render={({field: {onChange, value}}) => (
-            <View
-              className={'px-2 justify-center'}
-              style={{
-                borderWidth: 2,
-                borderRadius: 50,
-                backgroundColor: colors.white,
-                borderColor: errors.affiliated_to
-                  ? 'red'
-                  : colors.primary_purple,
-              }}>
-              <Picker
-                selectedValue={value}
-                onValueChange={onChange}
-                style={{
-                  height: 45,
-                  width: '100%',
-                }}>
-                <Picker.Item
-                  label="Selecione uma unidade"
-                  value=""
-                  style={{
-                    color: errors.affiliated_to ? 'red' : colors.primary_purple,
-                  }}
+              {/* Input de Seleção da Unidade */}
+              <Controller
+                control={control}
+                render={({field: {onChange, value}}) => (
+                  <View
+                    className={'px-2 justify-center'}
+                    style={{
+                      borderWidth: 2,
+                      borderRadius: 50,
+                      backgroundColor: colors.white,
+                      borderColor: errors.affiliated_to
+                        ? 'red'
+                        : colors.primary_purple,
+                    }}>
+                    <Picker
+                      selectedValue={value}
+                      onValueChange={onChange}
+                      style={{
+                        height: 45,
+                        width: '100%',
+                      }}>
+                      <Picker.Item
+                        label="Selecione uma unidade"
+                        value=""
+                        style={{
+                          color: errors.affiliated_to
+                            ? 'red'
+                            : colors.primary_purple,
+                        }}
+                      />
+                      {units.map(unit => (
+                        <Picker.Item key={unit} label={unit} value={unit} />
+                      ))}
+                    </Picker>
+                  </View>
+                )}
+                name="affiliated_to"
+              />
+
+              {/* Envio do Formulário de Cadastro */}
+              <View className="mt-5">
+                <Button
+                  text="CADASTRAR"
+                  backgroundColor="tertiary_purple"
+                  onPress={handleSubmit(onSubmit)}
                 />
-                {units.map(unit => (
-                  <Picker.Item key={unit} label={unit} value={unit} />
-                ))}
-              </Picker>
+              </View>
             </View>
-          )}
-          name="affiliated_to"
-        />
-
-        {/* Envio do Formulário de Cadastro */}
-        <View className="mt-5">
-          <Button
-            text="CADASTRAR"
-            backgroundColor="tertiary_purple"
-            onPress={handleSubmit(onSubmit)}
-          />
-        </View>
-      </View>
-      <TouchableOpacity
-        onPress={() => navigation.navigate('SignInScreen')}
-        className="items-center">
-        <Text style={gStyles.anchorTextSingUp}>
-          Já tem uma conta?{' '}
-          <Text style={gStyles.anchorLinkSingUp}>Faça Login</Text>
-        </Text>
-      </TouchableOpacity>
-    </ImageBackground>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('SignInScreen')}
+              className="items-center">
+              <Text style={gStyles.anchorTextSingUp}>
+                Já tem uma conta?{' '}
+                <Text style={gStyles.anchorLinkSingUp}>Faça Login</Text>
+              </Text>
+            </TouchableOpacity>
+          </ImageBackground>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }

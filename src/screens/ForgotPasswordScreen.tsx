@@ -36,7 +36,7 @@ export function ForgotPasswordScreen() {
       source={images.bg_purple}
       style={{flex: 1}}
       resizeMode="cover">
-      <View className="flex-1 justify-center ml-10 mr-10 gap-10">
+      <View className="flex-1 justify-center ml-10 mr-10">
         <Image
           style={{width: '95%', resizeMode: 'contain'}}
           source={images.avantar_voce_a_frente_branca}></Image>
