@@ -1,3 +1,4 @@
+import { spacing } from '@shopify/restyle'
 import { colors } from './src/styles/colors'
 
 /** @type {import('tailwindcss').Config} */
@@ -14,6 +15,21 @@ module.exports = {
         semiBold: "FamiljenGrotesk-SemiBold",
         bold: "FamiljenGrotesk-Bold"
       },
+      fontSize: {
+        ss: '12px',
+        s: '16px',
+        m: '24px',
+        l: '32px',
+        xl: "48px"
+      },
+      spacing: {
+        '30': '120px',
+        '32': '128px',
+        '40': '160px',
+        '48': '192px',
+        '56': '224px',
+        '64': '256px',
+      }
     },
   },
   plugins: [],

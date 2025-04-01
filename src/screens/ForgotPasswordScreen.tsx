@@ -49,6 +49,7 @@ export function ForgotPasswordScreen() {
           backgroundColor={colors.tertiary_purple}
           placeholderColor={colors.secondary_lillac}
           height={55}
+          color={colors.white}
         />
 
         {/* Envio do Formulário de Cadastro */}

@@ -24,6 +24,11 @@ import {
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+interface UserData {
+  displayName: string;
+  email: string;
+}
+
 interface AuthContextData {
   userAuthenticated: boolean;
   signUp: (
@@ -38,6 +43,7 @@ interface AuthContextData {
   registrationStatus: boolean;
   forgotPassword: (email: string) => Promise<void>;
   isLoading: boolean;
+  userData: UserData | null;
 }
 
 interface AuthProviderProps {
@@ -52,6 +58,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const [userAuthenticated, setIsUserAuthenticated] = useState(false);
   const [registrationStatus, setregistrationStatus] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [userData, setUserData] = useState<UserData | null>(null);
   
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user: any) => {
@@ -64,6 +71,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
           }
 
           setIsUserAuthenticated(true);
+          setUserData({displayName: user.displayName, email: user.email})
 
           const q = query(
             collection(db, 'users'),
@@ -81,10 +89,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
           await signOut(auth);
           setIsUserAuthenticated(false);
           setregistrationStatus(false);
+          setUserData(null)
         }
       } else {
         setIsUserAuthenticated(false);
         setregistrationStatus(false);
+        setUserData(null)
       }
 
       setIsLoading(false)
@@ -250,7 +260,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         signOut: handleSignOut,
         registrationStatus,
         forgotPassword,
-        isLoading
+        isLoading,
+        userData
       }}>
       {children}
     </AuthContext.Provider>

@@ -4,5 +4,14 @@ export default {
     avantar_voce_a_frente_branca: require('../assets/images/avantar_voce_a_frente_branco.png'),
     avantar_voce_a_frente_roxo: require('../assets/images/avantar_voce_a_frente_roxo.png'),
     bg_purple: require('../assets/images/bg-purple.png'),
-    bg_white: require('../assets/images/bg-white.png')
+    bg_white: require('../assets/images/bg-white.png'),
+    bg_home_purple: require('../assets/images/bg_home_purple.png'),
+    default_profile_picture: require('../assets/images/default_profile_picture.jpg'),
+    notification_icon: require('../assets/images/notification_icon.png'),
+    indicar_icon: require('../assets/images/indicar_icon.png'),
+    indicar_em_massa_icon: require('../assets/images/indicar_em_massa_icon.png'),
+    home_icon: require('../assets/images/home_icon.png'),
+    carteira_icon: require('../assets/images/carteira_icon.png'),
+    status_icon: require('../assets/images/status_icon.png'),
+    profile_icon: require('../assets/images/profile_icon.png'),
 }

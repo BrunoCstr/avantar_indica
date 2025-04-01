@@ -4,18 +4,21 @@ import { colors } from "../styles/colors";
 interface ButtonProps {
     text: string;
     backgroundColor: string;
+    textColor?: string;
+    fontWeight?: any;
+    fontSize?: number;
     onPress: () => void;
   }
 
-export function Button( { onPress, text, backgroundColor}: ButtonProps ) {
+export function Button( { onPress, text, backgroundColor, textColor, fontWeight, fontSize}: ButtonProps ) {
 
     return(
-        <TouchableOpacity 
+        <TouchableOpacity
         style={{ justifyContent:"center", alignItems:"center", backgroundColor: colors[backgroundColor as keyof typeof colors], borderRadius: 100, height: 50 }} 
-        activeOpacity={0.9}
+        activeOpacity={0.8}
         onPress={onPress}
         >
-            <Text style={{color: "white"}}>{text}</Text>
+            <Text style={{fontWeight,fontSize, color: colors[textColor as keyof typeof colors]}}>{text}</Text>
         </TouchableOpacity>
     )
 }
