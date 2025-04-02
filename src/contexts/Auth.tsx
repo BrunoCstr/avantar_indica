@@ -19,6 +19,8 @@ import {
   getDocs,
   getFirestore,
   serverTimestamp,
+  updateDoc,
+  doc,
 } from '@react-native-firebase/firestore';
 
 const auth = getAuth(app);
@@ -27,6 +29,7 @@ const db = getFirestore(app);
 interface UserData {
   displayName: string;
   email: string;
+  isFirstLogin: boolean;
 }
 
 interface AuthContextData {
@@ -59,9 +62,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const [registrationStatus, setregistrationStatus] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [userData, setUserData] = useState<UserData | null>(null);
-  
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user: any) => {
+      setIsLoading(true);
+
       if (user) {
         try {
           await user.reload(); // Recarrega pq pode ser que o token esteja armazenado no cache.
@@ -71,7 +76,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
           }
 
           setIsUserAuthenticated(true);
-          setUserData({displayName: user.displayName, email: user.email})
 
           const q = query(
             collection(db, 'users'),
@@ -83,21 +87,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
             if (doc.exists) {
               const data = doc.data();
               setregistrationStatus(data.registration_status);
+              setUserData({
+                displayName: user.displayName,
+                email: user.email,
+                isFirstLogin: data.isFirstLogin,
+              });
             }
           });
         } catch (err) {
           await signOut(auth);
           setIsUserAuthenticated(false);
           setregistrationStatus(false);
-          setUserData(null)
+          setUserData(null);
         }
       } else {
         setIsUserAuthenticated(false);
         setregistrationStatus(false);
-        setUserData(null)
+        setUserData(null);
       }
 
-      setIsLoading(false)
+      setIsLoading(false);
     });
 
     return () => unsubscribe();
@@ -127,6 +136,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         registration_status: false,
         createdAt: serverTimestamp(),
         uid: user.uid,
+        isFirstLogin: true,
       });
 
       await updateProfile(user, {displayName: fullName});
@@ -168,7 +178,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
   async function signIn(email: string, password: string) {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
+      const user = userCredential.user;
+
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('uid', '==', user.uid));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach(async docSnap => {
+        await updateDoc(doc(db, 'users', docSnap.id), {isFirstLogin: false});
+      });
     } catch (err: any) {
       switch (err.code) {
         case 'auth/invalid-email':
@@ -200,6 +222,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
           break;
         default:
           Alert.alert('Erro desconhecido', 'entre em contato com o suporte!');
+          console.error(err);
       }
     }
   }
@@ -228,25 +251,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
   async function forgotPassword(email: string) {
     try {
-      await sendPasswordResetEmail(auth, email)
+      await sendPasswordResetEmail(auth, email);
       Alert.alert('Enviado!', `enviado o link de redefinição para ${email}`);
     } catch (err: any) {
       switch (err.code) {
-        case "auth/user-not-found":
+        case 'auth/user-not-found':
           Alert.alert('Erro!', 'Usuário não encontrado.');
-        break;
-        case "auth/invalid-email":
+          break;
+        case 'auth/invalid-email':
           Alert.alert('Erro!', 'E-mail inválido.');
-        break;
-        case "auth/too-many-requests":
-          Alert.alert('Erro!', 'Muitas tentativas, tente novamente mais tarde.');
-        break;
-        case "auth/internal-error":
+          break;
+        case 'auth/too-many-requests':
+          Alert.alert(
+            'Erro!',
+            'Muitas tentativas, tente novamente mais tarde.',
+          );
+          break;
+        case 'auth/internal-error':
           Alert.alert('Erro!', 'Ocorreu um erro, tente novamente mais tarde.');
-        break;
-        case "auth/user-disabled":
+          break;
+        case 'auth/user-disabled':
           Alert.alert('Erro!', 'Usuário desabilitado!');
-        break;
+          break;
       }
     }
   }

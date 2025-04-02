@@ -17,10 +17,13 @@ import { BottomNavigator } from '../components/BottomNavigator';
 
 export function HomeScreen() {
   // Para usar nos componentes que nao sao do restyle
-  const {signOut, userData} = useAuth();
+  const {userData} = useAuth();
 
   const displayName = userData?.displayName;
   const userFirstName = displayName?.slice(0, displayName.indexOf(' '));
+
+  const isFirstLogin = userData?.isFirstLogin;
+  const welcomeMessage = isFirstLogin ? "Seja bem-vindo!" : "Seja bem-vindo de volta!"
 
   return (
     <ImageBackground
@@ -43,7 +46,7 @@ export function HomeScreen() {
           </View>
           <View className="ml-2.5">
             <Text className="text-white text-ss font-regular">
-              Seja Bem-vindo de volta!
+              {welcomeMessage}
             </Text>
           </View>
         </View>

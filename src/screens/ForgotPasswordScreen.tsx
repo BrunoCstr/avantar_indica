@@ -58,6 +58,7 @@ export function ForgotPasswordScreen() {
             text="ENVIAR"
             backgroundColor="tertiary_purple"
             onPress={handleSubmit(onSubmit)}
+            textColor='white'
           />
         </View>
       </View>

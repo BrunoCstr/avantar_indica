@@ -108,6 +108,7 @@ export function SignInScreen() {
                   text="ENTRAR"
                   backgroundColor="tertiary_purple"
                   onPress={handleSubmit(onSubmit)}
+                  textColor='white'
                 />
               </View>
 
