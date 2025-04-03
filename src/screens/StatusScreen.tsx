@@ -8,7 +8,6 @@ export function StatusScreen() {
             <Text>
                 Status
             </Text>
-            <BottomNavigator/>
         </View>
     )
 }

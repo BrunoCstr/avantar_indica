@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {NavigationContainer} from '@react-navigation/native';
-import BootSplapsh from 'react-native-bootsplash'
+import BootSplash from 'react-native-bootsplash'
 
 import {WaitingStack} from './WaitingStack';
 import {AuthStack} from './AuthStack';
@@ -13,7 +13,7 @@ export function Router() {
   useEffect(() => {
     if (!isLoading) {
       setTimeout(() => {
-        BootSplapsh.hide({fade: true})
+        BootSplash.hide({fade: true})
         setAppReady(true);
       }, 500);
     }

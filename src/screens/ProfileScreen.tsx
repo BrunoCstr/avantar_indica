@@ -8,7 +8,7 @@ export function ProfileScreen() {
     const { signOut } = useAuth()
 
     return(
-        <View className="flex-1">
+        <View className="flex-1 bg-black">
             <Text>
                 Profile
             </Text>
@@ -18,7 +18,6 @@ export function ProfileScreen() {
             textColor="white"
             onPress={() => signOut()}
             />
-            <BottomNavigator/>
         </View>
     )
 }

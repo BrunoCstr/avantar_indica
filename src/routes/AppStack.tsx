@@ -1,34 +1,24 @@
 import React from 'react';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {
+  createStackNavigator,
+  CardStyleInterpolators,
+} from '@react-navigation/stack';
 
-import {HomeScreen} from '../screens/HomeScreen';
-import {WalletScreen} from '../screens/WalletScreen';
-import {StatusScreen} from '../screens/StatusScreen';
-import {ProfileScreen} from '../screens/ProfileScreen';
+import { BottomNavigator } from '../components/BottomNavigator';
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
 export function AppStack() {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        gestureEnabled: false, 
+        cardStyleInterpolator: CardStyleInterpolators.forNoAnimation,
+        headerShown: false,
+      }}>
       <Stack.Screen
-        name="HomeScreen"
-        component={HomeScreen}
-        options={{headerShown: false}}
-      />
-      <Stack.Screen
-        name="WalletScreen"
-        component={WalletScreen}
-        options={{headerShown: false}}
-      />
-      <Stack.Screen
-        name="StatusScreen"
-        component={StatusScreen}
-        options={{headerShown: false}}
-      />
-      <Stack.Screen
-        name="ProfileScreen"
-        component={ProfileScreen}
+        name="BottomNavigator"
+        component={BottomNavigator}
         options={{headerShown: false}}
       />
     </Stack.Navigator>

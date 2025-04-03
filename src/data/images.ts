@@ -14,4 +14,6 @@ export default {
     carteira_icon: require('../assets/images/carteira_icon.png'),
     status_icon: require('../assets/images/status_icon.png'),
     profile_icon: require('../assets/images/profile_icon.png'),
+    bg_home_white: require('../assets/images/bg_home_white.png'),
+    left_icon: require('../assets/images/left_icon.png')
 }

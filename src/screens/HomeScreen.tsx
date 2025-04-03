@@ -99,7 +99,6 @@ export function HomeScreen() {
           </View>
         </View>
       </View>
-      <BottomNavigator/>
     </ImageBackground>
   );
 }
