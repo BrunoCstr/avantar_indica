@@ -4,7 +4,7 @@ import {
   CardStyleInterpolators,
 } from '@react-navigation/stack';
 
-import { BottomNavigator } from '../components/BottomNavigator';
+import {BottomNavigator} from '../components/BottomNavigator';
 
 const Stack = createStackNavigator();
 
@@ -12,7 +12,7 @@ export function AppStack() {
   return (
     <Stack.Navigator
       screenOptions={{
-        gestureEnabled: false, 
+        gestureEnabled: false,
         cardStyleInterpolator: CardStyleInterpolators.forNoAnimation,
         headerShown: false,
       }}>

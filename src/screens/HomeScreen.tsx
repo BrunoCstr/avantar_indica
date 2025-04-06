@@ -10,10 +10,7 @@ import {
 import {Button} from '../components/Button';
 import {useAuth} from '../contexts/Auth';
 import images from '../data/images';
-import gStyles from '../styles/gStyles';
 import {NotificationButton} from '../components/NotificationButton';
-import {colors} from '../styles/colors';
-import { BottomNavigator } from '../components/BottomNavigator';
 
 export function HomeScreen() {
   // Para usar nos componentes que nao sao do restyle
@@ -54,7 +51,6 @@ export function HomeScreen() {
           <NotificationButton count={3} />
         </View>
       </View>
-
       <View className="ml-7 mr-7 mt-10 h-30 items-center justify-center flex-row gap-3">
         <TouchableOpacity activeOpacity={0.8}>
           <View className="bg-transparent flex-row border-[2.5px] rounded-lg border-blue justify-center items-center p-8">

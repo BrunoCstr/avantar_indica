@@ -8,13 +8,15 @@ interface ButtonProps {
     fontWeight?: any;
     fontSize?: number;
     onPress: () => void;
+    height?: number;
+    width?: number;
   }
 
-export function Button( { onPress, text, backgroundColor, textColor, fontWeight, fontSize}: ButtonProps ) {
+export function Button( { onPress, text, backgroundColor, textColor, fontWeight, fontSize, width, height = 50}: ButtonProps ) {
 
     return(
         <TouchableOpacity
-        style={{ justifyContent:"center", alignItems:"center", backgroundColor: colors[backgroundColor as keyof typeof colors], borderRadius: 100, height: 50 }} 
+        style={{ justifyContent:"center", alignItems:"center", backgroundColor: colors[backgroundColor as keyof typeof colors], borderRadius: 100, height, width}} 
         activeOpacity={0.8}
         onPress={onPress}
         >

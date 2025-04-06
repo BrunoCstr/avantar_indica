@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
-import Icon from 'react-native-vector-icons/Feather';
+import Icon from 'react-native-vector-icons/Ionicons';
 import {
   Image,
   ImageBackground,
@@ -91,6 +91,7 @@ export function SignInScreen() {
                 </View>
                 <TouchableOpacity
                   style={{position: 'absolute', right: 20, top: '30%'}}
+                  activeOpacity={0.8}
                   onPress={() => {
                     setShowPassword(!showPassword);
                   }}>

@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {Picker} from '@react-native-picker/picker';
 import {useForm, Controller} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
-import Icon from 'react-native-vector-icons/Feather';
+import Icon from 'react-native-vector-icons/Ionicons';
 import {
   Image,
   ImageBackground,
@@ -155,7 +155,7 @@ export function SignUpScreen() {
                 </View>
                 <TouchableOpacity
                   className="absolute right-5 top-[28%]"
-                  // style={{position: 'absolute', right: 20, top: '20%'}}
+                  activeOpacity={0.8}
                   onPress={() => {
                     setShowPassword(!showPassword);
                   }}>
@@ -183,6 +183,7 @@ export function SignUpScreen() {
                 </View>
                 <TouchableOpacity
                   className="absolute right-5 top-[28%]"
+                  activeOpacity={0.8}
                   onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
                   <Icon
                     name={showConfirmPassword ? 'eye-off' : 'eye'}
