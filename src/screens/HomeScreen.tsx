@@ -84,7 +84,7 @@ export function HomeScreen() {
               textColor="primary_purple"
               fontWeight="bold"
               fontSize={22}
-              onPress={() => console.log('Status da Proposta')}
+              onPress={() => navigation.navigate('Status')}
             />
             <Button
               text="REGRAS"

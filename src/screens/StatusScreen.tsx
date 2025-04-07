@@ -11,35 +11,46 @@ import {Button} from '../components/Button';
 
 export function StatusScreen() {
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState<'approved' | 'refused'>('approved');
-  const [dataApproved, setDataApproved] = useState([]);
-  const [dataRefused, setDataRefused] = useState([]);
+  const [statusFilter, setStatusFilter] = useState<null | string>(null);
+  const [data, setData] = useState(null);
   const navigation = useNavigation();
 
-  const approvedData = [
-    {id:1 , indication_name: 'Bruno de Castro', status: 'Aprovado'},
-    {id:2 ,indication_name: 'Alan Turing', status: 'Aprovado'},
-    {id:3 ,indication_name: 'Neymar da Silva', status: 'Aprovado'},
-    {id:4 ,indication_name: 'Romário Silva', status: 'Aprovado'},
-    {id:5 ,indication_name: 'Edmundo Santos', status: 'Aprovado'},
-    {id:6 ,indication_name: 'Pablo Vegetti', status: 'Aprovado'},
-    {id:7 ,indication_name: 'Ada Lovelace', status: 'Aprovado'},
-    {id:8 ,indication_name: 'Bill Gates', status: 'Aprovado'},
+  const dataSimulation = [
+    {id: 1, indication_name: 'Bruno de Castro', status: 'Aprovado'},
+    {id: 2, indication_name: 'Alan Turing', status: 'Aprovado'},
+    {id: 3, indication_name: 'Neymar da Silva', status: 'Aprovado'},
+    {id: 4, indication_name: 'Romário Silva', status: 'Aprovado'},
+    {id: 5, indication_name: 'Edmundo Santos', status: 'Aprovado'},
+    {id: 6, indication_name: 'Pablo Vegetti', status: 'Aprovado'},
+    {id: 7, indication_name: 'Ada Lovelace', status: 'Aprovado'},
+    {id: 8, indication_name: 'Bill Gates', status: 'Aprovado'},
+    {id: 10, indication_name: 'Vasco da Gama', status: 'Recusada'},
+    {id: 11, indication_name: 'Elon Musk', status: 'Recusada'},
+    {id: 12, indication_name: 'Mark Zuckerberg', status: 'Recusada'},
+    {id: 13, indication_name: 'Maradona', status: 'Recusada'},
+    {id: 14, indication_name: 'Pelé', status: 'Recusada'},
+    {id: 15, indication_name: 'Kauan Martins', status: 'Recusada'},
+    {id: 16, indication_name: 'Lucas Neves', status: 'Recusada'},
+    {id: 17, indication_name: 'Davi Teixeira', status: 'Recusada'},
+    {id: 18, indication_name: 'Fagundes Geraldo', status: 'Recusada'},
+    {id: 19, indication_name: 'Antônio Fagundes', status: 'Enviado'},
+    {id: 20, indication_name: 'Machado de Assis', status: 'Enviado'},
+    {id: 21, indication_name: 'Patrick Bateman', status: 'Enviado'},
+    {id: 22, indication_name: 'Thomas Shelby', status: 'Enviado'},
+    {id: 23, indication_name: 'Arthur Shelby', status: 'Em contato'},
+    {id: 24, indication_name: 'Rick Grimes', status: 'Em contato'},
+    {id: 25, indication_name: 'Negan', status: 'Em contato'},
+    {id: 26, indication_name: 'Maggie Rhe', status: 'Em contato'},
+    {id: 27, indication_name: 'Josaci Oliveira', status: 'Em contato'},
   ];
 
-  const refusedData = [
-    {id:10 ,indication_name: 'Vasco da Gama', status: 'Recusada'},
-    {id:11 ,indication_name: 'Elon Musk', status: 'Recusada'},
-    {id:12 ,indication_name: 'Mark Zuckerberg', status: 'Recusada'},
-    {id:13 ,indication_name: 'Maradona', status: 'Recusada'},
-    {id:14 ,indication_name: 'Pelé', status: 'Recusada'},
-    {id:15 ,indication_name: 'Kauan Martins', status: 'Recusada'},
-    {id:16 ,indication_name: 'Lucas Neves', status: 'Recusada'},
-    {id:17 ,indication_name: 'Davi Teixeira', status: 'Recusada'},
-    {id:18 ,indication_name: 'Fagundes Geraldo', status: 'Recusada'},
-  ];
-
-  const data = filter === 'approved' ? approvedData : refusedData;
+  const filteredData = dataSimulation.filter(item => {
+    const matchStatus = statusFilter ? item.status === statusFilter : true;
+    const matchSearch = item.indication_name
+      .toLowerCase()
+      .includes(search.toLowerCase());
+    return matchStatus && matchSearch;
+  });
 
   return (
     <ImageBackground
@@ -66,11 +77,14 @@ export function StatusScreen() {
           />
           {/* Deixar para fazer a lógica de pesquisa por caractere quando tiver já integrado com o backend */}
           <TextInput
-            className="pl-16 pr-5"
+            className="pl-16 pr-5 flex-1"
             onChangeText={setSearch}
             value={search}
             placeholder="Buscar..."
           />
+          <TouchableOpacity onPress={() => setStatusFilter(null)} className='pr-4'>
+            <Ionicons name="reload" size={24} color={colors.black} />
+          </TouchableOpacity>
         </View>
 
         <View className="flex-row gap-1 mt-2">
@@ -82,7 +96,7 @@ export function StatusScreen() {
             fontSize={22}
             width={160}
             height={55}
-            onPress={() => setFilter('approved')}
+            onPress={() => setStatusFilter('Aprovado')}
           />
           <Button
             text="RECUSADAS"
@@ -92,7 +106,7 @@ export function StatusScreen() {
             fontSize={22}
             width={160}
             height={55}
-            onPress={() => setFilter('refused')}
+            onPress={() => setStatusFilter('Recusada')}
           />
         </View>
 
@@ -103,7 +117,7 @@ export function StatusScreen() {
           </View>
 
           <FlatList
-            data={data}
+            data={filteredData}
             showsVerticalScrollIndicator={false}
             keyExtractor={item => item.indication_name}
             renderItem={({item}) => (
@@ -115,7 +129,11 @@ export function StatusScreen() {
                   className="font-bold"
                   style={{
                     color:
-                      item.status === 'Aprovado' ? colors.green : colors.red,
+                      item.status === 'Aprovado'
+                        ? colors.green
+                        : item.status === 'Recusada'
+                          ? colors.red
+                          : colors.orange,
                   }}>
                   {item.status}
                 </Text>

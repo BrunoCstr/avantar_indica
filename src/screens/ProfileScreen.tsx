@@ -1,12 +1,14 @@
 import React from 'react';
 import {Text, View, Image} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+
 import {Button} from '../components/Button';
 import {useAuth} from '../contexts/Auth';
-
 import images from '../data/images';
 
 export function ProfileScreen() {
   const {signOut, userData} = useAuth();
+  const navigation = useNavigation();
 
   const displayName = userData?.displayName;
   const userFirstName = displayName?.slice(0, displayName.indexOf(' '));
@@ -41,7 +43,7 @@ export function ProfileScreen() {
               textColor="white"
               fontWeight="bold"
               fontSize={22}
-              onPress={() => console.log('Notificações')}
+              onPress={() => navigation.navigate('Notifications')}
             />
             <Button
               text="Cadastrar vendedores"
