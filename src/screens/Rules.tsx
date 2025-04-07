@@ -72,14 +72,14 @@ export function Rules() {
             </View>
 
             <View>
-              <Text className="text-white text-base font-bold mt-5 text-start">
+              <Text className="text-blue text-base font-bold mt-5 text-start">
                 Tipos de Usuários
               </Text>
               <Text className="text-white text-base font-regular text-start">
                 Nosso app possui dois tipos de usuários:
               </Text>
 
-              <Text className="text-white text-base font-bold mt-5 text-start">
+              <Text className="text-blue text-base font-bold mt-5 text-start">
                 Cliente Indicador
               </Text>
               {clienteIndicadorRules.map((rule, index) => (
@@ -90,7 +90,7 @@ export function Rules() {
                 </Text>
               ))}
 
-              <Text className="text-white text-base font-bold mt-5 text-start">
+              <Text className="text-blue text-base font-bold mt-5 text-start">
                 Parceiro Indicador
               </Text>
               {parceiroIndicadorRules.map((rule, index) => (
@@ -101,7 +101,7 @@ export function Rules() {
                 </Text>
               ))}
 
-              <Text className="text-white text-base font-bold mt-5 text-start">
+              <Text className="text-blue text-base font-bold mt-5 text-start">
                 Recompensas
               </Text>
               {Recompensas.map((rule, index) => (
@@ -120,7 +120,7 @@ export function Rules() {
                   size={21}
                   color={colors.white}
                 />
-                <Text className="text-white text-base font-bold text-start">
+                <Text className="text-blue text-base font-bold text-start">
                   Minhas Informações
                 </Text>
               </View>

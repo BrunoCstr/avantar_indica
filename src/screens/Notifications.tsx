@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   FlatList,
 } from 'react-native';
-import Entypo from 'react-native-vector-icons/Entypo';
+import Feather from 'react-native-vector-icons/Feather';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {useNavigation} from '@react-navigation/native';
 import {colors} from '../styles/colors';
@@ -73,10 +73,10 @@ export function Notifications() {
         <View className="items-center relative w-full flex-col">
           <View className="w-full flex-row items-center justify-between">
             <TouchableOpacity
-              className="border-[1px] rounded-md border-white h-15 w-15 justify-center items-center p-2"
+              className="border-[1px] rounded-md border-white h-15 w-15 justify-center items-center p-1"
               activeOpacity={0.8}
               onPress={() => navigation.goBack()}>
-              <Entypo name="arrow-long-left" size={21} color={colors.white} />
+              <Feather name="x" size={21} color={colors.white} />
             </TouchableOpacity>
 
             <Text className="text-white font-bold text-2xl text-center">
@@ -95,7 +95,7 @@ export function Notifications() {
             contentContainerStyle={{ paddingBottom: 60 }}
             renderItem={({item}) => (
               <View className="flex-row">
-                <View className="w-full flex-row items-center border-b-[3px] border-b-secondary_purple pb-5 pt-5">
+                <View className="w-full flex-row items-center border-b-[1px] border-b-white pb-5 pt-5">
                   <MaterialIcons
                     className="mr-3"
                     name="notifications-active"
@@ -106,7 +106,7 @@ export function Notifications() {
                     <Text className="text-white font-regular">
                       {item.notification}
                     </Text>
-                    <Text className="text-white font-regular">{item.date}</Text>
+                    <Text className="text-blue font-regular">{item.date}</Text>
                   </View>
                 </View>
               </View>

@@ -7,6 +7,7 @@ import {
 import {BottomNavigator} from '../components/BottomNavigator';
 import {Notifications} from '../screens/Notifications';
 import {Rules} from '../screens/Rules';
+import {EditProfile} from '../screens/Modal';
 
 const Stack = createStackNavigator();
 
@@ -26,12 +27,16 @@ export function AppStack() {
       <Stack.Screen
         name="Notifications"
         component={Notifications}
-        options={{cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS}}
+        options={{
+          cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS,
+        }}
       />
       <Stack.Screen
         name="Rules"
         component={Rules}
-        options={{cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS}}
+        options={{
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        }}
       />
     </Stack.Navigator>
   );

@@ -1,5 +1,5 @@
-import React from 'react';
-import {Text, View, Image} from 'react-native';
+import React, {useState} from 'react';
+import {Text, View, Image, Modal, TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
 import {Button} from '../components/Button';
@@ -10,13 +10,15 @@ export function ProfileScreen() {
   const {signOut, userData} = useAuth();
   const navigation = useNavigation();
 
+  const [modalType, setModalType] = useState<'edit' | 'info' | 'vendors'| null>(null);
+
   const displayName = userData?.displayName;
   const userFirstName = displayName?.slice(0, displayName.indexOf(' '));
 
   return (
     <View className="flex-1">
       <View className="h-1/4 justify-center items-center">
-      <Image source={images.bg_profile_default} className="h-full w-full" />
+        <Image source={images.bg_profile_default} className="h-full w-full" />
       </View>
       <View className="flex-1">
         <View className="justify-center h-full bg-fifth_purple">
@@ -27,7 +29,7 @@ export function ProfileScreen() {
               textColor="white"
               fontWeight="bold"
               fontSize={22}
-              onPress={() => console.log('Editar Perfil')}
+              onPress={() => setModalType('edit')}
             />
             <Button
               text="Minhas informações"
@@ -35,7 +37,7 @@ export function ProfileScreen() {
               textColor="white"
               fontWeight="bold"
               fontSize={22}
-              onPress={() => console.log('Minhas informações')}
+              onPress={() => setModalType('info')}
             />
             <Button
               text="Notificações"
@@ -51,7 +53,7 @@ export function ProfileScreen() {
               textColor="white"
               fontWeight="bold"
               fontSize={22}
-              onPress={() => console.log('Cadatrar vendedores')}
+              onPress={() => setModalType('vendors')}
             />
             <Button
               text="Sair"
@@ -74,6 +76,36 @@ export function ProfileScreen() {
           {userFirstName}
         </Text>
       </View>
+
+      <Modal
+        animationType="slide"
+        transparent
+        visible={modalType !== null}
+        onRequestClose={() => setModalType(null)}>
+        <View className="flex-1 justify-end bg-black/40">
+          <View className="bg-white rounded-t-2xl p-5 h-[40%]">
+            <View className="flex-row justify-between items-center mb-3">
+              <Text className="text-lg font-bold">
+                {modalType === 'edit' && 'Editar Perfil'}
+                {modalType === 'info' && 'Minhas Informações'}
+                {modalType === 'vendors' && 'Cadastrar Vendedores'}
+              </Text>
+              <TouchableOpacity onPress={() => setModalType(null)}>
+                <Text className="text-red-500 text-lg">Fechar</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Conteúdo do modal de acordo com o tipo */}
+            {modalType === 'edit' && (
+              <Text>Aqui vai o formulário para editar perfil</Text>
+            )}
+            {modalType === 'info' && <Text>Informações do usuário aqui</Text>}
+            {modalType === 'vendors' && (
+              <Text>Formulário de cadastro de vendedores</Text>
+            )}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

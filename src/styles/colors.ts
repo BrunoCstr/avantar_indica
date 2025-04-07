@@ -13,6 +13,7 @@ export const colors = {
     secondary_lillac: "#B270FF",
     tertiary_lillac: "#A556FF",
     black: "#000000",
+    purple_black: "#0F0124",
     white: "#F6F3FF",
     white_navBar: "#E3E3E3",
     gray: "#CDCDCD",
