@@ -6,21 +6,23 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 
 import {Button} from '../components/Button';
 import {useAuth} from '../contexts/Auth';
 import images from '../data/images';
 import {NotificationButton} from '../components/NotificationButton';
+import {getFirstName} from '../utils/getName';
 
 export function HomeScreen() {
   // Para usar nos componentes que nao sao do restyle
   const {userData} = useAuth();
-
-  const displayName = userData?.displayName;
-  const userFirstName = displayName?.slice(0, displayName.indexOf(' '));
+  const navigation = useNavigation();
 
   const isFirstLogin = userData?.isFirstLogin;
-  const welcomeMessage = isFirstLogin ? "Seja bem-vindo!" : "Seja bem-vindo de volta!"
+  const welcomeMessage = isFirstLogin
+    ? 'Seja bem-vindo!'
+    : 'Seja bem-vindo de volta!';
 
   return (
     <ImageBackground
@@ -38,7 +40,7 @@ export function HomeScreen() {
           <View className="ml-2.5 flex-row">
             <Text className="text-blue text-m font-medium">Olá, </Text>
             <Text className="text-white text-m font-medium">
-              {userFirstName}
+              {getFirstName(userData?.displayName)}
             </Text>
           </View>
           <View className="ml-2.5">
@@ -48,7 +50,7 @@ export function HomeScreen() {
           </View>
         </View>
         <View className="absolute right-0">
-          <NotificationButton count={3} />
+          <NotificationButton count={3}/>
         </View>
       </View>
       <View className="ml-7 mr-7 mt-10 h-30 items-center justify-center flex-row gap-3">
@@ -75,22 +77,22 @@ export function HomeScreen() {
 
       <View className="h-[50%] mt-7 rounded-[30px] bg-white">
         <View className="p-5">
-          <View className='gap-2'>
+          <View className="gap-2">
             <Button
               text="STATUS DA PROPOSTA"
-              backgroundColor='blue'
-              textColor='primary_purple'
-              fontWeight='bold'
+              backgroundColor="blue"
+              textColor="primary_purple"
+              fontWeight="bold"
               fontSize={22}
               onPress={() => console.log('Status da Proposta')}
             />
             <Button
               text="REGRAS"
-              textColor='white'
-              backgroundColor='orange'
-              fontWeight='bold'
+              textColor="white"
+              backgroundColor="orange"
+              fontWeight="bold"
               fontSize={22}
-              onPress={() => console.log('REGRAS')}
+              onPress={() => navigation.navigate('Rules')}
             />
           </View>
         </View>

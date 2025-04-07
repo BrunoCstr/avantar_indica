@@ -18,4 +18,5 @@ export default {
     left_icon: require('../assets/images/left_icon.png'),
     request_money: require('../assets/images/request_money.png'),
     bg_status: require('../assets/images/bg_status.png'),
+    bg_profile_default: require('../assets/images/bg_profile_default.png'),
 }

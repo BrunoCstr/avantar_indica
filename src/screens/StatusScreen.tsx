@@ -25,7 +25,6 @@ export function StatusScreen() {
     {id:6 ,indication_name: 'Pablo Vegetti', status: 'Aprovado'},
     {id:7 ,indication_name: 'Ada Lovelace', status: 'Aprovado'},
     {id:8 ,indication_name: 'Bill Gates', status: 'Aprovado'},
-    {id:9 ,indication_name: 'Lorem Ipsum', status: 'Aprovado'},
   ];
 
   const refusedData = [
@@ -105,6 +104,7 @@ export function StatusScreen() {
 
           <FlatList
             data={data}
+            showsVerticalScrollIndicator={false}
             keyExtractor={item => item.indication_name}
             renderItem={({item}) => (
               <View className="flex-row justify-between pl-10 pr-14 pt-1">

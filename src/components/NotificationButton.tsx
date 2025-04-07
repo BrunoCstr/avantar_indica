@@ -1,10 +1,14 @@
 import React from 'react';
 import {View, Text, Image, TouchableOpacity} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+
 import images from '../data/images';
 
 export function NotificationButton({count = 1}) {
+  const navigation = useNavigation();
+
   return (
-    <TouchableOpacity activeOpacity={0.8}>
+    <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Notifications')}>
       <View className="relative">
         <View className="bg-blue h-10 w-10 rounded-full items-center justify-center">
           <Image source={images.notification_icon} className="h-7 w-7" />
