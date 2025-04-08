@@ -1,5 +1,12 @@
 import React from 'react';
-import {Text, View, TouchableOpacity, Image, TextInput, Alert} from 'react-native';
+import {
+  Text,
+  View,
+  TouchableOpacity,
+  Image,
+  TextInput,
+  Alert,
+} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {indicationSchema, IndicationSchema} from '../schemas/validationSchema';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -11,7 +18,7 @@ import images from '../data/images';
 import {colors} from '../styles/colors';
 import {FormInput} from '../components/FormInput';
 import {Button} from '../components/Button';
-import { useAuth } from '../contexts/Auth';
+import {useAuth} from '../contexts/Auth';
 
 export function IndicateInBulkScreen() {
   const navigation = useNavigation();
@@ -36,9 +43,18 @@ export function IndicateInBulkScreen() {
 
     const cleanedTelephone = telephone.replace(/\D/g, '');
 
-    console.log(telephone, cleanedTelephone, dataFiltred.fullName, dataFiltred.observations, dataFiltred.product);
+    console.log(
+      telephone,
+      cleanedTelephone,
+      dataFiltred.fullName,
+      dataFiltred.observations,
+      dataFiltred.product,
+    );
 
-    Alert.alert('Enviado!', `Indicação enviada para a unidade: ${userData?.affiliated_to}.`);
+    Alert.alert(
+      'Enviado!',
+      `Indicação enviada para a unidade: ${userData?.affiliated_to}.`,
+    );
   };
 
   return (
@@ -58,13 +74,39 @@ export function IndicateInBulkScreen() {
             />
           </TouchableOpacity>
           <Text className="text-primary_purple font-bold text-3xl absolute left-1/2 -translate-x-1/2">
-            Indicar
+            Indicar em Massa
           </Text>
         </View>
 
-        <View className="flex-col mt-10">
-          
+        <View className='mt-5'>
+          <TouchableOpacity
+            style={{padding: 10, borderBottomWidth: 1, borderColor: '#ccc'}}>
+            <Text style={{fontWeight: 'bold'}}>Bruno de Castro</Text>
+            <Text>(33) 99944-2685</Text>
+            <Text>
+               Toque para selecionar
+            </Text>
+          </TouchableOpacity>
+        </View>
 
+        <View className="flex-row items-center justify-center w-full gap-1 mt-10">
+          <Button
+            text="IMPORTAR"
+            backgroundColor="tertiary_purple"
+            onPress={() => console.log('vasco')}
+            textColor="white"
+            width={175}
+          />
+          <Button
+            text="IMPORTAR TODOS"
+            backgroundColor="tertiary_purple"
+            onPress={() => console.log('vasco')}
+            textColor="white"
+            width={175}
+          />
+        </View>
+
+        <View className="mt-5">
           <Button
             text="ENVIAR"
             backgroundColor="tertiary_purple"
