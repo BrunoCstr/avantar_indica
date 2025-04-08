@@ -7,7 +7,8 @@ import {
 import {BottomNavigator} from '../components/BottomNavigator';
 import {Notifications} from '../screens/Notifications';
 import {Rules} from '../screens/Rules';
-import {EditProfile} from '../screens/Modal';
+import { IndicateScreen } from '../screens/IndicateScreen';
+import { IndicateInBulkScreen } from '../screens/IndicateInBulk';
 
 const Stack = createStackNavigator();
 
@@ -34,6 +35,20 @@ export function AppStack() {
       <Stack.Screen
         name="Rules"
         component={Rules}
+        options={{
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        }}
+      />
+      <Stack.Screen
+        name="Indicate"
+        component={IndicateScreen}
+        options={{
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        }}
+      />
+      <Stack.Screen
+        name="IndicateInBulk"
+        component={IndicateInBulkScreen}
         options={{
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
         }}

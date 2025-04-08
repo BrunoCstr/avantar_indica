@@ -29,6 +29,7 @@ const db = getFirestore(app);
 interface UserData {
   displayName: string;
   email: string;
+  affiliated_to: string;
   isFirstLogin: boolean;
 }
 
@@ -91,6 +92,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
                 displayName: user.displayName,
                 email: user.email,
                 isFirstLogin: data.isFirstLogin,
+                affiliated_to: data.affiliated_to
               });
             }
           });

@@ -50,11 +50,13 @@ export function HomeScreen() {
           </View>
         </View>
         <View className="absolute right-0">
-          <NotificationButton count={3}/>
+          <NotificationButton count={3} />
         </View>
       </View>
       <View className="ml-7 mr-7 mt-10 h-30 items-center justify-center flex-row gap-3">
-        <TouchableOpacity activeOpacity={0.8}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('Indicate')}>
           <View className="bg-transparent flex-row border-[2.5px] rounded-lg border-blue justify-center items-center p-8">
             <Image source={images.indicar_icon} />
             <Text className="text-white text-regular text-2xl ml-1.5">
@@ -62,7 +64,9 @@ export function HomeScreen() {
             </Text>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.8}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('IndicateInBulk')}>
           <View className="bg-transparent flex-row border-[2.5px] rounded-lg border-secondary_purple justify-center items-center p-8 pt-5 pb-5">
             <Image source={images.indicar_em_massa_icon} />
             <View>
