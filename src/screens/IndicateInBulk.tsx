@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   Text,
   View,
@@ -6,6 +6,9 @@ import {
   Image,
   TextInput,
   Alert,
+  FlatList,
+  PermissionsAndroid,
+  Platform,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {indicationSchema, IndicationSchema} from '../schemas/validationSchema';
@@ -13,16 +16,74 @@ import {zodResolver} from '@hookform/resolvers/zod';
 import {useForm, Controller} from 'react-hook-form';
 import {Picker} from '@react-native-picker/picker';
 import Entypo from 'react-native-vector-icons/Entypo';
+import Contacts from 'react-native-contacts';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import images from '../data/images';
 import {colors} from '../styles/colors';
 import {FormInput} from '../components/FormInput';
 import {Button} from '../components/Button';
 import {useAuth} from '../contexts/Auth';
+import {ConctactItem} from '../components/ContactItem';
+import {applyMaskTelephone} from '../utils/applyMaskTelephone';
+
+type Lead = {
+  recordID: string;
+  displayName: string;
+  phoneNumbers: {number: string}[];
+};
 
 export function IndicateInBulkScreen() {
   const navigation = useNavigation();
   const {userData} = useAuth();
+
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [selecteds, setSelecteds] = useState<{[key: string]: boolean}>({});
+  const [search, setSearch] = useState('');
+
+  const askForPermission = async () => {
+    if (Platform.OS === 'android') {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    }
+    return true;
+  };
+
+  const loadContacts = async () => {
+    const allowed = await askForPermission();
+    if (allowed) {
+      const all = await Contacts.getAll();
+      const withTelephone: any = all.filter(c => c.phoneNumbers.length > 0);
+      setLeads(withTelephone);
+    }
+  };
+
+  useEffect(() => {
+    loadContacts();
+  }, []);
+
+  const toggleContact = (id: string) => {
+    setSelecteds(prev => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const submitSelecteds = () => {
+    const arrSelecteds = leads.filter(c => selecteds[c.recordID]);
+    const leadsData = arrSelecteds.map(c => ({
+      fullName: c.displayName,
+      telephone: applyMaskTelephone(c.phoneNumbers[0].number) ?? 'Sem número',
+    }));
+
+    console.log(arrSelecteds)
+
+    console.log(leadsData);
+  };
+
+  // Envio do Formulário
 
   const {
     control,
@@ -53,9 +114,20 @@ export function IndicateInBulkScreen() {
 
     Alert.alert(
       'Enviado!',
-      `Indicação enviada para a unidade: ${userData?.affiliated_to}.`,
+      `Indicações enviadas para a unidade: ${userData?.affiliated_to}.`,
     );
   };
+
+  const filteredData = leads.filter(item => {
+    const matchSearchName = item.displayName
+      .toLowerCase()
+      .includes(search.toLowerCase());
+
+    const matchSearchTel = item.phoneNumbers?.[0]?.number
+    .includes(search);
+
+    return matchSearchName || matchSearchTel;
+  });
 
   return (
     <View className="flex-1">
@@ -78,39 +150,47 @@ export function IndicateInBulkScreen() {
           </Text>
         </View>
 
-        <View className='mt-5'>
-          <TouchableOpacity
-            style={{padding: 10, borderBottomWidth: 1, borderColor: '#ccc'}}>
-            <Text style={{fontWeight: 'bold'}}>Bruno de Castro</Text>
-            <Text>(33) 99944-2685</Text>
-            <Text>
-               Toque para selecionar
-            </Text>
-          </TouchableOpacity>
+        <View className="flex-1 mt-5">
+          <Text className="text-lg font-bold text-center text-primary_purple">
+            Selecione os contatos:
+          </Text>
+
+          <View className="flex-row mt-2 items-center w-full h-16 bg-primary_purple rounded-lg">
+            <Ionicons
+              name="search"
+              size={24}
+              color={colors.white}
+              className="absolute left-5"
+            />
+            <TextInput
+              className="pl-16 pr-5 flex-1"
+              onChangeText={setSearch}
+              value={search}
+              placeholder="Buscar..."
+              placeholderTextColor={colors.white}
+            />
+          </View>
+
+          <FlatList
+            className="mb-4"
+            data={filteredData}
+            keyExtractor={item => item.recordID}
+            showsVerticalScrollIndicator={false}
+            renderItem={({item}) => (
+              <ConctactItem
+                contact={item}
+                selected={!!selecteds[item.recordID]}
+                onToggle={() => toggleContact(item.recordID)}
+              />
+            )}
+          />
         </View>
 
-        <View className="flex-row items-center justify-center w-full gap-1 mt-10">
-          <Button
-            text="IMPORTAR"
-            backgroundColor="tertiary_purple"
-            onPress={() => console.log('vasco')}
-            textColor="white"
-            width={175}
-          />
-          <Button
-            text="IMPORTAR TODOS"
-            backgroundColor="tertiary_purple"
-            onPress={() => console.log('vasco')}
-            textColor="white"
-            width={175}
-          />
-        </View>
-
-        <View className="mt-5">
+        <View className="mt-auto mb-5">
           <Button
             text="ENVIAR"
             backgroundColor="tertiary_purple"
-            onPress={handleSubmit(onSubmit)}
+            onPress={submitSelecteds}
             textColor="white"
           />
         </View>

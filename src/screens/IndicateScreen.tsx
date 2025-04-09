@@ -61,11 +61,8 @@ export function IndicateScreen() {
   });
 
   const onSubmit = (data: IndicationSchema) => {
-    const {telephone, ...dataFiltred} = data;
 
-    const cleanedTelephone = telephone.replace(/\D/g, '');
-
-    console.log(telephone, cleanedTelephone, dataFiltred.fullName, dataFiltred.observations, dataFiltred.product);
+    console.log(data.fullName, data.telephone, data.observations, data.product);
 
     Alert.alert('Enviado!', `Indicação enviada para a unidade: ${userData?.affiliated_to}.`);
   };
