@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Image, Text, TouchableOpacity, View} from 'react-native';
+import {Alert, Image, Text, TouchableOpacity, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -8,10 +8,21 @@ import LinearGradient from 'react-native-linear-gradient';
 
 import images from '../data/images';
 import {colors} from '../styles/colors';
+import { useAuth } from '../contexts/Auth';
 
 export function WalletScreen() {
+  const { userData } = useAuth()
   const [showBalance, setShowBalance] = useState(true);
   const navigation = useNavigation();
+
+  function withdrawalRequest() {
+    const balance = 4.008; 
+    if(balance > 700 ) {
+      Alert.alert(`Saldo insuficiente!`, `Seu saldo precisa ser maior que R$ 700,00 para realizar o saque.`)
+    } else {
+      Alert.alert('Saque solicitado!' ,`Saque solicitado à unidade: ${userData?.affiliated_to}, você pode acompanhar o status em sua carteira.`)
+    }
+  }
 
   return (
     <View className="flex-1">
@@ -105,7 +116,7 @@ export function WalletScreen() {
           <TouchableOpacity
             className="justify-center items-center h-20"
             activeOpacity={0.8}
-            onPress={() => console.log('Solicitar Saque')}>
+            onPress={withdrawalRequest}>
             <LinearGradient
               className="w-[100%] flex-1 justify-center items-center rounded-lg border-[1px] border-blue"
               style={{borderRadius: 8}}

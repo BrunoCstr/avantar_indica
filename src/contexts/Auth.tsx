@@ -13,7 +13,7 @@ import {
 } from '@react-native-firebase/auth';
 import {
   collection,
-  addDoc,
+  setDoc,
   query,
   where,
   getDocs,
@@ -31,6 +31,7 @@ interface UserData {
   email: string;
   affiliated_to: string;
   isFirstLogin: boolean;
+  uid: string;
 }
 
 interface AuthContextData {
@@ -92,7 +93,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
                 displayName: user.displayName,
                 email: user.email,
                 isFirstLogin: data.isFirstLogin,
-                affiliated_to: data.affiliated_to
+                affiliated_to: data.affiliated_to,
+                uid: data.uid
               });
             }
           });
@@ -130,7 +132,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
       const user = userCredential.user;
 
-      await addDoc(collection(db, 'users'), {
+      await setDoc(doc(db, 'users', user.uid), {
         fullName,
         email,
         cpf,

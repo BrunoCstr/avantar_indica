@@ -86,7 +86,7 @@ export function ProfileScreen() {
       </View>
 
       <View className="absolute mt-28 left-1/2 -translate-x-1/2 z-20 items-center">
-        <TouchableOpacity activeOpacity={0.95}>
+        <TouchableOpacity activeOpacity={0.9}>
           <Image
             source={images.default_profile_picture}
             className="h-30 w-30 rounded-md"

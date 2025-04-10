@@ -103,7 +103,10 @@ export function Notifications() {
                     color={colors.white}
                   />
                   <View className="w-full">
-                    <Text className="text-white font-regular">
+                    <Text className="text-white font-bold">
+                      {item.notification}
+                    </Text>
+                    <Text className="text-white text-sm font-regular">
                       {item.notification}
                     </Text>
                     <Text className="text-blue font-regular">{item.date}</Text>

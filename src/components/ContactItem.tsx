@@ -13,21 +13,21 @@ export function ConctactItem({contact, selected, onToggle}: any) {
       <TouchableOpacity
         onPress={onToggle}
         className="p-3 border-2 rounded-lg"
-        style={{borderColor: selected ? 'green' : colors.secondary_lillac}}
+        style={{borderColor: selected ? 'green' : colors.primary_purple}}
         activeOpacity={0.6}>
         <Text
           className="font-bold"
-          style={{color: selected ? 'green' : colors.secondary_purple}}>
+          style={{color: selected ? 'green' : colors.primary_purple}}>
           {contact.displayName}
         </Text>
         <Text
           className="font-regular"
-          style={{color: selected ? 'green' : colors.secondary_purple}}>
+          style={{color: selected ? 'green' : colors.primary_purple}}>
           {telephoneFormatted || 'Sem número'}
         </Text>
         <Text
           className="font-regular"
-          style={{color: selected ? 'green' : colors.secondary_purple}}>
+          style={{color: selected ? 'green' : colors.primary_purple}}>
           {selected ? 'Selecionado' : 'Toque para selecionar'}
         </Text>
       </TouchableOpacity>

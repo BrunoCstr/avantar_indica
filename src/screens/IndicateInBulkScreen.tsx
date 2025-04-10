@@ -155,11 +155,11 @@ export function IndicateInBulkScreen() {
             Selecione os contatos:
           </Text>
 
-          <View className="flex-row mt-2 items-center w-full h-16 bg-primary_purple rounded-lg">
+          <View className="flex-row mt-2 items-center w-full h-16 border-2 border-primary_purple rounded-lg">
             <Ionicons
               name="search"
               size={24}
-              color={colors.white}
+              color={colors.primary_purple}
               className="absolute left-5"
             />
             <TextInput
@@ -167,7 +167,7 @@ export function IndicateInBulkScreen() {
               onChangeText={setSearch}
               value={search}
               placeholder="Buscar..."
-              placeholderTextColor={colors.white}
+              placeholderTextColor={colors.primary_purple}
             />
           </View>
 

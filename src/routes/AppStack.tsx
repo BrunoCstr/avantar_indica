@@ -6,9 +6,9 @@ import {
 
 import {BottomNavigator} from '../components/BottomNavigator';
 import {Notifications} from '../screens/Notifications';
-import {Rules} from '../screens/Rules';
+import {Rules} from '../screens/RulesScreen';
 import { IndicateScreen } from '../screens/IndicateScreen';
-import { IndicateInBulkScreen } from '../screens/IndicateInBulk';
+import { IndicateInBulkScreen } from '../screens/IndicateInBulkScreen';
 
 const Stack = createStackNavigator();
 

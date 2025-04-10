@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
   Text,
   View,
@@ -7,17 +7,46 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import messaging from '@react-native-firebase/messaging';
+import {getFirestore, doc, updateDoc} from '@react-native-firebase/firestore';
 
+import app from '../../firebaseConfig';
 import {Button} from '../components/Button';
 import {useAuth} from '../contexts/Auth';
 import images from '../data/images';
 import {NotificationButton} from '../components/NotificationButton';
 import {getFirstName} from '../utils/getName';
 
+const db = getFirestore(app);
+
 export function HomeScreen() {
-  // Para usar nos componentes que nao sao do restyle
   const {userData} = useAuth();
   const navigation = useNavigation();
+
+  async function requestUserPermission() {
+    const authStatus = await messaging().requestPermission();
+  }
+
+  useEffect(() => {
+    requestUserPermission();
+
+    const getToken = async () => {
+      try {
+        const fcmToken = await messaging().getToken();
+
+        if (userData?.uid) {
+          const userRef = doc(db, 'users', userData.uid);
+          await updateDoc(userRef, {
+            fcmToken: fcmToken,
+          });
+        }
+      } catch (error) {
+        console.error('Erro ao salvar token FCM:', error);
+      }
+    };
+
+    getToken();
+  }, []);
 
   const isFirstLogin = userData?.isFirstLogin;
   const welcomeMessage = isFirstLogin
