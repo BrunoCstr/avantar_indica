@@ -18,11 +18,15 @@ export const registrationsApproved = functions.firestore.onDocumentUpdated(
     }
 
     if (!beforeData.registration_status && afterData.registration_status) {
-      console.log('>>> Cadastro aprovado, executando notificações e e-mail...');
       const fcmToken = afterData.fcmToken;
       const userEmail = afterData.email;
       const userName = afterData.fullName;
       const userUnit = afterData.affiliated_to;
+
+      if (!fcmToken) {
+        console.warn('Usuário sem token FCM');
+        return;
+      }
 
       //Enviando Notificação
       const payload = {
@@ -53,7 +57,7 @@ export const registrationsApproved = functions.firestore.onDocumentUpdated(
         try {
           await admin
             .firestore()
-            .collection(`users/${event.params.userId}/notificacoes`)
+            .collection(`users/${event.params.userId}/notifications`)
             .add({
               title: 'Seu cadastro foi aprovado! ✅',
               body: 'A partir de agora, você já pode utilizar nosso aplicativo para realizar suas indicações de forma rápida e prática.',

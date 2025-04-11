@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   Text,
   View,
@@ -6,13 +6,23 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {
+  getFirestore,
+  getDocs,
+  collection,
+  query,
+  orderBy,
+} from '@react-native-firebase/firestore';
 
 import {Button} from '../components/Button';
 import {useAuth} from '../contexts/Auth';
 import images from '../data/images';
 import {NotificationButton} from '../components/NotificationButton';
 import {getFirstName} from '../utils/getName';
+import app from '../../firebaseConfig';
+
+const db = getFirestore(app);
 
 export function HomeScreen() {
   const {userData} = useAuth();
@@ -22,6 +32,31 @@ export function HomeScreen() {
   const welcomeMessage = isFirstLogin
     ? 'Seja bem-vindo!'
     : 'Seja bem-vindo de volta!';
+
+  const [unreadNotifications, setUnreadNotifications] = useState<number>(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchNotifications = async () => {
+        if (userData?.uid) {
+          const notificationsRef = collection(
+            db,
+            'users',
+            userData.uid,
+            'notifications',
+          );
+          const q = query(notificationsRef, orderBy('createdAt', 'desc'));
+          const querySnapshot = await getDocs(q);
+          const notificationsData = querySnapshot.docs.map(doc => doc.data());
+          setUnreadNotifications(
+            notificationsData.filter(notification => !notification.read).length,
+          );
+        }
+      };
+
+      fetchNotifications();
+    }, [userData?.uid]),
+  );
 
   return (
     <ImageBackground
@@ -53,7 +88,7 @@ export function HomeScreen() {
           </View>
         </View>
         <View className="absolute right-0">
-          <NotificationButton count={3} />
+          <NotificationButton count={unreadNotifications} />
         </View>
       </View>
       <View className="ml-7 mr-7 mt-10 h-30 items-center justify-center flex-row gap-3">

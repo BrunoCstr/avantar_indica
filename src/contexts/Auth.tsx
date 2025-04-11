@@ -94,12 +94,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
                 email: user.email,
                 isFirstLogin: data.isFirstLogin,
                 affiliated_to: data.affiliated_to,
-                uid: data.uid
+                uid: data.uid,
               });
             }
           });
         } catch (err) {
           await signOut(auth);
+          const userRef = doc(db, 'users', user.uid);
+          await updateDoc(userRef, {
+            fcmToken: null,
+          });
           setIsUserAuthenticated(false);
           setregistrationStatus(false);
           setUserData(null);
@@ -233,6 +237,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
   async function handleSignOut() {
     try {
+      const currentUser = auth.currentUser;
+
+      if (!currentUser) {
+        throw new Error('Nenhum usuário autenticado no momento.');
+      }
+
+      const userRef = doc(db, 'users', currentUser.uid);
+      await updateDoc(userRef, {
+        fcmToken: null,
+      });
+    
       await signOut(auth);
     } catch (err: any) {
       switch (err.code) {
@@ -291,7 +306,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         registrationStatus,
         forgotPassword,
         isLoading,
-        userData
+        userData,
       }}>
       {children}
     </AuthContext.Provider>
