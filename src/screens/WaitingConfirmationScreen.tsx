@@ -1,9 +1,43 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {View, Text, Image, ImageBackground} from 'react-native';
+import messaging from '@react-native-firebase/messaging';
+import {getFirestore, doc, updateDoc} from '@react-native-firebase/firestore';
+
 import gStyles from '../styles/gStyles';
 import images from '../data/images';
+import {useAuth} from '../contexts/Auth';
+import app from '../../firebaseConfig';
+
+const db = getFirestore(app);
 
 export function WaitingConfirmationScreen() {
+  const {userData} = useAuth();
+
+  async function requestUserPermission() {
+    await messaging().requestPermission();
+  }
+
+  useEffect(() => {
+    requestUserPermission();
+
+    const getToken = async () => {
+      try {
+        const fcmToken = await messaging().getToken();
+
+        if (userData?.uid) {
+          const userRef = doc(db, 'users', userData.uid);
+          await updateDoc(userRef, {
+            fcmToken: fcmToken,
+          });
+        }
+      } catch (error) {
+        console.error('Erro ao salvar token FCM:', error);
+      }
+    };
+
+    getToken();
+  }, []);
+
   return (
     <ImageBackground
       source={images.bg_white}

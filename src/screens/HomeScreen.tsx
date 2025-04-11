@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {
   Text,
   View,
@@ -7,46 +7,16 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import messaging from '@react-native-firebase/messaging';
-import {getFirestore, doc, updateDoc} from '@react-native-firebase/firestore';
 
-import app from '../../firebaseConfig';
 import {Button} from '../components/Button';
 import {useAuth} from '../contexts/Auth';
 import images from '../data/images';
 import {NotificationButton} from '../components/NotificationButton';
 import {getFirstName} from '../utils/getName';
 
-const db = getFirestore(app);
-
 export function HomeScreen() {
   const {userData} = useAuth();
   const navigation = useNavigation();
-
-  async function requestUserPermission() {
-    const authStatus = await messaging().requestPermission();
-  }
-
-  useEffect(() => {
-    requestUserPermission();
-
-    const getToken = async () => {
-      try {
-        const fcmToken = await messaging().getToken();
-
-        if (userData?.uid) {
-          const userRef = doc(db, 'users', userData.uid);
-          await updateDoc(userRef, {
-            fcmToken: fcmToken,
-          });
-        }
-      } catch (error) {
-        console.error('Erro ao salvar token FCM:', error);
-      }
-    };
-
-    getToken();
-  }, []);
 
   const isFirstLogin = userData?.isFirstLogin;
   const welcomeMessage = isFirstLogin
@@ -61,9 +31,13 @@ export function HomeScreen() {
       {/* Header */}
       <View className="grid-cols-3 flex-row items-center mt-10 ml-7 mr-7">
         <View>
-          <Image
-            source={images.default_profile_picture}
-            className="h-14 w-14 rounded-full"></Image>
+          <TouchableOpacity
+            onPress={() => console.log('Foto do perfil')}
+            activeOpacity={0.8}>
+            <Image
+              source={images.default_profile_picture}
+              className="h-14 w-14 rounded-full"></Image>
+          </TouchableOpacity>
         </View>
         <View>
           <View className="ml-2.5 flex-row">
