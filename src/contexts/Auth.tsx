@@ -22,6 +22,7 @@ import {
   updateDoc,
   doc,
 } from '@react-native-firebase/firestore';
+import { uploadDefaultProfilePicture } from '../utils/uploadDefaultProfilePicture';
 
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -133,8 +134,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         email,
         password,
       );
-
       const user = userCredential.user;
+
+      const profilePictureUrl = await uploadDefaultProfilePicture(user.uid);
 
       await setDoc(doc(db, 'users', user.uid), {
         fullName,
@@ -145,6 +147,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         createdAt: serverTimestamp(),
         uid: user.uid,
         isFirstLogin: true,
+        profilePicture: profilePictureUrl,
       });
 
       await updateProfile(user, {displayName: fullName});

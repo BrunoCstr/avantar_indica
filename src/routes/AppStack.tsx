@@ -29,7 +29,7 @@ export function AppStack() {
         name="Notifications"
         component={Notifications}
         options={{
-          cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS,
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
         }}
       />
       <Stack.Screen

@@ -35,6 +35,12 @@
 	<string/>
 	<key>NSContactsUsageDescription</key>
     <string>Precisamos acessar seus contatos para importar nome e telefone.</string>
+	<key>NSUserTrackingUsageDescription</key>
+    <string>Este app usará notificações para mantê-lo informado</string>
+    <key>UIBackgroundModes</key>
+    <array>
+    <string>remote-notification</string>
+    </array>
 	<key>UILaunchStoryboardName</key>
 	<string>BootSplash</string>
 	<key>UIRequiredDeviceCapabilities</key>

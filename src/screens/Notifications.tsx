@@ -69,8 +69,6 @@ export function Notifications() {
     fetchNotifications();
   }, [userData?.uid]);
 
-  console.log('Notificações:', notificationsList);
-
   const navigation = useNavigation();
 
   return (
