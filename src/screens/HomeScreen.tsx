@@ -14,6 +14,7 @@ import {
   query,
   orderBy,
 } from '@react-native-firebase/firestore';
+import { launchImageLibrary } from 'react-native-image-picker';
 
 import {Button} from '../components/Button';
 import {useAuth} from '../contexts/Auth';
@@ -34,6 +35,23 @@ export function HomeScreen() {
     : 'Seja bem-vindo de volta!';
 
   const [unreadNotifications, setUnreadNotifications] = useState<number>(0);
+  const [imageUri, setImageUri] = useState<string | null>(null);
+
+  const selectImage = () => {
+    console.log('Selecionando imagem...');
+    launchImageLibrary({mediaType: 'photo', quality: 0.5}, response => {
+      console.log('Resposta da biblioteca de imagens: ', response);
+      if (response.didCancel) {
+        console.log('Usuário cancelou a seleção de imagem');
+      } else if (response.errorCode) {
+        console.log('Erro ao selecionar imagem: ', response.errorCode);
+      } else if (response.assets && response.assets.length > 0) {
+        console.log('Imagem selecionada: ', response.assets[0]);
+        const {uri} = response.assets[0];
+        setImageUri(uri || null);
+      }
+    });
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -67,7 +85,7 @@ export function HomeScreen() {
       <View className="grid-cols-3 flex-row items-center mt-10 ml-7 mr-7">
         <View>
           <TouchableOpacity
-            onPress={() => console.log('Foto do perfil')}
+            onPress={() => selectImage()}
             activeOpacity={0.8}>
             <Image
               source={images.default_profile_picture}
