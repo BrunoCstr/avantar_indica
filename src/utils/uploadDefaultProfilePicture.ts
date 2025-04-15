@@ -9,7 +9,7 @@ export async function uploadDefaultProfilePicture(uid: string) {
     // Copiar o asset nativo para o sistema de arquivos acessível
     await RNFS.copyFileAssets(assetPath, localPath);
 
-    const ref = storage().ref(`profile_pictures/${uid}/default_profile_picture.jpg`);
+    const ref = storage().ref(`profile_pictures/${uid}/profile_picture.jpg`);
     await ref.putFile(localPath);
 
     const url = await ref.getDownloadURL();

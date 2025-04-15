@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   Text,
   View,
@@ -13,8 +13,11 @@ import {
   collection,
   query,
   orderBy,
+  updateDoc,
+  doc,
 } from '@react-native-firebase/firestore';
-import { launchImageLibrary } from 'react-native-image-picker';
+import {launchImageLibrary} from 'react-native-image-picker';
+import storage from '@react-native-firebase/storage';
 
 import {Button} from '../components/Button';
 import {useAuth} from '../contexts/Auth';
@@ -35,20 +38,33 @@ export function HomeScreen() {
     : 'Seja bem-vindo de volta!';
 
   const [unreadNotifications, setUnreadNotifications] = useState<number>(0);
-  const [imageUri, setImageUri] = useState<string | null>(null);
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
 
   const selectImage = () => {
-    console.log('Selecionando imagem...');
     launchImageLibrary({mediaType: 'photo', quality: 0.5}, response => {
-      console.log('Resposta da biblioteca de imagens: ', response);
-      if (response.didCancel) {
-        console.log('Usuário cancelou a seleção de imagem');
-      } else if (response.errorCode) {
-        console.log('Erro ao selecionar imagem: ', response.errorCode);
-      } else if (response.assets && response.assets.length > 0) {
-        console.log('Imagem selecionada: ', response.assets[0]);
-        const {uri} = response.assets[0];
-        setImageUri(uri || null);
+      if (response.assets && response.assets.length > 0) {
+        const asset = response.assets[0];
+        const {uri} = asset;
+
+        if (uri) {
+          const uploadTask = storage()
+            .ref(`profile_pictures/${userData?.uid}/profile_picture.jpg`)
+            .putFile(uri);
+
+          uploadTask.on('state_changed', async snapshot => {
+            if (snapshot.state === 'success') {
+              const downloadUrl = await snapshot.ref.getDownloadURL();
+
+              if (userData?.uid) {
+                await updateDoc(doc(db, 'users', userData.uid), {
+                  profilePicture: downloadUrl,
+                });
+
+                setProfilePicture(downloadUrl);
+              }
+            }
+          });
+        }
       }
     });
   };
@@ -76,6 +92,12 @@ export function HomeScreen() {
     }, [userData?.uid]),
   );
 
+  useEffect(() => {
+    if (userData?.profilePicture) {
+      setProfilePicture(userData.profilePicture);
+    }
+  }, [userData?.profilePicture]);
+
   return (
     <ImageBackground
       source={images.bg_home_purple}
@@ -84,11 +106,13 @@ export function HomeScreen() {
       {/* Header */}
       <View className="grid-cols-3 flex-row items-center mt-10 ml-7 mr-7">
         <View>
-          <TouchableOpacity
-            onPress={() => selectImage()}
-            activeOpacity={0.8}>
+          <TouchableOpacity onPress={() => selectImage()} activeOpacity={0.8}>
             <Image
-              source={images.default_profile_picture}
+              source={
+                profilePicture
+                  ? {uri: profilePicture}
+                  : images.default_profile_picture
+              }
               className="h-14 w-14 rounded-full"></Image>
           </TouchableOpacity>
         </View>

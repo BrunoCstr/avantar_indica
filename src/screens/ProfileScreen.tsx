@@ -1,16 +1,22 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Text, View, Image, Modal, TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useForm, Controller} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import Feather from 'react-native-vector-icons/Feather';
+import {launchImageLibrary} from 'react-native-image-picker';
+import {updateDoc, doc, getFirestore} from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
 
+import app from '../../firebaseConfig';
 import {Button} from '../components/Button';
 import {useAuth} from '../contexts/Auth';
 import images from '../data/images';
 import {colors} from '../styles/colors';
 import {FormInput} from '../components/FormInput';
 import {signUpSchema, SignUpFormData} from '../schemas/validationSchema';
+
+const db = getFirestore(app);
 
 export function ProfileScreen() {
   const {signOut, userData} = useAuth();
@@ -32,6 +38,43 @@ export function ProfileScreen() {
       email: '',
     },
   });
+
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
+
+  const selectImage = () => {
+    launchImageLibrary({mediaType: 'photo', quality: 0.5}, response => {
+      if (response.assets && response.assets.length > 0) {
+        const asset = response.assets[0];
+        const {uri} = asset;
+
+        if (uri) {
+          const uploadTask = storage()
+            .ref(`profile_pictures/${userData?.uid}/profile_picture.jpg`)
+            .putFile(uri);
+
+          uploadTask.on('state_changed', async snapshot => {
+            if (snapshot.state === 'success') {
+              const downloadUrl = await snapshot.ref.getDownloadURL();
+
+              if (userData?.uid) {
+                await updateDoc(doc(db, 'users', userData.uid), {
+                  profilePicture: downloadUrl,
+                });
+
+                setProfilePicture(downloadUrl);
+              }
+            }
+          });
+        }
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (userData?.profilePicture) {
+      setProfilePicture(userData.profilePicture);
+    }
+  }, [userData?.profilePicture]);
 
   return (
     <View className="flex-1">
@@ -86,9 +129,13 @@ export function ProfileScreen() {
       </View>
 
       <View className="absolute mt-28 left-1/2 -translate-x-1/2 z-20 items-center">
-        <TouchableOpacity activeOpacity={0.9}>
+        <TouchableOpacity activeOpacity={0.9} onPress={selectImage}>
           <Image
-            source={images.default_profile_picture}
+            source={
+              profilePicture
+                ? {uri: profilePicture}
+                : images.default_profile_picture
+            }
             className="h-30 w-30 rounded-md"
           />
         </TouchableOpacity>

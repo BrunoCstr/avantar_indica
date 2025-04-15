@@ -23,6 +23,7 @@ import {
   doc,
 } from '@react-native-firebase/firestore';
 import { uploadDefaultProfilePicture } from '../utils/uploadDefaultProfilePicture';
+import messaging from '@react-native-firebase/messaging';
 
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -33,6 +34,7 @@ interface UserData {
   affiliated_to: string;
   isFirstLogin: boolean;
   uid: string;
+  profilePicture: string;
 }
 
 interface AuthContextData {
@@ -96,6 +98,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
                 isFirstLogin: data.isFirstLogin,
                 affiliated_to: data.affiliated_to,
                 uid: data.uid,
+                profilePicture: data.profilePicture,
               });
             }
           });
@@ -137,6 +140,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       const user = userCredential.user;
 
       const profilePictureUrl = await uploadDefaultProfilePicture(user.uid);
+      const fcmToken = await messaging().getToken();
 
       await setDoc(doc(db, 'users', user.uid), {
         fullName,
@@ -147,6 +151,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         createdAt: serverTimestamp(),
         uid: user.uid,
         isFirstLogin: true,
+        fcmToken: fcmToken,
         profilePicture: profilePictureUrl,
       });
 
