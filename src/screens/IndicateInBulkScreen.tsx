@@ -75,7 +75,7 @@ export function IndicateInBulkScreen() {
     const arrSelecteds = leads.filter(c => selecteds[c.recordID]);
     const leadsData = arrSelecteds.map(c => ({
       fullName: c.displayName,
-      telephone: applyMaskTelephone(c.phoneNumbers[0].number) ?? 'Sem número',
+      phone: applyMaskTelephone(c.phoneNumbers[0].number) ?? 'Sem número',
     }));
 
     console.log(arrSelecteds)
@@ -93,19 +93,19 @@ export function IndicateInBulkScreen() {
     resolver: zodResolver(indicationSchema),
     defaultValues: {
       fullName: '',
-      telephone: '',
+      phone: '',
       product: '',
       observations: '',
     },
   });
 
   const onSubmit = (data: IndicationSchema) => {
-    const {telephone, ...dataFiltred} = data;
+    const {phone, ...dataFiltred} = data;
 
-    const cleanedTelephone = telephone.replace(/\D/g, '');
+    const cleanedTelephone = phone.replace(/\D/g, '');
 
     console.log(
-      telephone,
+      phone,
       cleanedTelephone,
       dataFiltred.fullName,
       dataFiltred.observations,

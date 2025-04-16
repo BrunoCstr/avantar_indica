@@ -15,6 +15,7 @@ import {
   orderBy,
   updateDoc,
   doc,
+  onSnapshot,
 } from '@react-native-firebase/firestore';
 import {launchImageLibrary} from 'react-native-image-picker';
 import storage from '@react-native-firebase/storage';
@@ -59,8 +60,6 @@ export function HomeScreen() {
                 await updateDoc(doc(db, 'users', userData.uid), {
                   profilePicture: downloadUrl,
                 });
-
-                setProfilePicture(downloadUrl);
               }
             }
           });
@@ -68,6 +67,20 @@ export function HomeScreen() {
       }
     });
   };
+
+  useEffect(() => {
+    if (!userData?.uid) return;
+
+    const unsubscribe = onSnapshot(doc(db, 'users', userData.uid), snapshot => {
+      const data = snapshot.data();
+
+      if (data?.profilePicture) {
+        setProfilePicture(data.profilePicture);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [userData?.uid]);
 
   useFocusEffect(
     useCallback(() => {
@@ -91,12 +104,6 @@ export function HomeScreen() {
       fetchNotifications();
     }, [userData?.uid]),
   );
-
-  useEffect(() => {
-    if (userData?.profilePicture) {
-      setProfilePicture(userData.profilePicture);
-    }
-  }, [userData?.profilePicture]);
 
   return (
     <ImageBackground

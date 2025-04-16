@@ -14,6 +14,11 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
 } from 'react-native';
+import {
+  collection,
+  getDocs,
+  getFirestore,
+} from '@react-native-firebase/firestore';
 
 import {signUpSchema, SignUpFormData} from '../schemas/validationSchema';
 import {FormInput} from '../components/FormInput';
@@ -23,9 +28,12 @@ import {useAuth} from '../contexts/Auth';
 import {colors} from '../styles/colors';
 import {useNavigation} from '@react-navigation/native';
 import gStyles from '../styles/gStyles';
+import app from '../../firebaseConfig';
+
+const db = getFirestore(app);
 
 export function SignUpScreen() {
-  const [units, setUnits] = useState<string[]>([]);
+  const [units, setUnits] = useState<any[]>([]);
   const [showPassword, setShowPassword] = useState(true);
   const [showConfirmPassword, setShowConfirmPassword] = useState(true);
 
@@ -35,13 +43,17 @@ export function SignUpScreen() {
   useEffect(() => {
     // Pegar as unidades do Firebase
     const fetchUnits = async () => {
-      const fetchedUnits = [
-        'Avantar São Paulo - SP - Paraíso',
-        'Avantar Belo Horizonte - MG',
-        'Avantar Valparaíso - GO',
-      ];
-      setUnits(fetchedUnits);
+      try {
+        const unitsCollection = collection(db, 'units');
+        const unitsSnapshot = await getDocs(unitsCollection);
+        const unitsList = unitsSnapshot.docs.map(doc => doc.data());
+
+        setUnits(unitsList);
+      } catch (error) {
+        console.error('Erro ao buscar unidades:', error);
+      }
     };
+
     fetchUnits();
   }, []);
 
@@ -54,7 +66,6 @@ export function SignUpScreen() {
     defaultValues: {
       fullName: '',
       email: '',
-      cpf: '',
       password: '',
       confirmPassword: '',
       affiliated_to: '',
@@ -62,15 +73,12 @@ export function SignUpScreen() {
   });
 
   const onSubmit = (data: SignUpFormData) => {
-    const {confirmPassword, cpf, ...dataFiltred} = data;
-
-    const cleanedCPF = cpf.replace(/\D/g, '');
+    const {confirmPassword, ...dataFiltred} = data;
 
     signUp(
       dataFiltred.fullName,
       dataFiltred.email,
       dataFiltred.password,
-      cleanedCPF,
       dataFiltred.affiliated_to,
     );
   };
@@ -107,32 +115,6 @@ export function SignUpScreen() {
                 placeholder="E-mail"
                 control={control}
                 errorMessage={errors.email?.message}
-                borderColor={colors.tertiary_purple}
-                backgroundColor={colors.white}
-                placeholderColor={colors.primary_purple}
-                height={50}
-              />
-              <FormInput
-                name="cpf"
-                placeholder="CPF"
-                control={control}
-                errorMessage={errors.cpf?.message}
-                mask={[
-                  /\d/,
-                  /\d/,
-                  /\d/,
-                  '.',
-                  /\d/,
-                  /\d/,
-                  /\d/,
-                  '.',
-                  /\d/,
-                  /\d/,
-                  /\d/,
-                  '-',
-                  /\d/,
-                  /\d/,
-                ]}
                 borderColor={colors.tertiary_purple}
                 backgroundColor={colors.white}
                 placeholderColor={colors.primary_purple}
@@ -224,7 +206,7 @@ export function SignUpScreen() {
                         }}
                       />
                       {units.map(unit => (
-                        <Picker.Item key={unit} label={unit} value={unit} />
+                        <Picker.Item key={unit.unitId} label={unit.name} value={unit.unitId} />
                       ))}
                     </Picker>
                   </View>
@@ -238,7 +220,7 @@ export function SignUpScreen() {
                   text="CADASTRAR"
                   backgroundColor="tertiary_purple"
                   onPress={handleSubmit(onSubmit)}
-                  textColor='white'
+                  textColor="white"
                 />
               </View>
             </View>

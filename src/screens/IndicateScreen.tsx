@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {Text, View, TouchableOpacity, Image, TextInput, Alert} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {indicationSchema, IndicationSchema} from '../schemas/validationSchema';
@@ -6,66 +6,79 @@ import {zodResolver} from '@hookform/resolvers/zod';
 import {useForm, Controller} from 'react-hook-form';
 import {Picker} from '@react-native-picker/picker';
 import Entypo from 'react-native-vector-icons/Entypo';
+import {getFirestore, collection, getDocs, doc, setDoc, serverTimestamp} from '@react-native-firebase/firestore';
 
 import images from '../data/images';
 import {colors} from '../styles/colors';
 import {FormInput} from '../components/FormInput';
 import {Button} from '../components/Button';
 import { useAuth } from '../contexts/Auth';
+import app from '../../firebaseConfig';
 
-const products = [
-  'AERONÁUTICO',
-  'AGRO - RURAL',
-  'AUTO',
-  'CAMINHÃO',
-  'CONDOMÍNIO',
-  'DEMAIS RAMOS',
-  'EQUIPAMENTOS E OUTROS BENS',
-  'EVENTOS',
-  'FROTA',
-  'GARANTIAS E RESPONSABILIDADES',
-  'MOTO',
-  'NÁUTICO',
-  'PATRIMONIAIS, EMPRESA E IMOVEIS',
-  'PLANOS DE SAÚDE',
-  'PLANOS ODONTOLÓGICOS',
-  'PREVIDÊNCIA',
-  'PRODUTOS FINANCEIROS',
-  'RESIDENCIAL',
-  'RESPONSABILIDADE CIVIL PROFISSIONAL',
-  'RISCOS FINANCEIROS',
-  'RURAL',
-  'SERVIÇOS FINANCEIROS',
-  'TRANSPORTE',
-  'VIAGEM',
-  'VIDA EM GRUPO',
-  'VIDA INDIVIDUAL',
-];
+const db = getFirestore(app);
 
 export function IndicateScreen() {
   const navigation = useNavigation();
   const {userData} = useAuth();
+  const [products, setProducts] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const productsCollection = collection(db, 'products');
+        const productsSnapshot = await getDocs(productsCollection);
+        const productsList = productsSnapshot.docs.map(doc => doc.data());
+        
+        setProducts(productsList.map(product => product.name));
+      } catch (error) {
+        console.error('Erro ao buscar os produtos:', error);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   const {
     control,
     handleSubmit,
     formState: {errors},
+    reset,
   } = useForm<IndicationSchema>({
     resolver: zodResolver(indicationSchema),
     defaultValues: {
       fullName: '',
-      telephone: '',
+      phone: '',
       product: '',
       observations: '',
     },
   });
 
-  const onSubmit = (data: IndicationSchema) => {
+  const onSubmit = async (data: IndicationSchema) => {
+    try {
+      const cleanedPhone = data.phone.replace(/\D/g, '');
 
-    console.log(data.fullName, data.telephone, data.observations, data.product);
+      // Sempre quando algum arquivo for criado aqui, mandar um e-mail e uma notificação para a unidade. (Cloud Functions)
+      const referralRef = doc(collection(db, 'referrals'));
 
-    Alert.alert('Enviado!', `Indicação enviada para a unidade: ${userData?.affiliated_to}.`);
+      await setDoc(referralRef, {
+        indicator_name: userData?.displayName,
+        referralId: referralRef.id,
+        unitId: userData?.affiliated_to,
+        name: data.fullName,
+        phone: cleanedPhone,
+        product: data.product,
+        observations: data.observations,
+        createdAt: serverTimestamp(),
+        status: "PENDENTE CONTATO"
+      });
+
+      reset();
+      Alert.alert('Indicação enviada!', 'Agradecemos sua indicação. Você pode acompanhar sua indicação no menu de status.');
+    } catch (error) {
+      Alert.alert('Erro ao enviar a indicação!', 'Por favor, tente novamente mais tarde.');
+      console.error('Erro ao enviar a indicação:', error);
+    }
   };
+
 
   return (
     <View className="flex-1">
@@ -101,10 +114,10 @@ export function IndicateScreen() {
             color={colors.black}
           />
           <FormInput
-            name="telephone"
+            name="phone"
             placeholder="Telefone"
             control={control}
-            errorMessage={errors.telephone?.message}
+            errorMessage={errors.phone?.message}
             borderColor={colors.primary_purple}
             backgroundColor={colors.transparent}
             placeholderColor={colors.primary_purple}

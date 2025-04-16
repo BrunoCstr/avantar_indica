@@ -5,7 +5,7 @@ import {useForm, Controller} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import Feather from 'react-native-vector-icons/Feather';
 import {launchImageLibrary} from 'react-native-image-picker';
-import {updateDoc, doc, getFirestore} from '@react-native-firebase/firestore';
+import {updateDoc, doc, getFirestore, onSnapshot} from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 
 import app from '../../firebaseConfig';
@@ -60,8 +60,6 @@ export function ProfileScreen() {
                 await updateDoc(doc(db, 'users', userData.uid), {
                   profilePicture: downloadUrl,
                 });
-
-                setProfilePicture(downloadUrl);
               }
             }
           });
@@ -71,10 +69,18 @@ export function ProfileScreen() {
   };
 
   useEffect(() => {
-    if (userData?.profilePicture) {
-      setProfilePicture(userData.profilePicture);
-    }
-  }, [userData?.profilePicture]);
+    if (!userData?.uid) return;
+
+    const unsubscribe = onSnapshot(doc(db, 'users', userData.uid), snapshot => {
+      const data = snapshot.data();
+
+      if (data?.profilePicture) {
+        setProfilePicture(data.profilePicture);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [userData?.uid]);
 
   return (
     <View className="flex-1">

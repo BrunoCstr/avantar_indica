@@ -43,7 +43,6 @@ interface AuthContextData {
     fullName: string,
     email: string,
     password: string,
-    cpf: string,
     affiliated_to: string,
   ) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
@@ -128,7 +127,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     fullName: string,
     email: string,
     password: string,
-    cpf: string,
     affiliated_to: string,
   ) {
     try {
@@ -145,7 +143,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       await setDoc(doc(db, 'users', user.uid), {
         fullName,
         email,
-        cpf,
         affiliated_to,
         registration_status: false,
         createdAt: serverTimestamp(),

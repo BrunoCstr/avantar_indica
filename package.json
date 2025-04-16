@@ -32,7 +32,7 @@
     "react-hook-form": "^7.54.2",
     "react-native": "^0.78.1",
     "react-native-bootsplash": "^6.3.4",
-    "react-native-contacts": "^8.0.4",
+    "react-native-contacts": "^7.0.8",
     "react-native-css-interop": "^0.1.22",
     "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "^2.25.0",
