@@ -19,4 +19,7 @@ export default {
     request_money: require('../assets/images/request_money.png'),
     bg_status: require('../assets/images/bg_status.png'),
     bg_profile_default: require('../assets/images/bg_profile_default.png'),
+    bg_login: require('../assets/images/bg_login.png'),
+    avantar_logo_seguros: require('../assets/images/avantar_logo_seguros.png'),
+    bg_dark: require('../assets/images/bg_dark.png'),
 }

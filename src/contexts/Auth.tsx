@@ -10,6 +10,7 @@ import {
   signOut,
   onAuthStateChanged,
   sendPasswordResetEmail,
+  sendEmailVerification,
 } from '@react-native-firebase/auth';
 import {
   collection,
@@ -22,7 +23,7 @@ import {
   updateDoc,
   doc,
 } from '@react-native-firebase/firestore';
-import { uploadDefaultProfilePicture } from '../utils/uploadDefaultProfilePicture';
+import {uploadDefaultProfilePicture} from '../utils/uploadDefaultProfilePicture';
 import messaging from '@react-native-firebase/messaging';
 
 const auth = getAuth(app);
@@ -35,6 +36,7 @@ interface UserData {
   isFirstLogin: boolean;
   uid: string;
   profilePicture: string;
+  phone: string;
 }
 
 interface AuthContextData {
@@ -44,11 +46,12 @@ interface AuthContextData {
     email: string,
     password: string,
     affiliated_to: string,
-  ) => Promise<void>;
+    phone: string,
+  ) => Promise<string | null>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   registrationStatus: boolean;
-  forgotPassword: (email: string) => Promise<void>;
+  forgotPassword: (email: string) => Promise<string | null>;
   isLoading: boolean;
   userData: UserData | null;
 }
@@ -98,6 +101,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
                 affiliated_to: data.affiliated_to,
                 uid: data.uid,
                 profilePicture: data.profilePicture,
+                phone: data.phone,
               });
             }
           });
@@ -128,6 +132,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     email: string,
     password: string,
     affiliated_to: string,
+    phone: string,
   ) {
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -135,6 +140,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         email,
         password,
       );
+
       const user = userCredential.user;
 
       const profilePictureUrl = await uploadDefaultProfilePicture(user.uid);
@@ -150,6 +156,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         isFirstLogin: true,
         fcmToken: fcmToken,
         profilePicture: profilePictureUrl,
+        phone,
       });
 
       await updateProfile(user, {displayName: fullName});
@@ -157,35 +164,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       if (auth.currentUser) {
         await deleteUser(auth.currentUser);
       }
-
-      switch (err.code) {
-        case 'auth/email-already-in-use':
-          Alert.alert('Falha ao cadastrar o usuário', 'E-mail já cadastrado.');
-          break;
-        case 'auth/invalid-email':
-          Alert.alert('Falha ao cadastrar o usuário', 'E-mail inválido.');
-          break;
-        case 'auth/weak-password':
-          Alert.alert('Falha ao cadastrar o usuário', 'Senha muito fraca.');
-          break;
-        case 'auth/operation-not-allowed':
-          Alert.alert(
-            'Falha ao cadastrar o usuário',
-            'Criação de conta com e-mail e senha não está habilitada.',
-          );
-          break;
-        case 'auth/network-request-failed':
-          Alert.alert(
-            'Falha ao cadastrar o usuário',
-            'Falha de conexão com a rede.',
-          );
-          break;
-        default:
-          Alert.alert(
-            'Falha ao cadastrar o usuário',
-            'Erro desconhecido, entre em contato com o suporte!',
-          );
-      }
+      return err.code;
     }
   }
 
@@ -252,7 +231,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       await updateDoc(userRef, {
         fcmToken: null,
       });
-    
+
       await signOut(auth);
     } catch (err: any) {
       switch (err.code) {
@@ -276,28 +255,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   async function forgotPassword(email: string) {
     try {
       await sendPasswordResetEmail(auth, email);
-      Alert.alert('Enviado!', `enviado o link de redefinição para ${email}`);
+      return null;
     } catch (err: any) {
-      switch (err.code) {
-        case 'auth/user-not-found':
-          Alert.alert('Erro!', 'Usuário não encontrado.');
-          break;
-        case 'auth/invalid-email':
-          Alert.alert('Erro!', 'E-mail inválido.');
-          break;
-        case 'auth/too-many-requests':
-          Alert.alert(
-            'Erro!',
-            'Muitas tentativas, tente novamente mais tarde.',
-          );
-          break;
-        case 'auth/internal-error':
-          Alert.alert('Erro!', 'Ocorreu um erro, tente novamente mais tarde.');
-          break;
-        case 'auth/user-disabled':
-          Alert.alert('Erro!', 'Usuário desabilitado!');
-          break;
-      }
+      return err.code;
     }
   }
 

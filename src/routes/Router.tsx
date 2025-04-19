@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import BootSplash from 'react-native-bootsplash'
 
-import {WaitingStack} from './WaitingStack';
 import {AuthStack} from './AuthStack';
+import {AppStack} from './AppStack';
 import {useAuth} from '../contexts/Auth';
 
 export function Router() {
@@ -23,7 +23,7 @@ export function Router() {
 
   return (
     <NavigationContainer>
-      {userAuthenticated ? <WaitingStack /> : <AuthStack />}
+      {userAuthenticated ? <AppStack /> : <AuthStack />}
     </NavigationContainer>
   );
 }

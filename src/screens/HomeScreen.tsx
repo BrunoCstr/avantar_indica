@@ -26,12 +26,16 @@ import images from '../data/images';
 import {NotificationButton} from '../components/NotificationButton';
 import {getFirstName} from '../utils/getName';
 import app from '../../firebaseConfig';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import {colors} from '../styles/colors';
+import {HomeSkeleton} from '../components/skeletons/HomeSkeleton';
 
 const db = getFirestore(app);
 
 export function HomeScreen() {
   const {userData} = useAuth();
   const navigation = useNavigation();
+  const [isLoading, setIsLoading] = useState(true);
 
   const isFirstLogin = userData?.isFirstLogin;
   const welcomeMessage = isFirstLogin
@@ -76,6 +80,7 @@ export function HomeScreen() {
 
       if (data?.profilePicture) {
         setProfilePicture(data.profilePicture);
+        setIsLoading(false);
       }
     });
 
@@ -111,83 +116,108 @@ export function HomeScreen() {
       className="flex-1"
       resizeMode="cover">
       {/* Header */}
-      <View className="grid-cols-3 flex-row items-center mt-10 ml-7 mr-7">
-        <View>
-          <TouchableOpacity onPress={() => selectImage()} activeOpacity={0.8}>
-            <Image
-              source={
-                profilePicture
-                  ? {uri: profilePicture}
-                  : images.default_profile_picture
-              }
-              className="h-14 w-14 rounded-full"></Image>
-          </TouchableOpacity>
-        </View>
-        <View>
-          <View className="ml-2.5 flex-row">
-            <Text className="text-blue text-m font-medium">Olá, </Text>
-            <Text className="text-white text-m font-medium">
-              {getFirstName(userData?.displayName)}
-            </Text>
-          </View>
-          <View className="ml-2.5">
-            <Text className="text-white text-ss font-regular">
-              {welcomeMessage}
-            </Text>
-          </View>
-        </View>
-        <View className="absolute right-0">
-          <NotificationButton count={unreadNotifications} />
-        </View>
-      </View>
-      <View className="ml-7 mr-7 mt-10 h-30 items-center justify-center flex-row gap-3">
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => navigation.navigate('Indicate')}>
-          <View className="bg-transparent flex-row border-[2.5px] rounded-lg border-blue justify-center items-center p-8">
-            <Image source={images.indicar_icon} />
-            <Text className="text-white text-regular text-2xl ml-1.5">
-              INDICAR
-            </Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => navigation.navigate('IndicateInBulk')}>
-          <View className="bg-transparent flex-row border-[2.5px] rounded-lg border-secondary_purple justify-center items-center p-8 pt-5 pb-5">
-            <Image source={images.indicar_em_massa_icon} />
+      {isLoading ? (
+        <HomeSkeleton />
+      ) : (
+        <>
+          <View className="grid-cols-3 flex-row items-center mt-10 ml-7 mr-7">
             <View>
-              <Text className="text-white text-bold text-2xl ml-1.5">
-                INDICAR
-              </Text>
-              <Text className="text-white text-bold text-s ml-2">EM MASSA</Text>
+              <TouchableOpacity
+                onPress={() => selectImage()}
+                activeOpacity={0.8}>
+                <Image
+                  source={
+                    profilePicture
+                      ? {uri: profilePicture}
+                      : images.default_profile_picture
+                  }
+                  className="h-[4.375rem] w-[4.375rem] rounded-full ml-1"></Image>
+              </TouchableOpacity>
+            </View>
+            <View>
+              <View className="ml-5 flex-row">
+                <Text className="text-blue text-m font-medium">Olá, </Text>
+                <Text className="text-white text-m font-medium">
+                  {getFirstName(userData?.displayName)}
+                </Text>
+              </View>
+              <View className="ml-5">
+                <Text className="text-white text-ss font-regular">
+                  {welcomeMessage}
+                </Text>
+              </View>
+            </View>
+            <View className="absolute right-0 mr-4">
+              <NotificationButton count={unreadNotifications} />
             </View>
           </View>
-        </TouchableOpacity>
-      </View>
 
-      <View className="h-[50%] mt-7 rounded-[30px] bg-white">
-        <View className="p-5">
-          <View className="gap-2">
-            <Button
-              text="STATUS DA PROPOSTA"
-              backgroundColor="blue"
-              textColor="primary_purple"
-              fontWeight="bold"
-              fontSize={22}
-              onPress={() => navigation.navigate('Status')}
-            />
+          <View className="ml-7 mr-7 h-30 items-center justify-center flex-row gap-3">
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate('Indicate')}>
+              <View className="bg-transparent flex-row border-[1.5px] rounded-lg border-blue justify-center items-center pr-8 pl-8 pt-6 pb-6">
+                <Image source={images.indicar_icon} />
+                <Text className="text-white text-bold text-2xl ml-1.5">
+                  INDICAR
+                </Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate('IndicateInBulk')}>
+              <View className="bg-transparent flex-row border-[1.5px] rounded-lg border-blue justify-center items-center pr-9 pl-9 pt-3 pb-3">
+                <Image source={images.indicar_em_massa_icon} />
+                <View>
+                  <Text className="text-white text-bold text-2xl ml-1.5">
+                    INDICAR
+                  </Text>
+                  <Text className="text-white text-bold text-s ml-2">
+                    EM MASSA
+                  </Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          <View className="ml-7 mr-7">
             <Button
               text="REGRAS"
-              textColor="white"
               backgroundColor="orange"
+              textColor="white"
               fontWeight="bold"
-              fontSize={22}
+              fontSize={25}
+              height={70}
               onPress={() => navigation.navigate('Rules')}
             />
           </View>
-        </View>
-      </View>
+
+          <View className="mt-6 ml-7 mr-7 bg-[#FFF] rounded-2xl h-[20rem] pt-5 pl-7 pr-7">
+            <View className="flex-row items-center justify-between">
+              <Text className="text-primary_purple text-m font-bold">
+                Indicações
+              </Text>
+              <TouchableOpacity
+                className="bg-primary_purple h-10 w-10 rounded-lg items-center justify-center"
+                activeOpacity={0.8}>
+                <FontAwesome6 name="sliders" size={21} color={colors.white} />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View className="mt-6 ml-7 mr-7">
+            <Button
+              text="STATUS DAS PROPOSTAS"
+              backgroundColor="pink"
+              textColor="white"
+              fontWeight="bold"
+              fontSize={25}
+              height={70}
+              onPress={() => navigation.navigate('Status')}
+            />
+          </View>
+        </>
+      )}
     </ImageBackground>
   );
 }

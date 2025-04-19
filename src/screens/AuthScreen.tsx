@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import images from '../data/images';
 import {useNavigation} from '@react-navigation/native';
-import gStyles from '../styles/gStyles';
 import messaging from '@react-native-firebase/messaging';
 
 export function AuthScreen() {
@@ -31,43 +30,42 @@ export function AuthScreen() {
   return (
     <ImageBackground
       source={images.background}
-      className="flex-1"
+      className="flex-1 justify-center items-center"
       resizeMode="cover">
-      <View className="mt-10 ml-7 mr-7">
-        <Image source={images.avantar_logo_branca}></Image>
+      <View className="mt-8 ml-7 mr-7">
+        <Image source={images.avantar_logo_seguros}></Image>
       </View>
-      <View className="flex-1 ml-7 mr-7 mb-10 justify-end">
-        {/* Texto */}
+      <View className="flex-1 pl-7 pr-7 w-full mb-10 justify-end">
         <View>
           <View>
-            <Text className="font-semiBold mb-[-12]" style={gStyles.title}>
+            <Text className="font-semiBold -mb-2 text-4xl text-white">
               Este é o seu
             </Text>
-            <Text className="font-semiBold mb-[-12]" style={gStyles.title}>
+            <Text className="font-semiBold -mb-2 text-4xl text-white">
               novo app da
             </Text>
-            <Text className="font-semiBold mb-[-12]" style={gStyles.title}>
+            <Text className="font-semiBold -mb-2 text-4xl text-white">
               Avantar
             </Text>
           </View>
           <View className="mt-5">
-            <Text style={gStyles.smallText}>onde você indica e ganha</Text>
-            <Text style={gStyles.smallText}>comissão ou cashback.</Text>
+            <Text className="font-regular text-white">onde você indica e ganha</Text>
+            <Text className="font-regular text-white">comissão ou cashback.</Text>
           </View>
         </View>
         {/* Botões */}
-        <View className="gap-5 mt-10">
+        <View className="gap-4 mt-10 mb-10">
           <TouchableOpacity
-            style={gStyles.btnStyle}
+            className="justify-center items-center bg-tertiary_purple h-14 rounded-full"
             onPress={() => navigation.navigate('SignUpScreen')}
             activeOpacity={0.9}>
-            <Text style={gStyles.smallText}>QUERO CRIAR UMA CONTA</Text>
+            <Text className="font-regular text-white text-lg">QUERO CRIAR UMA CONTA</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={gStyles.btnStyleTransparent}
+            className="justify-center items-center bg-transparent h-14 rounded-full border-[1px] border-white"
             onPress={() => navigation.navigate('SignInScreen')}
             activeOpacity={0.9}>
-            <Text style={gStyles.smallText}>ACESSAR CONTA</Text>
+            <Text className="font-regular text-white text-lg">ACESSAR CONTA</Text>
           </TouchableOpacity>
         </View>
       </View>

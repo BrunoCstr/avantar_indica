@@ -21,7 +21,6 @@ export const registrationsApproved = functions.firestore.onDocumentUpdated(
       const fcmToken = afterData.fcmToken;
       const userEmail = afterData.email;
       const userName = afterData.fullName;
-      const userUnit = afterData.affiliated_to;
 
       if (!fcmToken) {
         console.warn('Usuário sem token FCM');
@@ -118,7 +117,7 @@ export const registrationsApproved = functions.firestore.onDocumentUpdated(
           <div style="font-family: familjen grotesk;" class="div">
             <h1 style='color:#6600CC; font-size: 24px'>Olá ${userName},</h1>
             <p>Temos uma ótima notícia pra você!</p>
-            <p>Seu cadastro no Avantar Indica foi aprovado pela ${userUnit}. Agora, você já pode acessar o aplicativo e começar a fazer suas indicações.</p>
+            <p>Seu cadastro no Avantar Indica foi aprovado pela unidade escolhida. Agora, você já pode acessar o aplicativo e começar a fazer suas indicações.</p>
             <p>Cada indicação pode render recompensas exclusivas — e o melhor: de forma simples e prática, direto pelo app!</p>
             <p>👉 Acesse agora o Avantar Indica e comece a aproveitar todos os benefícios.</p>
             <br>

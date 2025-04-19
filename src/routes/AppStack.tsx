@@ -9,10 +9,17 @@ import {Notifications} from '../screens/Notifications';
 import {Rules} from '../screens/RulesScreen';
 import { IndicateScreen } from '../screens/IndicateScreen';
 import { IndicateInBulkScreen } from '../screens/IndicateInBulkScreen';
+import { WaitingConfirmationScreen } from '../screens/WaitingConfirmationScreen';
+import { useAuth } from '../contexts/Auth';
+import { HomeSkeleton } from '../components/skeletons/HomeSkeleton';
 
 const Stack = createStackNavigator();
 
 export function AppStack() {
+  const {registrationStatus, isLoading} = useAuth();
+
+  if (isLoading) return <HomeSkeleton />;
+
   return (
     <Stack.Navigator
       screenOptions={{
@@ -41,14 +48,14 @@ export function AppStack() {
       />
       <Stack.Screen
         name="Indicate"
-        component={IndicateScreen}
+        component={registrationStatus ? IndicateScreen : WaitingConfirmationScreen}
         options={{
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
         }}
       />
       <Stack.Screen
         name="IndicateInBulk"
-        component={IndicateInBulkScreen}
+        component={registrationStatus ? IndicateInBulkScreen : WaitingConfirmationScreen}
         options={{
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
         }}

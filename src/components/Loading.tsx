@@ -12,7 +12,7 @@ export function Loading() {
       resizeMode="cover">
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator
-          size="large"
+          size='large'
           color={colors.white}
           style={{transform: [{scale: 1.5}]}}
         />

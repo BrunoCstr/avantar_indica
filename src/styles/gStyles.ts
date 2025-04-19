@@ -3,59 +3,36 @@ import {StyleSheet} from 'react-native';
 import {colors} from './colors';
 
 const gStyles = StyleSheet.create({
-  title: {
-    fontSize: 35,
-    color: colors.white,
-  },
-  smallText: {
-    color: colors.white,
-  },
-  btnStyle: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.tertiary_purple,
-    height: 50,
-    borderRadius: 50,
-  },
-  btnStyleTransparent: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-    height: 50,
-    borderWidth: 1,
-    borderColor: 'white',
-    borderRadius: 50,
-  },
   anchorTextSingUp: {
+    fontFamily: 'FamiljenGrotesk-regular',
     color: colors.primary_purple,
     marginBottom: 80,
     fontWeight: 500
   },
   anchorLinkSingUp: {
+    fontFamily: 'FamiljenGrotesk-regular',
     color: colors.secondary_purple,
     marginBottom: 80,
     fontWeight: 800
   },
-  anchorTextSingIn: {
-    color: colors.secondary_lillac,
-    fontWeight: 500,
-    paddingLeft: 10,
-    marginTop: 10
-  },
   anchorText2SingIn: {
+    fontFamily: 'FamiljenGrotesk-regular',
     color: colors.secondary_lillac,
     fontWeight: 500,
   },
   anchorLinkSingIn: {
+    fontFamily: 'FamiljenGrotesk-regular',
     color: colors.blue,
     fontWeight: 700,
   },
   titleWaiting: {
+    fontFamily: 'FamiljenGrotesk-regular',
     fontSize: 30,
     color: colors.secondary_purple,
     fontWeight: 700
   },
   smallTextWaiting: {
+    fontFamily: 'FamiljenGrotesk-regular',
     fontSize: 15,
     color: colors.black,
     textAlign: "center",
@@ -64,6 +41,7 @@ const gStyles = StyleSheet.create({
     paddingRight: 20,
   },
   avantarVoceAFrente: {
+    fontFamily: 'FamiljenGrotesk-regular',
     height: 130
   }
 });

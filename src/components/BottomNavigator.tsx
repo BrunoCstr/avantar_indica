@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, TouchableWithoutFeedback} from 'react-native';
+import {View, TouchableWithoutFeedback, TouchableOpacity} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -10,7 +10,7 @@ import {WalletScreen} from '../screens/WalletScreen';
 import {StatusScreen} from '../screens/StatusScreen';
 import {ProfileScreen} from '../screens/ProfileScreen';
 import {colors} from '../styles/colors';
-
+import {IndicateScreen} from '../screens/IndicateScreen';
 const Tab = createBottomTabNavigator();
 
 export function BottomNavigator() {
@@ -19,17 +19,18 @@ export function BottomNavigator() {
       screenOptions={({route}) => ({
         tabBarStyle: {
           backgroundColor: colors.white_navBar,
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
-          height: 60,
+          borderRadius: 20,
+          height: 65,
           position: 'absolute',
-          paddingBottom: 0,
+          marginBottom: 30,
+          marginLeft: 28,
+          marginRight: 28,
           justifyContent: 'center',
           alignItems: 'center',
         },
         tabBarShowLabel: false,
         headerShown: false,
-        tabBarIcon: ({focused}) => {
+        tabBarIcon: () => {
           let iconName: string = '';
           let IconComponent: any = Entypo;
 
@@ -45,6 +46,29 @@ export function BottomNavigator() {
           } else if (route.name === 'Profile') {
             iconName = 'user';
             IconComponent = FontAwesome;
+          } else if (route.name === 'Indicate') {
+            iconName = 'plus';
+            IconComponent = FontAwesome;
+          }
+
+          if (route.name === 'Indicate') {
+            return (
+              <View
+                style={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  width: 75,
+                  height: 75,
+                  borderRadius: 100,
+                  backgroundColor: colors.blue,
+                }}>
+                <IconComponent
+                  name={iconName}
+                  size={32}
+                  color={colors.primary_purple}
+                />
+              </View>
+            );
           }
 
           return (
@@ -52,12 +76,8 @@ export function BottomNavigator() {
               style={{
                 justifyContent: 'center',
                 alignItems: 'center',
-                width: 50,
-                height: 50,
-                borderRadius: 25,
-                backgroundColor: focused
-                  ? colors.blue_navigator
-                  : 'transparent',
+                width: 80,
+                height: 80,
               }}>
               <IconComponent
                 name={iconName}
@@ -67,23 +87,34 @@ export function BottomNavigator() {
             </View>
           );
         },
-        tabBarButton: (props) => {
-          const { accessibilityLabel, accessibilityState, onPress } = props;
+        tabBarButton: props => {
+          const {accessibilityLabel, accessibilityState, onPress} = props;
           return (
-            <TouchableWithoutFeedback
+            <TouchableOpacity
+              activeOpacity={0.8}
               accessibilityLabel={accessibilityLabel}
               accessibilityState={accessibilityState}
               onPress={onPress}
-            >
-              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
                 {props.children}
               </View>
-            </TouchableWithoutFeedback>
+            </TouchableOpacity>
           );
         },
       })}>
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Wallet" component={WalletScreen} />
+      <Tab.Screen name="Indicate" component={IndicateScreen} />
       <Tab.Screen name="Status" component={StatusScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>

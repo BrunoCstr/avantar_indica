@@ -28,12 +28,12 @@ export const FormInput = ({
   backgroundColor,
   placeholderColor,
   height,
-  color
+  color,
 }: FormInputProps) => (
   <>
     <Controller
       control={control}
-      render={({field: {onChange, onBlur, value}}) => 
+      render={({field: {onChange, onBlur, value}}) =>
         mask ? (
           <MaskInput
             placeholder={placeholder}
@@ -41,43 +41,47 @@ export const FormInput = ({
             onBlur={onBlur}
             onChangeText={onChange}
             mask={mask} // Aplica a máscara se existir
-            placeholderTextColor= {errorMessage ? 'red' : placeholderColor}
+            placeholderTextColor={errorMessage ? 'red' : placeholderColor}
             style={{
-              borderWidth: 2,
+              borderWidth: 1,
               borderColor: errorMessage ? 'red' : borderColor,
               backgroundColor: backgroundColor,
               marginBottom: 6,
               height: height,
-              width:"100%",
+              width: '100%',
               padding: 15,
               paddingLeft: 20,
-              borderRadius: 50,
-              color: color
+              borderRadius: 10,
+              color: color,
+              fontFamily: 'FamiljenGrotesk-regular',
+              fontSize: 16,
             }}
           />
-        ) :
-        (
-        <TextInput
-          placeholder={placeholder}
-          onBlur={onBlur}
-          onChangeText={onChange}
-          value={value}
-          secureTextEntry={secureTextEntry}
-          placeholderTextColor= {errorMessage ? 'red' : placeholderColor}
-          style={{
-            borderWidth: 2,
-            borderColor: errorMessage ? 'red' : borderColor,
-            backgroundColor: backgroundColor,
-            marginBottom: 6,
-            height: height,
-            width: '100%',
-            padding: 15,
-            paddingLeft: 20,
-            borderRadius: 50,
-            color: color
-          }}
-        />
-      )}
+        ) : (
+          <TextInput
+            placeholder={placeholder}
+            onBlur={onBlur}
+            onChangeText={onChange}
+            value={value}
+            secureTextEntry={secureTextEntry}
+            placeholderTextColor={errorMessage ? 'red' : placeholderColor}
+            style={{
+              borderWidth: 1,
+              borderColor: errorMessage ? 'red' : borderColor,
+              backgroundColor: backgroundColor,
+              marginBottom: 6,
+              height: height,
+              width: '100%',
+              padding: 15,
+              paddingLeft: 20,
+              borderRadius: 10,
+              color: color,
+              fontFamily: 'FamiljenGrotesk-regular',
+              fontSize: 16,
+            }}
+          />
+        )
+      }
       name={name}
     />
   </>

@@ -4,9 +4,14 @@ import { z } from 'zod';
 export const signUpSchema = z.object({
   fullName: z.string().min(3, "Nome é obrigatório"),
   email: z.string().email("E-mail inválido"),
+  phone: z.string().min(14, "Digite um telefone válido!").max(15, "Digite um telefone válido!").regex(/^\(\d{2}\)\s?\d{4,5}-\d{4}$/, "Formato de telefone inválido!"),
   password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
   confirmPassword: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
   affiliated_to: z.string().min(5, "Selecione uma unidade para se afiliar"),
+  acceptTerms: z.boolean().refine((data) => data === true, {
+    message: "Você deve aceitar os termos e condições para continuar!",
+    path: ["acceptTerms"]
+  })
 }).refine((data) => data.password === data.confirmPassword, {
   message: "As senhas devem ser iguais!",
   path:["password"]

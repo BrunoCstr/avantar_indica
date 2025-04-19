@@ -11,7 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
@@ -20,9 +20,8 @@ import {signInSchema, SignInFormData} from '../schemas/validationSchema';
 import {FormInput} from '../components/FormInput';
 import {Button} from '../components/Button';
 import {useAuth} from '../contexts/Auth';
-import gStyles from '../styles/gStyles';
 import {colors} from '../styles/colors';
-
+import {BackButton} from '../components/BackButton';
 export function SignInScreen() {
   const {signIn} = useAuth();
   const [showPassword, setShowPassword] = useState(true);
@@ -54,23 +53,26 @@ export function SignInScreen() {
           contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}}
           keyboardShouldPersistTaps="handled">
           <ImageBackground
-            source={images.bg_purple}
+            source={images.bg_login}
             style={{flex: 1}}
             resizeMode="cover">
-            <View
-              className="flex-1 justify-center items-center ml-10 mr-10"
-              style={{gap: 8}}>
-              <Image
-                style={{width: '95%', resizeMode: 'contain'}}
-                source={images.avantar_voce_a_frente_branca}></Image>
+            
+            <View className='pt-16 ml-10'>
+              <BackButton />
+            </View>
+
+            <View className="flex-1 justify-center items-center ml-10 mr-10 gap-2">
+              <Text className="font-semiBold text-2xl text-white mb-3">
+                Faça seu login
+              </Text>
               <FormInput
                 name="email"
-                placeholder="E-mail"
+                placeholder="Login"
                 control={control}
                 errorMessage={errors.email?.message}
                 borderColor={colors.blue}
-                backgroundColor={colors.tertiary_purple}
-                placeholderColor={colors.secondary_lillac}
+                backgroundColor={colors.tertiary_purple_opacity}
+                placeholderColor={colors.white}
                 height={55}
                 color={colors.white}
               />
@@ -83,8 +85,8 @@ export function SignInScreen() {
                     control={control}
                     errorMessage={errors.password?.message}
                     borderColor={colors.blue}
-                    backgroundColor={colors.tertiary_purple}
-                    placeholderColor={colors.secondary_lillac}
+                    backgroundColor={colors.tertiary_purple_opacity}
+                    placeholderColor={colors.white}
                     height={55}
                     color={colors.white}
                   />
@@ -104,12 +106,14 @@ export function SignInScreen() {
               </View>
 
               {/* Envio do Formulário de Cadastro */}
-              <View className="w-full mt-5">
+              <View className="w-full mt-1">
                 <Button
                   text="ENTRAR"
-                  backgroundColor="tertiary_purple"
+                  height={55}
+                  fontSize={25}
+                  backgroundColor="blue"
                   onPress={handleSubmit(onSubmit)}
-                  textColor='white'
+                  textColor="tertiary_purple"
                 />
               </View>
 
@@ -117,18 +121,8 @@ export function SignInScreen() {
                 <TouchableOpacity
                   onPress={() => navigation.navigate('ForgotPasswordScreen')}
                   className="w-full">
-                  <Text className="text-right" style={gStyles.anchorTextSingIn}>
+                  <Text className="text-center font-regular text-white underline mt-3 text-lg">
                     Esqueci minha senha!
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={{height: 100, justifyContent: 'flex-end'}}>
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('SignUpScreen')}>
-                  <Text style={gStyles.anchorText2SingIn}>
-                    Não tem uma conta?{' '}
-                    <Text style={gStyles.anchorLinkSingIn}>Crie aqui</Text>
                   </Text>
                 </TouchableOpacity>
               </View>

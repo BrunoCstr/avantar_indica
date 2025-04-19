@@ -24,12 +24,18 @@ import {ptBR} from 'date-fns/locale';
 import app from '../../firebaseConfig';
 import {colors} from '../styles/colors';
 import images from '../data/images';
+import {NotificationsSkeleton} from '../components/skeletons/NotificationsSkeleton';
+import {BackButton} from '../components/BackButton';
 
 const db = getFirestore(app);
 
 export function Notifications() {
   const {userData} = useAuth();
-  const [notificationsList, setNotificationsList] = useState<any[]>([]);
+  const [readNotifications, setReadNotifications] = useState<any[]>([]);
+  const [unreadNotifications, setUnreadNotifications] = useState<any[]>([]);
+  const [showUnread, setShowUnread] = useState(true);
+
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -52,16 +58,26 @@ export function Notifications() {
             }
 
             return {
-              id: doc.id,
+              id: data.id,
+              read: data.read,
               ...data,
               createdAt: data.createdAt?.toDate(),
             };
           });
 
           await batch.commit();
-          setNotificationsList(notificationsData);
+
+          setReadNotifications(
+            notificationsData.filter(notification => notification.read),
+          );
+          setUnreadNotifications(
+            notificationsData.filter(notification => !notification.read),
+          );
+
+          setIsLoading(false);
         } catch (error) {
           console.error('Erro ao buscar/marcar notificações:', error);
+          setIsLoading(true);
         }
       }
     };
@@ -73,62 +89,82 @@ export function Notifications() {
 
   return (
     <ImageBackground
-      source={images.bg_status}
+      source={images.bg_home_purple}
       className="flex-1"
       resizeMode="cover">
-      <View className="flex-1 ml-7 mr-7 mt-20 justify-start items-center">
-        <View className="items-center relative w-full flex-col">
-          <View className="w-full flex-row items-center justify-between">
-            <TouchableOpacity
-              className="border-[1px] rounded-md border-white h-15 w-15 justify-center items-center p-1"
-              activeOpacity={0.8}
-              onPress={() => navigation.goBack()}>
-              <Feather name="x" size={21} color={colors.white} />
-            </TouchableOpacity>
+      {isLoading ? (
+        <NotificationsSkeleton />
+      ) : (
+        <View className="flex-1 ml-7 mr-7 mt-20 justify-start items-center">
+          <View className="items-center relative w-full flex-col">
+            <View className="w-full flex-row items-center justify-between">
+              <View>
+                <BackButton color={colors.blue} borderColor={colors.blue} />
+              </View>
 
-            <Text className="text-white font-bold text-2xl text-center">
-              Notificações
-            </Text>
+              <Text className="text-blue font-bold text-2xl text-center">
+                Notificações
+              </Text>
 
-            {/* Espaço de mesmo tamanho do botão para manter o centro visual por causa do justify-between */}
-            <View className="h-12 w-12" />
-          </View>
+              {/* Espaço de mesmo tamanho do botão para manter o centro visual por causa do justify-between */}
+              <View className="h-12 w-12" />
+            </View>
 
-          <FlatList
-            className="mt-5"
-            data={notificationsList}
-            keyExtractor={item => item.id}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{paddingBottom: 60}}
-            renderItem={({item}) => (
-              <View className="flex-row">
-                <View className="w-full flex-row items-center border-b-[1px] border-b-white pb-5 pt-5">
-                  <MaterialIcons
-                    className="mr-3"
-                    name="notifications-active"
-                    size={24}
-                    color={colors.white}
-                  />
-                  <View className="w-full">
-                    <Text className="text-white font-bold">{item.title}</Text>
-                    <Text className="text-white text-sm font-regular">
-                      {item.body}
-                    </Text>
-                    <Text className="text-blue font-regular">
-                      {item.createdAt
-                        ? formatDistanceToNow(item.createdAt, {
-                            addSuffix: true,
-                            locale: ptBR,
-                          })
-                        : 'Data não encontrada'}
-                    </Text>
+            <View className="w-full flex-row pt-2 gap-2 justify-end items-end mt-10">
+              <TouchableOpacity
+                className="bg-orange rounded-full w-24"
+                activeOpacity={0.8}
+                onPress={() => setShowUnread(false)}
+                >
+                <Text className="text-white font-bold text-sm text-center">
+                  LIDAS
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="bg-orange rounded-full w-24"
+                activeOpacity={0.8}
+                onPress={() => setShowUnread(true)}>
+                <Text className="text-white font-bold text-sm text-center">
+                  NÃO LIDAS
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <FlatList
+              className="mt-5"
+              data={showUnread ? unreadNotifications : readNotifications}
+              keyExtractor={item => item.id || "Não possui"}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{paddingBottom: 60}}
+              renderItem={({item}) => (
+                <View className="flex-row">
+                  <View className="w-full h-25 flex-row items-center bg-primary_purple p-4 rounded-2xl gap-3">
+                    <MaterialIcons
+                      name="notifications-active"
+                      size={24}
+                      color={colors.white}
+                    />
+                    <View className="w-[90%]">
+                      <Text className="text-white font-bold">{item.title}</Text>
+                      <Text className="text-white text-sm font-regular">
+                        {item.body}
+                      </Text>
+                      <Text className="text-blue font-regular">
+                        {item.createdAt
+                          ? formatDistanceToNow(item.createdAt, {
+                              addSuffix: true,
+                              locale: ptBR,
+                            })
+                          : 'Data não encontrada'}
+                      </Text>
+                    </View>
                   </View>
                 </View>
-              </View>
-            )}
-          />
+              )}
+            />
+          </View>
         </View>
-      </View>
+      )}
     </ImageBackground>
   );
 }
