@@ -3,7 +3,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {colors} from '../styles/colors';
 import {useNavigation} from '@react-navigation/native';
 
-export function BackButton(props: {color?: string; borderColor?: string}) {
+export function BackButton(props: {color?: string; borderColor?: string, onPress?: () => void}) {
   const navigation = useNavigation();
   return (
     <TouchableOpacity
@@ -12,7 +12,7 @@ export function BackButton(props: {color?: string; borderColor?: string}) {
         borderColor: props.borderColor || colors.blue,
       }}
       activeOpacity={0.8}
-      onPress={() => navigation.goBack()}>
+      onPress={props.onPress || (() => navigation.goBack())}>
       <Ionicons
         name="chevron-back"
         size={21}

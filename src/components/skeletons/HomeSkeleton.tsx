@@ -1,88 +1,89 @@
 import React from 'react';
-import { View, ImageBackground } from 'react-native';
+import {View, ImageBackground, Dimensions} from 'react-native';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import images from '../../data/images';
+
+const screenWidth = Dimensions.get('window').width;
 
 export function HomeSkeleton() {
   return (
     <ImageBackground
       source={images.bg_home_purple}
       className="flex-1"
-      resizeMode="cover"
-    >
-      <SkeletonPlaceholder backgroundColor="#ffffff20" highlightColor="#ffffff10" marginLeft={28} marginRight={28} marginTop={20}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' ,marginLeft: 28, marginRight: 28, marginTop: 20 }}>
-          {/* Header com foto, texto e botão de notificação */}
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            {/* Foto de perfil */}
-            <SkeletonPlaceholder.Item
-              width={70}
-              height={70}
-              borderRadius={35}
-              marginRight={20}
-            />
-            {/* Textos */}
-            <View style={{ flex: 1 }}>
-              <SkeletonPlaceholder.Item
-                width={120}
-                height={20}
-                borderRadius={4}
-              />
-              <SkeletonPlaceholder.Item
-                width={180}
-                height={16}
-                borderRadius={4}
-                marginTop={8}
+      resizeMode="cover">
+      <View className="flex-1">
+        <SkeletonPlaceholder
+          backgroundColor="#3f2763"
+          highlightColor="#5f3c9c"
+          borderRadius={8}>
+          <View style={{paddingTop: 50, paddingHorizontal: 24}}>
+            {/* Avatar + Nome + Notificação */}
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <View style={{width: 70, height: 70, borderRadius: 35}} />
+              <View style={{marginLeft: 16}}>
+                <View style={{width: 120, height: 18, borderRadius: 4}} />
+                <View
+                  style={{
+                    width: 180,
+                    height: 14,
+                    borderRadius: 4,
+                    marginTop: 6,
+                  }}
+                />
+              </View>
+              <View
+                style={{
+                  marginLeft: 'auto',
+                  width: 35,
+                  height: 35,
+                  borderRadius: 10,
+                }}
               />
             </View>
-            {/* Botão de notificação */}
-            <SkeletonPlaceholder.Item
-              width={40}
-              height={40}
-              borderRadius={8}
-              marginLeft={10}
+
+            {/* Botões de indicação */}
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginTop: 32,
+              }}>
+              <View style={{width: (screenWidth - 70) / 2, height: 80}} />
+              <View style={{width: (screenWidth - 70) / 2, height: 80}} />
+            </View>
+
+            {/* Botão de Regras */}
+            <View
+              style={{
+                width: '100%',
+                height: 70,
+                borderRadius: 10,
+                marginTop: 20,
+              }}
+            />
+
+            {/* Card de Indicações */}
+            <View
+              style={{
+                width: '100%',
+                height: 250,
+                borderRadius: 20,
+                marginTop: 24,
+              }}
+            />
+
+            {/* Botão de Status */}
+            <View
+              style={{
+                width: '100%',
+                height: 70,
+                borderRadius: 10,
+                marginTop: 24,
+              }}
             />
           </View>
-
-          {/* Botões INDICAR e INDICAR EM MASSA */}
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 30 }}>
-            <SkeletonPlaceholder.Item
-              width={150}
-              height={60}
-              borderRadius={12}
-            />
-            <SkeletonPlaceholder.Item
-              width={150}
-              height={60}
-              borderRadius={12}
-            />
-          </View>
-
-          {/* Botão REGRAS */}
-          <SkeletonPlaceholder.Item
-            width="100%"
-            height={70}
-            borderRadius={12}
-            marginTop={20}
-          />
-
-          {/* Card Indicações */}
-          <SkeletonPlaceholder.Item
-            width="100%"
-            height={320}
-            borderRadius={20}
-            marginTop={24}
-          />
-
-          {/* Botão STATUS DAS PROPOSTAS */}
-          <SkeletonPlaceholder.Item
-            width="100%"
-            height={70}
-            borderRadius={12}
-            marginTop={24}
-          />
-        </View>
-      </SkeletonPlaceholder>
+        </SkeletonPlaceholder>
+      </View>
     </ImageBackground>
   );
 }

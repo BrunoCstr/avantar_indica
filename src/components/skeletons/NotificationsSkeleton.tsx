@@ -9,76 +9,72 @@ export function NotificationsSkeleton() {
       source={images.bg_home_purple}
       className="flex-1"
       resizeMode="cover">
-      <View className="flex-1 ml-7 mr-7 mt-20 justify-start items-center">
-        <View className="items-center relative w-full flex-col">
-          <View className="w-full flex-row items-center justify-between mb-5">
-            {/* Botão de voltar (só o esqueleto do quadrado com X) */}
-            <SkeletonPlaceholder backgroundColor="#ffffff20" highlightColor="#ffffff10">
-              <SkeletonPlaceholder.Item
-                width={48}
-                height={48}
-                borderRadius={8}
-              />
-            </SkeletonPlaceholder>
+      <View className="flex-1">
+        <SkeletonPlaceholder
+          backgroundColor="#3f2763"
+          highlightColor="#5f3c9c"
+          borderRadius={10}>
+          <View style={{paddingTop: 70, paddingHorizontal: 28}}>
+            {/* Header com título e botões laterais */}
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}>
+              <View style={{width: 35, height: 35, borderRadius: 6}} />
+              <View style={{width: 160, height: 24, borderRadius: 6}} />
+              <View/>
+            </View>
 
-            {/* Título */}
-            <SkeletonPlaceholder backgroundColor="#ffffff20" highlightColor="#ffffff10">
-              <SkeletonPlaceholder.Item
-                width={160}
-                height={30}
-                borderRadius={6}
-              />
-            </SkeletonPlaceholder>
+            {/* Botões de filtro (LIDAS / NÃO LIDAS) */}
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'flex-end',
+                gap: 6,
+                marginTop: 30,
+              }}>
+              <View style={{width: 80, height: 20, borderRadius: 20}} />
+              <View style={{width: 80, height: 20, borderRadius: 20}} />
+            </View>
 
-            {/* Espaço visual à direita */}
-            <View className="h-12 w-12" />
-          </View>
-
-          {/* Lista de notificações falsas */}
-          <FlatList
-            data={Array.from({length: 5})}
-            keyExtractor={(_, i) => i.toString()}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{paddingBottom: 60}}
-            renderItem={() => (
-              <SkeletonPlaceholder backgroundColor="#ffffff20" highlightColor="#ffffff10">
-                <SkeletonPlaceholder.Item
-                  flexDirection="row"
-                  alignItems="flex-start"
-                  marginBottom={25}>
-                  {/* Ícone de notificação (círculo) */}
-                  <SkeletonPlaceholder.Item
-                    width={24}
-                    height={24}
-                    borderRadius={12}
-                    marginRight={10}
-                    marginTop={5}
+            {/* Lista de notificações */}
+            {[...Array(4)].map((_, index) => (
+              <View
+                key={index}
+                style={{
+                  marginTop: 24,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  padding: 16,
+                  backgroundColor: '#3f2763',
+                  borderRadius: 20,
+                }}>
+                <View style={{width: 24, height: 24, borderRadius: 12}} />
+                <View style={{marginLeft: 16, flex: 1}}>
+                  <View style={{width: '80%', height: 16, borderRadius: 4}} />
+                  <View
+                    style={{
+                      width: '95%',
+                      height: 14,
+                      borderRadius: 4,
+                      marginTop: 6,
+                    }}
                   />
-                  {/* Texto da notificação */}
-                  <SkeletonPlaceholder.Item>
-                    <SkeletonPlaceholder.Item
-                      width={220}
-                      height={16}
-                      borderRadius={4}
-                      marginBottom={6}
-                    />
-                    <SkeletonPlaceholder.Item
-                      width={280}
-                      height={12}
-                      borderRadius={4}
-                      marginBottom={6}
-                    />
-                    <SkeletonPlaceholder.Item
-                      width={100}
-                      height={10}
-                      borderRadius={4}
-                    />
-                  </SkeletonPlaceholder.Item>
-                </SkeletonPlaceholder.Item>
-              </SkeletonPlaceholder>
-            )}
-          />
-        </View>
+                  <View
+                    style={{
+                      width: 100,
+                      height: 12,
+                      borderRadius: 4,
+                      marginTop: 6,
+                    }}
+                  />
+                </View>
+              </View>
+            ))}
+          </View>
+        </SkeletonPlaceholder>
       </View>
     </ImageBackground>
   );

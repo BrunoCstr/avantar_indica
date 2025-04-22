@@ -6,9 +6,7 @@ import {
   TouchableOpacity,
   FlatList,
 } from 'react-native';
-import Feather from 'react-native-vector-icons/Feather';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {useNavigation} from '@react-navigation/native';
 import {useAuth} from '../contexts/Auth';
 import {
   getFirestore,
@@ -84,8 +82,6 @@ export function Notifications() {
 
     fetchNotifications();
   }, [userData?.uid]);
-
-  const navigation = useNavigation();
 
   return (
     <ImageBackground

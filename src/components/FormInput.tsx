@@ -15,6 +15,7 @@ interface FormInputProps {
   placeholderColor: string;
   height: number;
   color?: string;
+  fontSize?: number;
 }
 
 export const FormInput = ({
@@ -29,6 +30,7 @@ export const FormInput = ({
   placeholderColor,
   height,
   color,
+  fontSize
 }: FormInputProps) => (
   <>
     <Controller
@@ -54,7 +56,7 @@ export const FormInput = ({
               borderRadius: 10,
               color: color,
               fontFamily: 'FamiljenGrotesk-regular',
-              fontSize: 16,
+              fontSize: fontSize,
             }}
           />
         ) : (
@@ -77,7 +79,7 @@ export const FormInput = ({
               borderRadius: 10,
               color: color,
               fontFamily: 'FamiljenGrotesk-regular',
-              fontSize: 16,
+              fontSize: fontSize,
             }}
           />
         )

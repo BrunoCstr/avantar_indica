@@ -29,12 +29,14 @@ import app from '../../firebaseConfig';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import {colors} from '../styles/colors';
 import {HomeSkeleton} from '../components/skeletons/HomeSkeleton';
+import {IndicateModal} from '../components/IndicateModal';
 
 const db = getFirestore(app);
 
 export function HomeScreen() {
   const {userData} = useAuth();
   const navigation = useNavigation();
+
   const [isLoading, setIsLoading] = useState(true);
 
   const isFirstLogin = userData?.isFirstLogin;
@@ -44,6 +46,7 @@ export function HomeScreen() {
 
   const [unreadNotifications, setUnreadNotifications] = useState<number>(0);
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   const selectImage = () => {
     launchImageLibrary({mediaType: 'photo', quality: 0.5}, response => {
@@ -138,7 +141,7 @@ export function HomeScreen() {
               <View className="ml-5 flex-row">
                 <Text className="text-blue text-m font-medium">Olá, </Text>
                 <Text className="text-white text-m font-medium">
-                  {getFirstName(userData?.displayName)}
+                  {getFirstName(userData?.displayName || '')}
                 </Text>
               </View>
               <View className="ml-5">
@@ -155,7 +158,7 @@ export function HomeScreen() {
           <View className="ml-7 mr-7 h-30 items-center justify-center flex-row gap-3">
             <TouchableOpacity
               activeOpacity={0.8}
-              onPress={() => navigation.navigate('Indicate')}>
+              onPress={() => setShowModal(true)}>
               <View className="bg-transparent flex-row border-[1.5px] rounded-lg border-blue justify-center items-center pr-8 pl-8 pt-6 pb-6">
                 <Image source={images.indicar_icon} />
                 <Text className="text-white text-bold text-2xl ml-1.5">
@@ -216,6 +219,11 @@ export function HomeScreen() {
               onPress={() => navigation.navigate('Status')}
             />
           </View>
+
+          <IndicateModal
+            visible={showModal}
+            onClose={() => setShowModal(false)}
+          />
         </>
       )}
     </ImageBackground>

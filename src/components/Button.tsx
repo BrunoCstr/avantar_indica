@@ -9,7 +9,7 @@ interface ButtonProps {
   fontSize?: number;
   onPress: () => void;
   height?: number;
-  width?: number;
+  width?: number | string;
 }
 
 export function Button({
@@ -19,7 +19,7 @@ export function Button({
   textColor,
   fontWeight,
   fontSize,
-  width,
+  width = '100%',
   height = 50,
 }: ButtonProps) {
   return (
@@ -36,6 +36,8 @@ export function Button({
       onPress={onPress}>
       <Text
         style={{
+          textAlign: 'center',
+          fontFamily: 'FamiljenGrotesk-regular',
           fontWeight,
           fontSize,
           color: colors[textColor as keyof typeof colors],
