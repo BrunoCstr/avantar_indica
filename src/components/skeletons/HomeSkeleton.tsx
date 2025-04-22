@@ -1,89 +1,46 @@
 import React from 'react';
-import {View, ImageBackground, Dimensions} from 'react-native';
-import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
-import images from '../../data/images';
-
-const screenWidth = Dimensions.get('window').width;
+import { View, Dimensions } from 'react-native';
+import ContentLoader, { Rect, Circle } from 'react-content-loader/native';
 
 export function HomeSkeleton() {
+  const { width } = Dimensions.get('window');
+  const horizontalPadding = 28; // ml-7 + mr-7 → 14px + 14px
+  const containerWidth = width - horizontalPadding * 2;
+  const halfWidth = (containerWidth - 10) / 2; // espaço entre os dois botões
+
   return (
-    <ImageBackground
-      source={images.bg_home_purple}
-      className="flex-1"
-      resizeMode="cover">
-      <View className="flex-1">
-        <SkeletonPlaceholder
-          backgroundColor="#3f2763"
-          highlightColor="#5f3c9c"
-          borderRadius={8}>
-          <View style={{paddingTop: 50, paddingHorizontal: 24}}>
-            {/* Avatar + Nome + Notificação */}
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <View style={{width: 70, height: 70, borderRadius: 35}} />
-              <View style={{marginLeft: 16}}>
-                <View style={{width: 120, height: 18, borderRadius: 4}} />
-                <View
-                  style={{
-                    width: 180,
-                    height: 14,
-                    borderRadius: 4,
-                    marginTop: 6,
-                  }}
-                />
-              </View>
-              <View
-                style={{
-                  marginLeft: 'auto',
-                  width: 35,
-                  height: 35,
-                  borderRadius: 10,
-                }}
-              />
-            </View>
+    <View style={{ flex: 1, marginTop: 40, marginLeft: 28, marginRight: 28 }}>
+      <ContentLoader
+        speed={1}
+        width={containerWidth}
+        height={700}
+        viewBox={`0 0 ${containerWidth} 700`}
+        backgroundColor="#3f2763"
+        foregroundColor="#5f3c9c"
+      >
+        {/* Avatar */}
+        <Circle cx="40" cy="40" r="35" />
 
-            {/* Botões de indicação */}
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                marginTop: 32,
-              }}>
-              <View style={{width: (screenWidth - 70) / 2, height: 80}} />
-              <View style={{width: (screenWidth - 70) / 2, height: 80}} />
-            </View>
+        {/* Nome + descrição */}
+        <Rect x="85" y="20" rx="4" ry="4" width="35%" height="18" />
+        <Rect x="85" y="44" rx="4" ry="4" width="50%" height="14" />
 
-            {/* Botão de Regras */}
-            <View
-              style={{
-                width: '100%',
-                height: 70,
-                borderRadius: 10,
-                marginTop: 20,
-              }}
-            />
+        {/* Notificação */}
+        <Rect x={containerWidth - 40} y="20" rx="10" ry="10" width="35" height="35" />
 
-            {/* Card de Indicações */}
-            <View
-              style={{
-                width: '100%',
-                height: 250,
-                borderRadius: 20,
-                marginTop: 24,
-              }}
-            />
+        {/* Botões de indicação */}
+        <Rect x="0" y="100" rx="10" ry="10" width={halfWidth} height={80} />
+        <Rect x={halfWidth + 10} y="100" rx="10" ry="10" width={halfWidth} height={80} />
 
-            {/* Botão de Status */}
-            <View
-              style={{
-                width: '100%',
-                height: 70,
-                borderRadius: 10,
-                marginTop: 24,
-              }}
-            />
-          </View>
-        </SkeletonPlaceholder>
-      </View>
-    </ImageBackground>
+        {/* Botão de Regras */}
+        <Rect x="0" y="200" rx="10" ry="10" width={containerWidth} height={80} />
+
+        {/* Card de Indicações */}
+        <Rect x="0" y="300" rx="20" ry="20" width={containerWidth} height={250} />
+
+        {/* Botão de Status */}
+        <Rect x="0" y="570" rx="10" ry="10" width={containerWidth} height={80} />
+      </ContentLoader>
+    </View>
   );
 }

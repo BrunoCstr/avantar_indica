@@ -8,6 +8,7 @@ import images from '../data/images';
 import {colors} from '../styles/colors';
 import {FlatList, TextInput} from 'react-native-gesture-handler';
 import {Button} from '../components/Button';
+import { BackButton } from '../components/BackButton';
 
 export function StatusScreen() {
   const [search, setSearch] = useState('');
@@ -54,18 +55,16 @@ export function StatusScreen() {
 
   return (
     <ImageBackground
-      source={images.bg_status}
+      source={images.bg_white}
       className="flex-1"
       resizeMode="cover">
       <View className="flex-1 ml-5 mr-5 mb-10 justify-center items-center">
         <View className="items-center flex-row relative w-full">
-          <TouchableOpacity
-            className="border-[1px] rounded-md border-white h-15 w-15 p-2 absolute "
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate('Wallet')}>
-            <Entypo name="arrow-long-left" size={21} color={colors.white} />
-          </TouchableOpacity>
-          <Text className="text-white font-bold text-3xl mx-auto">Status</Text>
+          <BackButton
+          color={colors.tertiary_purple}
+          borderColor={colors.tertiary_purple}
+          />
+          <Text className="text-tertiary_purple font-bold text-3xl">Status</Text>
         </View>
 
         <View className="flex-row items-center mt-10 w-full h-16 bg-white rounded-lg">

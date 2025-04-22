@@ -47,13 +47,6 @@ export function AppStack() {
         }}
       />
       <Stack.Screen
-        name="Indicate"
-        component={registrationStatus ? IndicateScreen : WaitingConfirmationScreen}
-        options={{
-          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-        }}
-      />
-      <Stack.Screen
         name="IndicateInBulk"
         component={registrationStatus ? IndicateInBulkScreen : WaitingConfirmationScreen}
         options={{

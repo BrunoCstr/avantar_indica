@@ -2,30 +2,27 @@ import React, {useState, useEffect} from 'react';
 import {
   Text,
   View,
-  TouchableOpacity,
-  Image,
   TextInput,
   Alert,
   FlatList,
   PermissionsAndroid,
   Platform,
+  ImageBackground,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
 import {indicationSchema, IndicationSchema} from '../schemas/validationSchema';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useForm, Controller} from 'react-hook-form';
-import {Picker} from '@react-native-picker/picker';
-import Entypo from 'react-native-vector-icons/Entypo';
 import Contacts from 'react-native-contacts';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import images from '../data/images';
 import {colors} from '../styles/colors';
-import {FormInput} from '../components/FormInput';
 import {Button} from '../components/Button';
 import {useAuth} from '../contexts/Auth';
 import {ConctactItem} from '../components/ContactItem';
 import {applyMaskTelephone} from '../utils/applyMaskTelephone';
+import {BackButton} from '../components/BackButton';
+import {IndicateInBulkSkeleton} from '../components/skeletons/IndicateInBulkSkeleton';
 
 type Lead = {
   recordID: string;
@@ -34,8 +31,8 @@ type Lead = {
 };
 
 export function IndicateInBulkScreen() {
-  const navigation = useNavigation();
   const {userData} = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
 
   const [leads, setLeads] = useState<Lead[]>([]);
   const [selecteds, setSelecteds] = useState<{[key: string]: boolean}>({});
@@ -57,6 +54,8 @@ export function IndicateInBulkScreen() {
       const all = await Contacts.getAll();
       const withTelephone: any = all.filter(c => c.phoneNumbers.length > 0);
       setLeads(withTelephone);
+
+      setIsLoading(false)
     }
   };
 
@@ -78,7 +77,7 @@ export function IndicateInBulkScreen() {
       phone: applyMaskTelephone(c.phoneNumbers[0].number) ?? 'Sem número',
     }));
 
-    console.log(arrSelecteds)
+    console.log(arrSelecteds);
 
     console.log(leadsData);
   };
@@ -123,78 +122,78 @@ export function IndicateInBulkScreen() {
       .toLowerCase()
       .includes(search.toLowerCase());
 
-    const matchSearchTel = item.phoneNumbers?.[0]?.number
-    .includes(search);
+    const matchSearchTel = item.phoneNumbers?.[0]?.number.includes(search);
 
     return matchSearchName || matchSearchTel;
   });
 
   return (
-    <View className="flex-1">
-      <Image source={images.bg_home_white} resizeMode="contain" />
-
-      <View className="flex-1 ml-5 mr-5">
-        <View className="justify-between items-center flex-row">
-          <TouchableOpacity
-            className="border-[1px] rounded-md border-primary_purple h-15 w-15 p-2"
-            activeOpacity={0.8}
-            onPress={() => navigation.goBack()}>
-            <Entypo
-              name="arrow-long-left"
-              size={21}
+    <ImageBackground
+      source={images.bg_white}
+      resizeMode="cover"
+      className="flex-1">
+      {isLoading ? (
+        <IndicateInBulkSkeleton />
+      ) : (
+        <View className="flex-1 ml-5 mr-5 mt-10">
+          <View className="justify-between items-center flex-row">
+            <BackButton
               color={colors.primary_purple}
+              borderColor={colors.primary_purple}
             />
-          </TouchableOpacity>
-          <Text className="text-primary_purple font-bold text-3xl absolute left-1/2 -translate-x-1/2">
-            Indicar em Massa
-          </Text>
-        </View>
+            <Text className="text-primary_purple font-bold text-3xl absolute left-1/2 -translate-x-1/2">
+              Indicar em Massa
+            </Text>
+          </View>
 
-        <View className="flex-1 mt-5">
-          <Text className="text-lg font-bold text-center text-primary_purple">
-            Selecione os contatos:
-          </Text>
+          <View className="flex-1 mt-5">
+            <Text className="text-lg font-bold text-center text-primary_purple">
+              Selecione os contatos:
+            </Text>
 
-          <View className="flex-row mt-2 items-center w-full h-16 border-2 border-primary_purple rounded-lg">
-            <Ionicons
-              name="search"
-              size={24}
-              color={colors.primary_purple}
-              className="absolute left-5"
-            />
-            <TextInput
-              className="pl-16 pr-5 flex-1"
-              onChangeText={setSearch}
-              value={search}
-              placeholder="Buscar..."
-              placeholderTextColor={colors.primary_purple}
+            <View className="flex-row mt-2 items-center w-full h-16 border-2 border-primary_purple rounded-lg">
+              <Ionicons
+                name="search"
+                size={24}
+                color={colors.primary_purple}
+                className="absolute left-5"
+              />
+              <TextInput
+                className="pl-16 pr-5 flex-1"
+                onChangeText={setSearch}
+                value={search}
+                placeholder="Buscar..."
+                placeholderTextColor={colors.primary_purple}
+              />
+            </View>
+
+            <FlatList
+              className="mb-5"
+              data={filteredData}
+              keyExtractor={item => item.recordID}
+              showsVerticalScrollIndicator={false}
+              renderItem={({item}) => (
+                <ConctactItem
+                  contact={item}
+                  selected={!!selecteds[item.recordID]}
+                  onToggle={() => toggleContact(item.recordID)}
+                />
+              )}
             />
           </View>
 
-          <FlatList
-            className="mb-4"
-            data={filteredData}
-            keyExtractor={item => item.recordID}
-            showsVerticalScrollIndicator={false}
-            renderItem={({item}) => (
-              <ConctactItem
-                contact={item}
-                selected={!!selecteds[item.recordID]}
-                onToggle={() => toggleContact(item.recordID)}
-              />
-            )}
-          />
+          <View className="mt-auto mb-10">
+            <Button
+              text="ENVIAR"
+              backgroundColor="blue"
+              onPress={submitSelecteds}
+              textColor="tertiary_purple"
+              fontSize={25}
+              fontWeight="bold"
+            />
+          </View>
         </View>
-
-        <View className="mt-auto mb-5">
-          <Button
-            text="ENVIAR"
-            backgroundColor="tertiary_purple"
-            onPress={submitSelecteds}
-            textColor="white"
-          />
-        </View>
-      </View>
-    </View>
+      )}
+    </ImageBackground>
   );
 }
