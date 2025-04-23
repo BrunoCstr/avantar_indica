@@ -9,12 +9,12 @@ export function IndicateInBulkSkeleton() {
   return (
     <View style={{ flex: 1, marginHorizontal: 20, marginTop: 40 }}>
       <ContentLoader
-        speed={1}
+        speed={1.2}
         width={`${contentWidth}`}
         height={800}
         viewBox={`0 0 ${contentWidth} 800`}
-        backgroundColor="#dddddd"
-        foregroundColor="#f0f0f0"
+        backgroundColor="#D8CDE8"
+        foregroundColor="#EFEAF6"
       >
         {/* Header */}
         <Rect x="0" y="0" rx="8" ry="8" width={30} height={32} /> {/* BackButton */}

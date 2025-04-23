@@ -22,4 +22,5 @@ export default {
     bg_login: require('../assets/images/bg_login.png'),
     avantar_logo_seguros: require('../assets/images/avantar_logo_seguros.png'),
     bg_dark: require('../assets/images/bg_dark.png'),
+    plus: require('../assets/images/plus.png')
 }

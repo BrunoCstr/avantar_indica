@@ -10,6 +10,9 @@ interface ButtonProps {
   onPress: () => void;
   height?: number;
   width?: number | string;
+  borderBottomWidth?: number;
+  borderRightWidth?: number;
+  borderColor?: string;
 }
 
 export function Button({
@@ -21,6 +24,9 @@ export function Button({
   fontSize,
   width = '100%',
   height = 50,
+  borderBottomWidth,
+  borderRightWidth,
+  borderColor
 }: ButtonProps) {
   return (
     <TouchableOpacity
@@ -31,6 +37,9 @@ export function Button({
         borderRadius: 10,
         height,
         width,
+        borderBottomWidth,
+        borderRightWidth,
+        borderColor: colors[borderColor as keyof typeof colors]
       }}
       activeOpacity={0.8}
       onPress={onPress}>

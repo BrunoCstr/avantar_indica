@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {View, TouchableWithoutFeedback, TouchableOpacity} from 'react-native';
+import {View, TouchableWithoutFeedback, TouchableOpacity, Image} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -11,6 +11,7 @@ import {StatusScreen} from '../screens/StatusScreen';
 import {ProfileScreen} from '../screens/ProfileScreen';
 import {colors} from '../styles/colors';
 import {IndicateModal} from './IndicateModal';
+import images from '../data/images';
 
 const Tab = createBottomTabNavigator();
 
@@ -114,10 +115,15 @@ export function BottomNavigator() {
                     backgroundColor: colors.blue,
                     marginTop: -5, // elevar um pouco pra parecer centralizado
                   }}>
-                  <FontAwesome
+                  {/*<FontAwesome
                     name="plus"
                     size={32}
                     color={colors.primary_purple}
+                  />*/}
+
+                  <Image
+                  source={images.plus}
+                  className='h-7 w-7'
                   />
                 </TouchableOpacity>
             ),

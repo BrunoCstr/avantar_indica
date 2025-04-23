@@ -191,6 +191,9 @@ export function HomeScreen() {
               fontWeight="bold"
               fontSize={25}
               height={70}
+              borderColor='second_orange'
+              borderBottomWidth={4}
+              borderRightWidth={2}
               onPress={() => navigation.navigate('Rules')}
             />
           </View>
@@ -216,6 +219,9 @@ export function HomeScreen() {
               fontWeight="bold"
               fontSize={25}
               height={70}
+              borderColor='sixteen_purple'
+              borderBottomWidth={4}
+              borderRightWidth={2}
               onPress={() => navigation.navigate('Status')}
             />
           </View>

@@ -1,20 +1,38 @@
 import React, {useState} from 'react';
 import {ImageBackground, Text, View, TouchableOpacity} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import Entypo from 'react-native-vector-icons/Entypo';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import images from '../data/images';
 import {colors} from '../styles/colors';
 import {FlatList, TextInput} from 'react-native-gesture-handler';
-import {Button} from '../components/Button';
-import { BackButton } from '../components/BackButton';
+import {BackButton} from '../components/BackButton';
+import {FilterDropdown} from '../components/FilterDropdown';
+import {StatusScreenSkeleton} from '../components/skeletons/StatusScreenSkeleton';
 
 export function StatusScreen() {
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<null | string>(null);
-  const [data, setData] = useState(null);
-  const navigation = useNavigation();
+
+  const [showFilter, setShowFilter] = useState(false);
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+
+  const [isLoading, setIsLoading] = useState(true); 
+
+  // Temporario até integrar o Backend
+  setTimeout(() => {
+    setIsLoading(false);
+  }, 1000)
+
+  const filterOptions = [
+    'FECHADO',
+    'NÃO FECHADO',
+    'AGUARDANDO CLIENTE',
+    'CONTATO REALIZADO',
+    'PENDENTE CONTATO',
+    'NÃO INTERESSOU',
+    'INICIO DE PROPOSTA',
+    'PROPOSTA APRESENTADA',
+  ];
 
   const dataSimulation = [
     {id: 1, indication_name: 'Bruno de Castro', status: 'FECHADO'},
@@ -45,8 +63,18 @@ export function StatusScreen() {
     {id: 27, indication_name: 'Josaci Oliveira', status: 'CONTATO REALIZADO'},
   ];
 
+  const handleSelectFilter = (option: string) => {
+    if (selectedFilters.includes(option)) {
+      setSelectedFilters(selectedFilters.filter(item => item !== option));
+    } else {
+      setSelectedFilters([...selectedFilters, option]);
+    }
+  };
+
   const filteredData = dataSimulation.filter(item => {
-    const matchStatus = statusFilter ? item.status === statusFilter : true;
+    const matchStatus =
+      selectedFilters.length > 0 ? selectedFilters.includes(item.status) : true;
+
     const matchSearch = item.indication_name
       .toLowerCase()
       .includes(search.toLowerCase());
@@ -58,89 +86,98 @@ export function StatusScreen() {
       source={images.bg_white}
       className="flex-1"
       resizeMode="cover">
-      <View className="flex-1 ml-5 mr-5 mb-10 justify-center items-center">
-        <View className="items-center flex-row relative w-full">
-          <BackButton
-          color={colors.tertiary_purple}
-          borderColor={colors.tertiary_purple}
-          />
-          <Text className="text-tertiary_purple font-bold text-3xl">Status</Text>
-        </View>
-
-        <View className="flex-row items-center mt-10 w-full h-16 bg-white rounded-lg">
-          <Ionicons
-            name="search"
-            size={24}
-            color={colors.black}
-            className="absolute left-5"
-          />
-          {/* Deixar para fazer a lógica de pesquisa por caractere quando tiver já integrado com o backend */}
-          <TextInput
-            className="pl-16 pr-5 flex-1"
-            onChangeText={setSearch}
-            value={search}
-            placeholder="Buscar..."
-          />
-          <TouchableOpacity onPress={() => setStatusFilter(null)} className='pr-4'>
-            <Ionicons name="reload" size={24} color={colors.black} />
-          </TouchableOpacity>
-        </View>
-
-        <View className="flex-row gap-1 mt-2">
-          <Button
-            text="APROVADAS"
-            backgroundColor="orange"
-            textColor="white"
-            fontWeight="bold"
-            fontSize={22}
-            width={160}
-            height={55}
-            onPress={() => setStatusFilter('FECHADO')}
-          />
-          <Button
-            text="RECUSADAS"
-            backgroundColor="tertiary_lillac"
-            textColor="white"
-            fontWeight="bold"
-            fontSize={22}
-            width={160}
-            height={55}
-            onPress={() => setStatusFilter('NÃO FECHADO')}
-          />
-        </View>
-
-        <View className="bg-white w-full rounded-2xl shadow-md mt-2 h-[21.875rem]">
-          <View className="flex-row justify-between bg-blue p-3 pl-10 pr-10 rounded-t-2xl w-full">
-            <Text className="text-2xl font-bold text-black">Nome</Text>
-            <Text className="text-2xl font-bold text-black">Status</Text>
+      {isLoading ? (
+        <StatusScreenSkeleton />
+      ) : (
+        <View className="flex-1 ml-5 mr-5 mb-10 justify-center items-center">
+          <View className="items-center flex-row justify-between w-full">
+            <BackButton
+              color={colors.tertiary_purple}
+              borderColor={colors.tertiary_purple}
+            />
+            <Text className="text-tertiary_purple font-bold text-3xl mr-6">
+              Status
+            </Text>
+            <View>
+              <Text></Text>
+            </View>{' '}
+            {/* Para o texto ficar no centro com o justify-between */}
           </View>
 
-          <FlatList
-            data={filteredData}
-            showsVerticalScrollIndicator={false}
-            keyExtractor={item => item.indication_name}
-            renderItem={({item}) => (
-              <View className="flex-row justify-between pl-10 pr-10 pt-1">
-                <Text className="text-black font-bold">
-                  {item.indication_name}
-                </Text>
-                <Text
-                  className="font-bold text-xs"
-                  style={{
-                    color:
-                      item.status === 'FECHADO'
-                        ? colors.green
-                        : item.status === 'NÃO FECHADO'
-                          ? colors.red
-                          : colors.black,
-                  }}>
-                  {item.status}
-                </Text>
-              </View>
-            )}
-          />
+          <View className="flex-row items-center mt-10 w-full h-16 bg-tertiary_purple rounded-xl border-b-4 border-l-2 border-pink px-4">
+            <Ionicons
+              name="search"
+              size={24}
+              color={colors.white}
+              className="absolute left-5"
+            />
+
+            <TextInput
+              className="pl-16 pr-5 flex-1 text-white font-regular text-lg"
+              placeholderTextColor={colors.white}
+              onChangeText={setSearch}
+              value={search}
+              placeholder="Buscar..."
+            />
+
+            <TouchableOpacity
+              onPress={() => setShowFilter(!showFilter)}
+              className="pr-4">
+              <FontAwesome6
+                name={showFilter ? 'xmark' : 'sliders'}
+                size={24}
+                color={colors.white}
+              />
+            </TouchableOpacity>
+
+            <FilterDropdown
+              visible={showFilter}
+              onClose={() => setShowFilter(false)}
+              options={filterOptions}
+              selectedOptions={selectedFilters}
+              onSelectOption={handleSelectFilter}
+            />
+          </View>
+
+          <View className="bg-transparent border-2 border-tertiary_purple items-center w-full rounded-2xl mt-4 h-[60%]">
+            <View className="flex-row justify-between p-3 pl-10 pr-10 rounded-t-2xl w-full">
+              <Text className="text-2xl font-bold text-tertiary_purple">
+                Nome
+              </Text>
+              <Text className="text-2xl font-bold text-tertiary_purple">
+                Status
+              </Text>
+            </View>
+
+            <FlatList
+              data={filteredData}
+              showsVerticalScrollIndicator={false}
+              keyExtractor={item => item.indication_name}
+              renderItem={({item}) => (
+                <View className="justify-center items-center">
+                  <View className="flex-row justify-between bg-transparent w-[93%] px-2 py-3 border-b-2 items-center border-tertiary_purple">
+                    <Text className="text-black text-lg font-bold">
+                      {item.indication_name}
+                    </Text>
+                    <Text
+                      className="font-bold text-sm"
+                      style={{
+                        color:
+                          item.status === 'FECHADO'
+                            ? colors.green
+                            : item.status === 'NÃO FECHADO'
+                              ? colors.red
+                              : colors.black,
+                      }}>
+                      {item.status}
+                    </Text>
+                  </View>
+                </View>
+              )}
+            />
+          </View>
         </View>
-      </View>
+      )}
     </ImageBackground>
   );
 }

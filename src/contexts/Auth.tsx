@@ -10,7 +10,6 @@ import {
   signOut,
   onAuthStateChanged,
   sendPasswordResetEmail,
-  sendEmailVerification,
 } from '@react-native-firebase/auth';
 import {
   collection,

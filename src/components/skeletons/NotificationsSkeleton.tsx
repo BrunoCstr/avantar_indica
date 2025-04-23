@@ -14,7 +14,7 @@ export function NotificationsSkeleton() {
       resizeMode="cover">
       <View style={{ flex: 1, paddingHorizontal: 28, paddingTop: 36 }}>
         <ContentLoader
-          speed={1}
+          speed={1.2}
           width={loaderWidth}
           height={950}
           viewBox={`0 0 ${loaderWidth} 950`}

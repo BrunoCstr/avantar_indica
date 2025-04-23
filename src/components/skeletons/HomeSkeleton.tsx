@@ -11,7 +11,7 @@ export function HomeSkeleton() {
   return (
     <View style={{ flex: 1, marginTop: 40, marginLeft: 28, marginRight: 28 }}>
       <ContentLoader
-        speed={1}
+        speed={1.2}
         width={containerWidth}
         height={700}
         viewBox={`0 0 ${containerWidth} 700`}

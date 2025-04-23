@@ -5,8 +5,15 @@ import {useForm, Controller} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import Feather from 'react-native-vector-icons/Feather';
 import {launchImageLibrary} from 'react-native-image-picker';
-import {updateDoc, doc, getFirestore, onSnapshot} from '@react-native-firebase/firestore';
+import {
+  updateDoc,
+  doc,
+  getFirestore,
+  onSnapshot,
+} from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 import app from '../../firebaseConfig';
 import {Button} from '../components/Button';
@@ -15,6 +22,7 @@ import images from '../data/images';
 import {colors} from '../styles/colors';
 import {FormInput} from '../components/FormInput';
 import {signUpSchema, SignUpFormData} from '../schemas/validationSchema';
+import {BackButton} from '../components/BackButton';
 
 const db = getFirestore(app);
 
@@ -83,80 +91,94 @@ export function ProfileScreen() {
   }, [userData?.uid]);
 
   return (
-    <View className="flex-1">
-      <View className="h-1/4 justify-center items-center">
-        <Image source={images.bg_profile_default} className="h-full w-full" />
-      </View>
-      <View className="flex-1">
-        <View className="justify-center h-full bg-fifth_purple">
-          <View className="mr-5 ml-5 gap-3">
-            <Button
-              text="Editar Perfil"
-              backgroundColor="primary_purple"
-              textColor="white"
-              fontWeight="bold"
-              fontSize={22}
-              onPress={() => setModalType('edit')}
-            />
-            <Button
-              text="Minhas informações"
-              backgroundColor="primary_purple"
-              textColor="white"
-              fontWeight="bold"
-              fontSize={22}
-              onPress={() => setModalType('info')}
-            />
-            <Button
-              text="Notificações"
-              backgroundColor="primary_purple"
-              textColor="white"
-              fontWeight="bold"
-              fontSize={22}
-              onPress={() => navigation.navigate('Notifications')}
-            />
-            <Button
-              text="Cadastrar vendedores"
-              backgroundColor="primary_purple"
-              textColor="white"
-              fontWeight="bold"
-              fontSize={22}
-              onPress={() => console.log('Vendedores')}
-            />
-            <Button
-              text="Sair"
-              backgroundColor="red"
-              textColor="white"
-              fontWeight="bold"
-              fontSize={22}
-              onPress={() => signOut()}
-            />
-          </View>
-        </View>
+    <View className="flex-1 bg-fifth_purple justify-center">
+      <View className="flex-row justify-between mr-7 ml-7">
+        <BackButton />
+
+        <TouchableOpacity
+          className="items-center justify-center"
+          activeOpacity={0.8}>
+          <Ionicons name="exit-outline" size={35} color={colors.red} />
+        </TouchableOpacity>
       </View>
 
-      <View className="absolute mt-28 left-1/2 -translate-x-1/2 z-20 items-center">
+      <View className="items-center">
         <TouchableOpacity activeOpacity={0.9} onPress={selectImage}>
+          <Text className="text-white text-2xl font-bold text-center mb-4">
+            Perfil
+          </Text>
           <Image
             source={
               profilePicture
                 ? {uri: profilePicture}
                 : images.default_profile_picture
             }
-            className="h-30 w-30 rounded-md"
+            className="h-32 w-32 rounded-full border-2 border-white"
           />
         </TouchableOpacity>
-        <Text className="text-white text-2xl font-bold text-center mt-2">
-          {userFirstName}
-        </Text>
       </View>
 
-      <Modal
+      <View className="items-center h-3/5 flex-col gap-4">
+        <View className="bg-white h-[38%] w-4/5 rounded-3xl px-8 py-5 mt-9">
+          <View className="flex-row justify-between">
+            <Text className="text-lg font-bold">Informações do usuário</Text>
+            <TouchableOpacity activeOpacity={0.5}>
+              <Text className="font-regular text-lg">Editar</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View className="flex-col mt-1">
+            <View className="flex-row items-center gap-2">
+              <FontAwesome name={'user'} size={25} color={colors.black} />
+              <View className="flex-col">
+                <Text className="text-sm font-regular">Nome</Text>
+                <Text className="text-base font-bold">
+                  {userData?.displayName}
+                </Text>
+              </View>
+            </View>
+
+            <View className="flex-row items-center gap-2">
+              <FontAwesome name={'envelope'} size={19} color={colors.black} />
+              <View className="flex-col">
+                <Text className="text-sm font-regular">E-mail</Text>
+                <Text className="text-base font-bold">{userData?.email}</Text>
+              </View>
+            </View>
+
+            <View className="flex-row items-center gap-2">
+              <FontAwesome
+                name={'phone-square'}
+                size={22}
+                color={colors.black}
+              />
+              <View className="flex-col">
+                <Text className="text-sm font-regular">Telefone</Text>
+                <Text className="text-base font-bold">{userData?.phone}</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        <View className="bg-white h-[38%] w-4/5 rounded-3xl px-8 py-5">
+          <View className="flex-row justify-between">
+            <Text className="text-lg font-bold">Dados para pagamento</Text>
+            <TouchableOpacity activeOpacity={0.5}>
+              <Text className="font-regular text-lg">Editar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        
+      </View>
+
+      {/*<Modal
         animationType="slide"
         transparent
         visible={modalType !== null}
         onRequestClose={() => setModalType(null)}>
         <View className="flex-1 justify-end bg-black/40">
-          <View className="bg-white_navBar rounded-t-2xl p-5 h-[35%]">
+          <View className="bg-white_navBar rounded-t-2xl p-5">
             <View className="flex-row justify-between items-center mb-3">
               <Text className="text-lg font-bold text-fifth_purple">
                 {modalType === 'edit' && 'Editar Perfil'}
@@ -170,7 +192,7 @@ export function ProfileScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Conteúdo do modal de acordo com o tipo */}
+            {/* Conteúdo do modal de acordo com o tipo 
             {modalType === 'edit' && (
               <View className="mt-3">
                 <FormInput
@@ -232,7 +254,7 @@ export function ProfileScreen() {
             )}
           </View>
         </View>
-      </Modal>
+      </Modal>*/}
     </View>
   );
 }
