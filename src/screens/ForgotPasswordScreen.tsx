@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {Text, ImageBackground, View} from 'react-native';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
+import {BackButton} from '../components/BackButton';
 
 import images from '../data/images';
 import {FormInput} from '../components/FormInput';
@@ -92,7 +93,10 @@ export function ForgotPasswordScreen() {
       source={images.bg_dark}
       style={{flex: 1}}
       resizeMode="cover">
-      <View className="flex-1 justify-center item ml-10 mr-10">
+      <View className="pt-16 ml-10">
+        <BackButton />
+      </View>
+      <View className="flex-1 justify-center item ml-10 mr-10 mb-10">
         <View className="items-center">
           <Text className="font-semiBold text-2xl text-white mb-3">
             Altere sua senha
@@ -119,6 +123,7 @@ export function ForgotPasswordScreen() {
             height={55}
             fontSize={25}
             backgroundColor="blue"
+            fontWeight="bold"
           />
         </View>
         <CustomModal

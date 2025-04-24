@@ -317,6 +317,7 @@ export function SignUpScreen() {
                   textColor="tertiary_purple"
                   height={55}
                   fontSize={25}
+                  fontWeight='bold'
                 />
               </View>
 

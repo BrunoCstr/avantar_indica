@@ -114,6 +114,7 @@ export function SignInScreen() {
                   backgroundColor="blue"
                   onPress={handleSubmit(onSubmit)}
                   textColor="tertiary_purple"
+                  fontWeight='bold'
                 />
               </View>
 

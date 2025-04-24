@@ -9,7 +9,7 @@ import {
   deleteUser,
   signOut,
   onAuthStateChanged,
-  sendPasswordResetEmail,
+  sendPasswordResetEmail
 } from '@react-native-firebase/auth';
 import {
   collection,
@@ -21,6 +21,7 @@ import {
   serverTimestamp,
   updateDoc,
   doc,
+  onSnapshot,
 } from '@react-native-firebase/firestore';
 import {uploadDefaultProfilePicture} from '../utils/uploadDefaultProfilePicture';
 import messaging from '@react-native-firebase/messaging';
@@ -36,6 +37,7 @@ interface UserData {
   uid: string;
   profilePicture: string;
   phone: string;
+  pixKey: string;
 }
 
 interface AuthContextData {
@@ -70,8 +72,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const [userData, setUserData] = useState<UserData | null>(null);
 
   useEffect(() => {
+    let unsubscribeSnapshot: (() => void) | null = null;
     const unsubscribe = onAuthStateChanged(auth, async (user: any) => {
       setIsLoading(true);
+
+      if (unsubscribeSnapshot) {
+        unsubscribeSnapshot();
+        unsubscribeSnapshot = null;
+      }
 
       if (user) {
         try {
@@ -83,27 +91,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
           setIsUserAuthenticated(true);
 
-          const q = query(
-            collection(db, 'users'),
-            where('uid', '==', user.uid),
+          const userRef = doc(db, 'users', user.uid);
+          unsubscribeSnapshot = onSnapshot(
+            userRef,
+            snapshot => {
+              if (snapshot.exists) {
+                const data = snapshot.data()!;
+                setregistrationStatus(data.registration_status);
+                setUserData({
+                  displayName: data.fullName,
+                  email: data.email,
+                  isFirstLogin: data.isFirstLogin,
+                  affiliated_to: data.affiliated_to,
+                  uid: data.uid,
+                  profilePicture: data.profilePicture,
+                  phone: data.phone,
+                  pixKey: data.pixKey,
+                });
+              }
+              setIsLoading(false);
+            },
+            error => {
+              console.error('Erro no snapshot:', error);
+              setIsLoading(false);
+            },
           );
-
-          const querySnapshot = await getDocs(q);
-          querySnapshot.forEach(doc => {
-            if (doc.exists) {
-              const data = doc.data();
-              setregistrationStatus(data.registration_status);
-              setUserData({
-                displayName: user.displayName,
-                email: user.email,
-                isFirstLogin: data.isFirstLogin,
-                affiliated_to: data.affiliated_to,
-                uid: data.uid,
-                profilePicture: data.profilePicture,
-                phone: data.phone,
-              });
-            }
-          });
         } catch (err) {
           await signOut(auth);
           const userRef = doc(db, 'users', user.uid);
@@ -141,7 +153,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       );
 
       const user = userCredential.user;
-
+      const phoneCleaned = phone.replace(/\D/g, '');
       const profilePictureUrl = await uploadDefaultProfilePicture(user.uid);
       const fcmToken = await messaging().getToken();
 
@@ -155,7 +167,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         isFirstLogin: true,
         fcmToken: fcmToken,
         profilePicture: profilePictureUrl,
-        phone,
+        phoneCleaned,
+        bankAccount: '',
       });
 
       await updateProfile(user, {displayName: fullName});
