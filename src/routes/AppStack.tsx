@@ -52,6 +52,13 @@ export function AppStack() {
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
         }}
       />
+      <Stack.Screen
+        name="WaitingConfirmationScreen"
+        component={WaitingConfirmationScreen}
+        options={{
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        }}
+      />
     </Stack.Navigator>
   );
 }

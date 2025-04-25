@@ -167,8 +167,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         isFirstLogin: true,
         fcmToken: fcmToken,
         profilePicture: profilePictureUrl,
-        phoneCleaned,
-        bankAccount: '',
+        phone: phoneCleaned,
+        pixKey: null,
       });
 
       await updateProfile(user, {displayName: fullName});

@@ -30,11 +30,12 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import {colors} from '../styles/colors';
 import {HomeSkeleton} from '../components/skeletons/HomeSkeleton';
 import {IndicateModal} from '../components/IndicateModal';
+import {WaitingConfirmationScreen} from '../screens/WaitingConfirmationScreen';
 
 const db = getFirestore(app);
 
 export function HomeScreen() {
-  const {userData} = useAuth();
+  const {userData, registrationStatus} = useAuth();
   const navigation = useNavigation();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -158,7 +159,7 @@ export function HomeScreen() {
           <View className="ml-7 mr-7 h-30 items-center justify-center flex-row gap-3">
             <TouchableOpacity
               activeOpacity={0.8}
-              onPress={() => setShowModal(true)}>
+              onPress={() => {registrationStatus ? setShowModal(true) : navigation.navigate(WaitingConfirmationScreen)}}>
               <View className="bg-transparent flex-row border-[1.5px] rounded-lg border-blue justify-center items-center pr-8 pl-8 pt-6 pb-6">
                 <Image source={images.indicar_icon} />
                 <Text className="text-white text-bold text-2xl ml-1.5">

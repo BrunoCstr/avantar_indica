@@ -4,6 +4,7 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { useNavigation } from '@react-navigation/native';
 
 import {HomeScreen} from '../screens/HomeScreen';
 import {WalletScreen} from '../screens/WalletScreen';
@@ -12,11 +13,15 @@ import {ProfileScreen} from '../screens/ProfileScreen';
 import {colors} from '../styles/colors';
 import {IndicateModal} from './IndicateModal';
 import images from '../data/images';
+import { useAuth } from '../contexts/Auth';
+import {WaitingConfirmationScreen} from '../screens/WaitingConfirmationScreen';
 
 const Tab = createBottomTabNavigator();
 
 export function BottomNavigator() {
+  const { registrationStatus } = useAuth();
   const [showModal, setShowModal] = useState(false);
+  const navigation = useNavigation();
 
   return (
     <>
@@ -105,7 +110,7 @@ export function BottomNavigator() {
             tabBarButton: () => (
                 <TouchableOpacity
                   activeOpacity={0.8}
-                  onPress={() => setShowModal(true)}
+                  onPress={() => {registrationStatus ? setShowModal(true) : navigation.navigate(WaitingConfirmationScreen)}}
                   style={{
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -115,12 +120,6 @@ export function BottomNavigator() {
                     backgroundColor: colors.blue,
                     marginTop: -5, // elevar um pouco pra parecer centralizado
                   }}>
-                  {/*<FontAwesome
-                    name="plus"
-                    size={32}
-                    color={colors.primary_purple}
-                  />*/}
-
                   <Image
                   source={images.plus}
                   className='h-7 w-7'

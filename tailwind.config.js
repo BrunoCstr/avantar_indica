@@ -1,4 +1,3 @@
-import { spacing } from '@shopify/restyle'
 import { colors } from './src/styles/colors'
 
 /** @type {import('tailwindcss').Config} */

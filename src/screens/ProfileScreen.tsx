@@ -398,7 +398,7 @@ export function ProfileScreen() {
                   />
                 ) : (
                   <Text className="text-base font-bold">
-                    {userData?.pixKey}
+                    {userData?.pixKey || 'Não cadastrado'}
                   </Text>
                 )}
               </View>

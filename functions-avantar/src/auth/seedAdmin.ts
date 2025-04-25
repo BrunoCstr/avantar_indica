@@ -1,0 +1,35 @@
+import admin from 'firebase-admin';
+import servicesAccountJSON from './../../../avantar-indica-firebase-adminsdk-a0cev-005b2a5df5.json';
+
+const serviceAccount = {
+  projectId: servicesAccountJSON.project_id,
+  clientEmail: servicesAccountJSON.client_email,
+  privateKey: servicesAccountJSON.private_key,
+} as admin.ServiceAccount;
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+const db = admin.firestore();
+
+async function seed() {
+  try {
+    const user = await admin
+      .auth()
+      .getUserByEmail('brunocastro@avantar.com.br');
+
+    await admin
+      .auth()
+      .setCustomUserClaims(user.uid, {role: 'admin_franqueadora'});
+
+    await db.collection('users').doc(user.uid).update({
+      role: 'admin_franqueadora',
+    });
+
+    console.log('Claim atribuída!');
+  } catch (error) {
+    console.error('Claim não atribuída: ', error);
+  }
+}
+
+seed();
