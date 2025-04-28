@@ -1,21 +1,18 @@
-import * as functions from 'firebase-functions/v1';
+import { user } from 'firebase-functions/v1/auth';
 import * as admin from 'firebase-admin';
 
-admin.initializeApp();
 const db = admin.firestore();
 
-export const onUserSignUp = functions.auth
-  .user()
-  .onCreate(async (user: any) => {
-    const defaultRole = 'nao_definida';
-
-    try {
-      await admin.auth().setCustomUserClaims(user.uid, {role: defaultRole});
-
-      await db.collection('users').doc(user.uid).set({
-        role: defaultRole,
-      });
-    } catch (error) {
-      console.error('Erro ao definir regra para o usuário: ', error);
-    }
-  });
+export const rules = user().onCreate(async (user) => {
+  const defaultRule = 'nao_definida';
+  try {
+    await admin.auth().setCustomUserClaims(user.uid, { rule: defaultRule });
+    await db.collection('users').doc(user.uid).set(
+      { rule: defaultRule },
+      { merge: true }
+    );
+    console.log(user.uid)
+  } catch (error) {
+    console.error('Erro ao definir regra para o usuário:', error);
+  }
+});

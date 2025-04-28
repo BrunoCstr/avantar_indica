@@ -20,10 +20,10 @@ async function seed() {
 
     await admin
       .auth()
-      .setCustomUserClaims(user.uid, {role: 'admin_franqueadora'});
+      .setCustomUserClaims(user.uid, {rule: 'admin_franqueadora'});
 
     await db.collection('users').doc(user.uid).update({
-      role: 'admin_franqueadora',
+      rule: 'admin_franqueadora',
     });
 
     console.log('Claim atribuída!');

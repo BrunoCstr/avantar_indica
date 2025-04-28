@@ -9,7 +9,7 @@ import {
   deleteUser,
   signOut,
   onAuthStateChanged,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
 } from '@react-native-firebase/auth';
 import {
   collection,
@@ -23,7 +23,7 @@ import {
   doc,
   onSnapshot,
 } from '@react-native-firebase/firestore';
-import {uploadDefaultProfilePicture} from '../utils/uploadDefaultProfilePicture';
+import {getDefaultProfilePicture} from '../utils/getDefaultProfilePicture';
 import messaging from '@react-native-firebase/messaging';
 
 const auth = getAuth(app);
@@ -154,22 +154,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
       const user = userCredential.user;
       const phoneCleaned = phone.replace(/\D/g, '');
-      const profilePictureUrl = await uploadDefaultProfilePicture(user.uid);
+      const profilePictureUrl = await getDefaultProfilePicture();
       const fcmToken = await messaging().getToken();
 
-      await setDoc(doc(db, 'users', user.uid), {
-        fullName,
-        email,
-        affiliated_to,
-        registration_status: false,
-        createdAt: serverTimestamp(),
-        uid: user.uid,
-        isFirstLogin: true,
-        fcmToken: fcmToken,
-        profilePicture: profilePictureUrl,
-        phone: phoneCleaned,
-        pixKey: null,
-      });
+      await setDoc(
+        doc(db, 'users', user.uid),
+        {
+          fullName,
+          email,
+          affiliated_to,
+          registration_status: false,
+          createdAt: serverTimestamp(),
+          uid: user.uid,
+          isFirstLogin: true,
+          fcmToken: fcmToken,
+          profilePicture: profilePictureUrl,
+          phone: phoneCleaned,
+          pixKey: null,
+        },
+        {merge: true},
+      );
 
       await updateProfile(user, {displayName: fullName});
     } catch (err: any) {
