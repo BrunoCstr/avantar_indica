@@ -81,12 +81,16 @@ export function SignUpScreen() {
   const onSubmit = async (data: SignUpFormData) => {
     const {confirmPassword, ...dataFiltred} = data;
 
+    const unit = units.find(u => u.unitId === dataFiltred.affiliated_to);
+    const unitName = unit?.name ?? "";
+
     const errorCode = await signUp(
       dataFiltred.fullName,
       dataFiltred.email,
       dataFiltred.password,
       dataFiltred.affiliated_to,
       dataFiltred.phone,
+      unitName
     );
 
     if (errorCode) {

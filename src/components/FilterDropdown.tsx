@@ -1,7 +1,5 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
 interface FilterDropdownProps {
   visible: boolean;
   onClose: () => void;

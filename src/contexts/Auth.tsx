@@ -48,6 +48,7 @@ interface AuthContextData {
     password: string,
     affiliated_to: string,
     phone: string,
+    unitName: string, 
   ) => Promise<string | null>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -144,6 +145,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     password: string,
     affiliated_to: string,
     phone: string,
+    unitName: string,
   ) {
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -171,6 +173,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
           profilePicture: profilePictureUrl,
           phone: phoneCleaned,
           pixKey: null,
+          unitName: unitName,
         },
         {merge: true},
       );
