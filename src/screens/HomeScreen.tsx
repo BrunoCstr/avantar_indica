@@ -1,3 +1,4 @@
+import app from '../../firebaseConfig';
 import React, {useCallback, useEffect, useState} from 'react';
 import {
   Text,
@@ -25,7 +26,6 @@ import {useAuth} from '../contexts/Auth';
 import images from '../data/images';
 import {NotificationButton} from '../components/NotificationButton';
 import {getFirstName} from '../utils/getName';
-import app from '../../firebaseConfig';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import {colors} from '../styles/colors';
 import {HomeSkeleton} from '../components/skeletons/HomeSkeleton';

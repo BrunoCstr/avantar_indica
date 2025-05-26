@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   View,
   Text,
-  Alert,
 } from 'react-native';
 import images from '../data/images';
 import {useNavigation} from '@react-navigation/native';

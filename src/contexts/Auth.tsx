@@ -1,6 +1,6 @@
+import app from '../../firebaseConfig';
 import React, {createContext, useContext, useEffect, useState} from 'react';
 import {Alert} from 'react-native';
-import app from '../../firebaseConfig';
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -48,7 +48,7 @@ interface AuthContextData {
     password: string,
     affiliated_to: string,
     phone: string,
-    unitName: string, 
+    unitName: string,
   ) => Promise<string | null>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -86,6 +86,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         try {
           await user.reload(); // Recarrega pq pode ser que o token esteja armazenado no cache.
           const idTokenResult = await user.getIdTokenResult();
+
+          if (idTokenResult.claims.disabled) {
+            await signOut(auth);
+          }
+
           if (!idTokenResult) {
             throw new Error('Usuário inválido!');
           }
@@ -147,17 +152,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     phone: string,
     unitName: string,
   ) {
+    console.log('🔄 Iniciando cadastro...');
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
         password,
       );
+      console.log('✅ Usuário criado no Auth:', userCredential.user.uid);
 
       const user = userCredential.user;
       const phoneCleaned = phone.replace(/\D/g, '');
       const profilePictureUrl = await getDefaultProfilePicture();
       const fcmToken = await messaging().getToken();
+      console.log('🔄 Preparando dados do usuário...', {
+        uid: user.uid,
+        phoneCleaned,
+      });
+
+      console.log('parâmetros do usuário:', {
+        profilePicture: profilePictureUrl,
+      });
 
       await setDoc(
         doc(db, 'users', user.uid),
@@ -174,6 +189,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
           phone: phoneCleaned,
           pixKey: null,
           unitName: unitName,
+          disabled: false,
         },
         {merge: true},
       );
@@ -183,6 +199,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       if (auth.currentUser) {
         await deleteUser(auth.currentUser);
       }
+      console.error('Erro ao criar usuário:', err);
       return err.code;
     }
   }

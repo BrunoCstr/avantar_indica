@@ -1,3 +1,4 @@
+import app from '../../firebaseConfig';
 import React, {useEffect, useState} from 'react';
 import {Alert, Modal, View, Text, TextInput} from 'react-native';
 import {BlurView} from '@react-native-community/blur';
@@ -17,7 +18,6 @@ import {
 import {Button} from './Button';
 import {colors} from '../styles/colors';
 import {FormInput} from '../components/FormInput';
-import app from '../../firebaseConfig';
 import {BackButton} from '../components/BackButton';
 import {CustomModal} from '../components/CustomModal';
 import {useAuth} from '../contexts/Auth';
@@ -73,11 +73,12 @@ export function IndicateModal({visible, onClose}: ModalProps) {
       const cleanedPhone = data.phone.replace(/\D/g, '');
 
       // Sempre quando algum arquivo for criado aqui, mandar um e-mail e uma notificação para a unidade. (Cloud Functions)
-      const referralRef = doc(collection(db, 'referrals'));
+      const indicationRef = doc(collection(db, 'indications'));
 
-      await setDoc(referralRef, {
+      await setDoc(indicationRef, {
+        indicator_id: userData?.uid,
         indicator_name: userData?.displayName,
-        referralId: referralRef.id,
+        indicationId: indicationRef.id,
         unitId: userData?.affiliated_to,
         name: data.fullName,
         phone: cleanedPhone,
@@ -85,6 +86,7 @@ export function IndicateModal({visible, onClose}: ModalProps) {
         observations: data.observations,
         createdAt: serverTimestamp(),
         status: 'PENDENTE CONTATO',
+        sgcorId: null,
       });
 
       reset();

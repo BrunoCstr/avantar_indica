@@ -16,14 +16,14 @@ async function seed() {
   try {
     const user = await admin
       .auth()
-      .getUserByEmail('brunocastro@avantar.com.br');
+      .getUserByEmail('tecnologia@avantar.com.br');
 
     await admin
       .auth()
-      .setCustomUserClaims(user.uid, {rule: 'admin_franqueadora'});
+      .setCustomUserClaims(user.uid, {rule: 'admin_unidade'});
 
     await db.collection('users').doc(user.uid).update({
-      rule: 'admin_franqueadora',
+      rule: 'admin_unidade',
     });
 
     console.log('Claim atribuída!');

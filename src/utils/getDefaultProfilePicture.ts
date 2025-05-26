@@ -1,15 +1,13 @@
-import { getStorage, ref, getDownloadURL } from 'firebase/storage';
+import storage from '@react-native-firebase/storage';
 
-const storage = getStorage();
-const defaultPictureRef = ref(storage, 'profile_pictures/default/default_profile_pictures.png')
-
-export async function getDefaultProfilePicture() {
-  await getDownloadURL(defaultPictureRef)
-  .then((url) => {
+export async function getDefaultProfilePicture(): Promise<string | null> {
+  try {
+    const url = await storage()
+      .ref('profile_pictures/default/default_profile_picture.png')
+      .getDownloadURL();
     return url;
-  })
-  .catch((err) => {
+  } catch (err) {
     console.error('Erro ao pegar a imagem de perfil padrão', err);
     return null;
-  })
+  }
 }

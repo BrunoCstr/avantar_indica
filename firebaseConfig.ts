@@ -1,8 +1,8 @@
 import { initializeApp } from "@react-native-firebase/app";
-import { FIREBASE_PROJECTID, FIREBASE_APPID, FIREBASE_MESSAGINGSENDERID, FIREBASE_STORAGEBUCKET } from '@env';
+import { FIREBASE_PROJECTID, FIREBASE_APPID, FIREBASE_MESSAGINGSENDERID, FIREBASE_STORAGEBUCKET, FIREBASE_APIKEY } from '@env';
 
 const firebaseConfig = {
-  apiKey: "",
+  apiKey: FIREBASE_APIKEY,
   projectId: FIREBASE_PROJECTID,
   storageBucket: FIREBASE_STORAGEBUCKET,
   messagingSenderId: FIREBASE_MESSAGINGSENDERID,

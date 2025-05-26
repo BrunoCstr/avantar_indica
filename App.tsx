@@ -1,4 +1,5 @@
 import React from 'react';
+import './firebaseConfig';
 import {Router} from './src/routes/Router';
 import {AuthProvider} from './src/contexts/Auth';
 import './global.css';
