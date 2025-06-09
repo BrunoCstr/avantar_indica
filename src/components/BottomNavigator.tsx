@@ -37,10 +37,12 @@ export function BottomNavigator() {
             marginRight: 28,
             justifyContent: 'center',
             alignItems: 'center',
+            paddingBottom: 0, // Remove padding que pode desalinhar
+            paddingTop: 0,    // Remove padding que pode desalinhar
           },
           tabBarShowLabel: false,
           headerShown: false,
-          tabBarIcon: () => {
+          tabBarIcon: ({focused}) => {
             let iconName: string = '';
             let IconComponent: any = Entypo;
 
@@ -59,19 +61,11 @@ export function BottomNavigator() {
             }
 
             return (
-              <View
-                style={{
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  width: 80,
-                  height: 80,
-                }}>
-                <IconComponent
-                  name={iconName}
-                  size={32}
-                  color={colors.primary_purple}
-                />
-              </View>
+              <IconComponent
+                name={iconName}
+                size={28} // Tamanho mais consistente
+                color={focused ? colors.primary_purple : colors.gray} // Cor baseada no foco
+              />
             );
           },
           tabBarButton: props => {
@@ -86,15 +80,9 @@ export function BottomNavigator() {
                   flex: 1,
                   justifyContent: 'center',
                   alignItems: 'center',
+                  height: '100%', // Usa toda a altura disponível
                 }}>
-                <View
-                  style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}>
-                  {props.children}
-                </View>
+                {props.children}
               </TouchableOpacity>
             );
           },
@@ -108,23 +96,46 @@ export function BottomNavigator() {
           component={() => null}
           options={{
             tabBarButton: () => (
+              <View style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100%',
+              }}>
                 <TouchableOpacity
                   activeOpacity={0.8}
-                  onPress={() => {registrationStatus ? setShowModal(true) : navigation.navigate(WaitingConfirmationScreen)}}
+                  onPress={() => {
+                    registrationStatus 
+                      ? setShowModal(true) 
+                      : navigation.navigate('WaitingConfirmation') // Corrigido aqui
+                  }}
                   style={{
                     justifyContent: 'center',
                     alignItems: 'center',
-                    width: 75,
-                    height: 75,
-                    borderRadius: 100,
+                    width: 55, // Tamanho mais proporcional
+                    height: 55,
+                    borderRadius: 27.5, // Metade da width/height para círculo perfeito
                     backgroundColor: colors.blue,
-                    marginTop: -5, // elevar um pouco pra parecer centralizado
+                    elevation: 3, // Sombra no Android
+                    shadowColor: '#000', // Sombra no iOS
+                    shadowOffset: {
+                      width: 0,
+                      height: 2,
+                    },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 3.84,
                   }}>
                   <Image
-                  source={images.plus}
-                  className='h-7 w-7'
+                    source={images.plus}
+                    style={{
+                      width: 24,
+                      height: 24,
+                      tintColor: colors.primary_purple, // Cor do ícone
+                    }}
+                    resizeMode="contain"
                   />
                 </TouchableOpacity>
+              </View>
             ),
           }}
         />

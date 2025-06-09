@@ -1,19 +1,28 @@
-import {user} from 'firebase-functions/v1/auth';
+import * as functions from 'firebase-functions/v1';
 import * as admin from 'firebase-admin';
 
-const db = admin.firestore();
+const auth = admin.auth();
 
-export const rules = user().onCreate(async user => {
-  const defaultRule = 'nao_definida';
-  const defaultRuleDB = 'Não definida';
-  try {
-    await admin.auth().setCustomUserClaims(user.uid, {rule: defaultRule});
-    await db
-      .collection('users')
-      .doc(user.uid)
-      .set({rule: defaultRuleDB}, {merge: true});
-    console.log(user.uid);
-  } catch (error) {
-    console.error('Erro ao definir regra para o usuário:', error);
-  }
-});
+export const rules = functions.firestore
+  .document('users/{uid}')
+  .onCreate(async (snap, context) => {
+    const data = snap.data();
+    const uid = context.params.uid;
+
+    // se veio createdBy, pule
+    if (data?.createdBy) {
+      console.log(`Ignorando regra padrão para ${uid}, createdBy encontrado.`);
+      return null;
+    }
+
+    try {
+      // seta a claim
+      await auth.setCustomUserClaims(uid, {rule: 'nao_definida'});
+      // grava o campo rule no Firestore
+      await snap.ref.set({rule: 'nao_definida'}, {merge: true});
+    } catch (error) {
+      console.error('Erro ao definir claim/regra para o usuário:', error);
+    }
+
+    return null;
+  });

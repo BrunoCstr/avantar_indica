@@ -152,27 +152,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     phone: string,
     unitName: string,
   ) {
-    console.log('🔄 Iniciando cadastro...');
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
         password,
       );
-      console.log('✅ Usuário criado no Auth:', userCredential.user.uid);
 
       const user = userCredential.user;
       const phoneCleaned = phone.replace(/\D/g, '');
       const profilePictureUrl = await getDefaultProfilePicture();
       const fcmToken = await messaging().getToken();
-      console.log('🔄 Preparando dados do usuário...', {
-        uid: user.uid,
-        phoneCleaned,
-      });
-
-      console.log('parâmetros do usuário:', {
-        profilePicture: profilePictureUrl,
-      });
 
       await setDoc(
         doc(db, 'users', user.uid),
