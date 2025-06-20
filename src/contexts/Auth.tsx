@@ -38,6 +38,7 @@ interface UserData {
   profilePicture: string;
   phone: string;
   pixKey: string;
+  unitName: string;
 }
 
 interface AuthContextData {
@@ -113,6 +114,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
                   profilePicture: data.profilePicture,
                   phone: data.phone,
                   pixKey: data.pixKey,
+                  unitName: data.unitName,
                 });
               }
               setIsLoading(false);

@@ -1,0 +1,86 @@
+import React from 'react';
+import {View, Text} from 'react-native';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+
+type indicationsData = {
+  product: string;
+  count: number;
+  percentage: number;
+  totalIndications: number;
+};
+
+export type indicationsDataArray = indicationsData[];
+
+const DashboardIndicacoes = ({data}: {data: indicationsDataArray}) => {
+  const indications = data;
+
+  const getIconNameByProduct = (product: string) => {
+    switch (product) {
+      case 'AERONÁUTICO':
+        return 'plane-up';
+      case 'AGRO - RURAL':
+        return 'sun-plant-wilt';
+      case 'AUTO':
+        return 'car';
+      case 'CAMINHÃO':
+        return 'truck-front';
+      case 'CONDOMÍNIO':
+        return 'house-chimney-user';
+      case 'DEMAIS RAMOS':
+        return 'shield-halved';
+      case 'MOTO':
+        return 'motorcycle';
+      case 'NÁUTICO':
+        return 'ship';
+      case 'RESIDENCIAL':
+        return 'house-chimney';
+      default:
+        return 'shield-halved';
+    }
+  };
+
+  const renderIndicacaoItem = (item: any, index: number) => (
+    <View key={index} className="flex-row items-center">
+      <View className="bg-[#E3E3E3] h-10 w-10 rounded-md justify-center items-center mr-4">
+        <FontAwesome6
+          name={getIconNameByProduct(item.product)}
+          size={22}
+          color="#4A04A5"
+        />
+      </View>
+
+      <View className="flex-1 mr-4">
+        <Text className="text-base font-semibold text-gray-800 mb-2">
+          {item.product}
+        </Text>
+
+        <View className="flex-row items-center gap-3">
+          <View className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+            <View
+              className="h-full rounded-full"
+              style={{
+                width: `${item.percentage}%`,
+                backgroundColor: '#4A04A5',
+              }}
+            />
+          </View>
+          <Text className="text-xs text-gray-500 font-medium min-w-8">
+            {item.percentage}%
+          </Text>
+        </View>
+      </View>
+
+      <Text className="text-2xl font-bold text-gray-800 min-w-10 text-right">
+        {item.count}
+      </Text>
+    </View>
+  );
+
+  return (
+    <View>
+      <View className="gap-4">{indications.map(renderIndicacaoItem)}</View>
+    </View>
+  );
+};
+
+export default DashboardIndicacoes;

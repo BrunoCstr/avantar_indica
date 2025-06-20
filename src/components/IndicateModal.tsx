@@ -80,6 +80,7 @@ export function IndicateModal({visible, onClose}: ModalProps) {
         indicator_name: userData?.displayName,
         indicationId: indicationRef.id,
         unitId: userData?.affiliated_to,
+        unitName: userData?.unitName,
         name: data.fullName,
         phone: cleanedPhone,
         product: data.product,

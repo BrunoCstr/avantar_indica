@@ -6,6 +6,7 @@ import {
   ImageBackground,
   Image,
   TouchableOpacity,
+  ScrollView,
 } from 'react-native';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {
@@ -31,6 +32,9 @@ import {colors} from '../styles/colors';
 import {HomeSkeleton} from '../components/skeletons/HomeSkeleton';
 import {IndicateModal} from '../components/IndicateModal';
 import {WaitingConfirmationScreen} from '../screens/WaitingConfirmationScreen';
+import DashboardIndications from '../components/DashboardIndications';
+import {getTop4ProductsByUser} from '../home/DashboardIndications';
+import {indicationsDataArray} from '../components/DashboardIndications';
 
 const db = getFirestore(app);
 
@@ -39,6 +43,7 @@ export function HomeScreen() {
   const navigation = useNavigation();
 
   const [isLoading, setIsLoading] = useState(true);
+  const [topProducts, setTopProducts] = useState<indicationsDataArray>([]);
 
   const isFirstLogin = userData?.isFirstLogin;
   const welcomeMessage = isFirstLogin
@@ -79,16 +84,17 @@ export function HomeScreen() {
   useEffect(() => {
     if (!userData?.uid) return;
 
-    const unsubscribe = onSnapshot(doc(db, 'users', userData.uid), snapshot => {
-      const data = snapshot.data();
-
-      if (data?.profilePicture) {
-        setProfilePicture(data.profilePicture);
-        setIsLoading(false);
+    const fetchTopProducts = async () => {
+      try {
+        const topProducts = await getTop4ProductsByUser(userData.uid);
+        setTopProducts(topProducts);
+        console.log(topProducts);
+      } catch (error) {
+        console.error('Erro ao buscar top produtos:', error);
       }
-    });
+    };
 
-    return () => unsubscribe();
+    fetchTopProducts();
   }, [userData?.uid]);
 
   useFocusEffect(
@@ -113,6 +119,21 @@ export function HomeScreen() {
       fetchNotifications();
     }, [userData?.uid]),
   );
+
+  useEffect(() => {
+    if (!userData?.uid) return;
+
+    const unsubscribe = onSnapshot(doc(db, 'users', userData.uid), snapshot => {
+      const data = snapshot.data();
+
+      if (data?.profilePicture) {
+        setProfilePicture(data.profilePicture);
+        setIsLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [userData?.uid]);
 
   return (
     <ImageBackground
@@ -159,7 +180,11 @@ export function HomeScreen() {
           <View className="ml-7 mr-7 h-30 items-center justify-center flex-row gap-3">
             <TouchableOpacity
               activeOpacity={0.8}
-              onPress={() => {registrationStatus ? setShowModal(true) : navigation.navigate(WaitingConfirmationScreen)}}>
+              onPress={() => {
+                registrationStatus
+                  ? setShowModal(true)
+                  : navigation.navigate(WaitingConfirmationScreen);
+              }}>
               <View className="bg-transparent flex-row border-[1.5px] rounded-lg border-blue justify-center items-center pr-8 pl-8 pt-6 pb-6">
                 <Image source={images.indicar_icon} />
                 <Text className="text-white text-bold text-2xl ml-1.5">
@@ -192,14 +217,14 @@ export function HomeScreen() {
               fontWeight="bold"
               fontSize={25}
               height={70}
-              borderColor='second_orange'
+              borderColor="second_orange"
               borderBottomWidth={4}
               borderRightWidth={2}
               onPress={() => navigation.navigate('Rules')}
             />
           </View>
 
-          <View className="mt-6 ml-7 mr-7 bg-[#FFF] rounded-2xl h-[20rem] pt-5 pl-7 pr-7">
+          <View className="mt-6 ml-7 mr-7 bg-[#FFF] rounded-2xl h-[20rem] pt-4 pl-7 pr-7">
             <View className="flex-row items-center justify-between">
               <Text className="text-primary_purple text-m font-bold">
                 Indicações
@@ -210,6 +235,12 @@ export function HomeScreen() {
                 <FontAwesome6 name="sliders" size={21} color={colors.white} />
               </TouchableOpacity>
             </View>
+            <ScrollView
+              className="flex-1 pt-1"
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{paddingBottom: 10}}>
+              <DashboardIndications data={topProducts} />
+            </ScrollView>
           </View>
 
           <View className="mt-6 ml-7 mr-7">
@@ -220,7 +251,7 @@ export function HomeScreen() {
               fontWeight="bold"
               fontSize={25}
               height={70}
-              borderColor='sixteen_purple'
+              borderColor="sixteen_purple"
               borderBottomWidth={4}
               borderRightWidth={2}
               onPress={() => navigation.navigate('Status')}
