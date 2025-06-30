@@ -22,6 +22,8 @@ export const colors = {
     white_btn_modal: "#F4F4F4",
     white_opacity: "#FFFFFFD4",
     gray: "#CDCDCD",
+    gray_light: "#E5E5E5",
+    gray_dark: "#333333",
     red: "#FF0000", 
     transparent: "transparent",
     green: "#32CD32",

@@ -1,48 +1,172 @@
 import React from 'react';
-import { View, Dimensions } from 'react-native';
-import ContentLoader, { Rect } from 'react-content-loader/native';
+import {View, ImageBackground, Animated, Easing} from 'react-native';
+import images from '../../data/images';
 
-const { width } = Dimensions.get('window');
-const containerWidth = width * 0.9;
+const StatusScreenSkeleton = () => {
+  const animatedValue = React.useRef(new Animated.Value(0)).current;
 
-export const StatusScreenSkeleton = () => (
-  <View
-    style={{
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    }}
-  >
-    <ContentLoader
-      speed={1.2}
-      width={width}
-      height={600}
-      backgroundColor="#D8CDE8" // cinza roxo claro
-      foregroundColor="#EFEAF6" // brilho lilás suave
-    >
-      {/* Título e botão voltar */}
-      <Rect x="15" y="10" rx="8" ry="8" width="30" height="30" />
-      <Rect x={width / 2 - 50} y="10" rx="5" ry="5" width="100" height="25" />
+  React.useEffect(() => {
+    const startAnimation = () => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(animatedValue, {
+            toValue: 1,
+            duration: 1000,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: false,
+          }),
+          Animated.timing(animatedValue, {
+            toValue: 0,
+            duration: 1000,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: false,
+          }),
+        ]),
+      ).start();
+    };
 
-      {/* Barra de busca */}
-      <Rect x="15" y="60" rx="12" ry="12" width={containerWidth} height="50" />
+    startAnimation();
+  }, [animatedValue]);
 
-      {/* Cabeçalhos da lista */}
-      <Rect x="30" y="130" rx="6" ry="6" width="100" height="20" />
-      <Rect x={width - 130} y="130" rx="6" ry="6" width="80" height="20" />
+  const opacity = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.3, 0.7],
+  });
 
-      {/* Linhas de carregamento da lista */}
-      {[...Array(6)].map((_, i) => (
-        <Rect
-          key={i}
-          x="20"
-          y={170 + i * 60}
-          rx="12"
-          ry="12"
-          width={containerWidth}
-          height="45"
-        />
-      ))}
-    </ContentLoader>
-  </View>
-);
+  const SkeletonBox = ({width, height, borderRadius = 8, style = {}}) => (
+    <Animated.View
+      style={[
+        {
+          width,
+          height,
+          backgroundColor: '#E1E9EE',
+          borderRadius,
+          opacity,
+        },
+        style,
+      ]}
+    />
+  );
+
+  return (
+    <ImageBackground
+      source={images.bg_white}
+      className="flex-1"
+      resizeMode="cover">
+      <View
+        style={{
+          flex: 1,
+          marginLeft: 20,
+          marginRight: 20,
+          marginBottom: 100,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+        {/* Header */}
+        <View
+          style={{
+            alignItems: 'center',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            width: '100%',
+            marginTop: 40,
+          }}>
+          <SkeletonBox width={30} height={30} />
+          <SkeletonBox width={80} height={28} borderRadius={8} />
+          <View style={{width: 40}} />
+        </View>
+
+        {/* Campo de busca */}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginTop: 40,
+            width: '100%',
+            height: 64,
+            backgroundColor: '#3E0085',
+            borderRadius: 12,
+            paddingHorizontal: 16,
+          }}
+          className="border-b-4 border-l-2 border-pink rounded-xl">
+          <SkeletonBox
+            width={24}
+            height={24}
+            borderRadius={4}
+            style={{backgroundColor: '#A78BFA'}}
+          />
+          <View style={{flex: 1, marginLeft: 16, marginRight: 16}}>
+            <SkeletonBox
+              width="70%"
+              height={18}
+              borderRadius={6}
+              style={{backgroundColor: '#A78BFA'}}
+            />
+          </View>
+          <SkeletonBox
+            width={24}
+            height={24}
+            borderRadius={4}
+            style={{backgroundColor: '#A78BFA'}}
+          />
+        </View>
+
+        {/* Container da lista */}
+        <View
+          style={{
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            borderColor: '#3E0085',
+            alignItems: 'center',
+            width: '100%',
+            borderRadius: 16,
+            marginTop: 16,
+            height: '68%',
+          }}>
+          {/* Header da tabela */}
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              padding: 12,
+              paddingLeft: 40,
+              paddingRight: 40,
+              borderTopLeftRadius: 16,
+              borderTopRightRadius: 16,
+              width: '100%',
+            }}>
+            <SkeletonBox width={60} height={20} borderRadius={6} />
+            <SkeletonBox width={60} height={20} borderRadius={6} />
+          </View>
+
+          {/* Lista de itens */}
+          <View style={{width: '100%', paddingHorizontal: 16}}>
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(item => (
+              <View
+                key={item}
+                style={{justifyContent: 'center', alignItems: 'center'}}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    backgroundColor: 'transparent',
+                    width: '93%',
+                    paddingHorizontal: 8,
+                    paddingVertical: 12,
+                    borderBottomWidth: 2,
+                    alignItems: 'center',
+                    borderBottomColor: '#3E0085',
+                  }}>
+                  <SkeletonBox width={120} height={16} borderRadius={4} />
+                  <SkeletonBox width={80} height={14} borderRadius={4} />
+                </View>
+              </View>
+            ))}
+          </View>
+        </View>
+      </View>
+    </ImageBackground>
+  );
+};
+
+export {StatusScreenSkeleton};

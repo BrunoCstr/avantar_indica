@@ -19,9 +19,9 @@ export function StatusScreen() {
   const [isLoading, setIsLoading] = useState(true); 
 
   // Temporario até integrar o Backend
-  setTimeout(() => {
-    setIsLoading(false);
-  }, 1000)
+  // setTimeout(() => {
+  //   setIsLoading(false);
+  // }, 1000)
 
   const filterOptions = [
     'FECHADO',

@@ -1,4 +1,4 @@
-import app from '../../firebaseConfig';
+
 import React, {useCallback, useEffect, useState} from 'react';
 import {
   Text,
@@ -9,6 +9,16 @@ import {
   ScrollView,
 } from 'react-native';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import type {StackNavigationProp} from '@react-navigation/stack';
+
+type RootStackParamList = {
+  IndicateInBulk: undefined;
+  Rules: undefined;
+  Status: undefined;
+  WaitingConfirmationScreen: undefined;
+};
+
+type NavigationProp = StackNavigationProp<RootStackParamList>;
 import {
   getFirestore,
   getDocs,
@@ -35,15 +45,19 @@ import {WaitingConfirmationScreen} from '../screens/WaitingConfirmationScreen';
 import DashboardIndications from '../components/DashboardIndications';
 import {getTop4ProductsByUser} from '../services/home/DashboardIndications';
 import {indicationsDataArray} from '../components/DashboardIndications';
+import {FilterDropdown} from '../components/FilterDropdown';
 
-const db = getFirestore(app);
+const db = getFirestore();
 
 export function HomeScreen() {
   const {userData, registrationStatus} = useAuth();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp>();
 
   const [isLoading, setIsLoading] = useState(true);
   const [topProducts, setTopProducts] = useState<indicationsDataArray>([]);
+  const [allProducts, setAllProducts] = useState<indicationsDataArray>([]);
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [showFilter, setShowFilter] = useState(false);
 
   const isFirstLogin = userData?.isFirstLogin;
   const welcomeMessage = isFirstLogin
@@ -88,7 +102,9 @@ export function HomeScreen() {
     const fetchTopProducts = async () => {
       try {
         const topProducts = await getTop4ProductsByUser(userData.uid);
+        setAllProducts(topProducts);
         setTopProducts(topProducts);
+        setSelectedFilters(topProducts.map(product => product.product));
         console.log(topProducts);
       } catch (error) {
         console.error('Erro ao buscar top produtos:', error);
@@ -99,6 +115,28 @@ export function HomeScreen() {
 
     fetchTopProducts();
   }, [userData?.uid]);
+
+  const handleSelectFilter = (option: string) => {
+    if (selectedFilters.includes(option)) {
+      setSelectedFilters(selectedFilters.filter(item => item !== option));
+    } else {
+      setSelectedFilters([...selectedFilters, option]);
+    }
+  };
+
+  const availableProducts = allProducts.map(product => product.product);
+
+  // Filtra os produtos baseado nos filtros selecionados
+  useEffect(() => {
+    if (selectedFilters.length === 0) {
+      setTopProducts(allProducts);
+    } else {
+      const filtered = allProducts.filter(product => 
+        selectedFilters.includes(product.product)
+      );
+      setTopProducts(filtered);
+    }
+  }, [selectedFilters, allProducts]);
 
   useFocusEffect(
     useCallback(() => {
@@ -186,7 +224,7 @@ export function HomeScreen() {
               onPress={() => {
                 registrationStatus
                   ? setShowModal(true)
-                  : navigation.navigate(WaitingConfirmationScreen);
+                  : navigation.navigate('WaitingConfirmationScreen');
               }}>
               <View className="bg-transparent flex-row border-[1.5px] rounded-lg border-blue justify-center items-center pr-8 pl-8 pt-6 pb-6">
                 <Image source={images.indicar_icon} />
@@ -234,8 +272,13 @@ export function HomeScreen() {
               </Text>
               <TouchableOpacity
                 className="bg-primary_purple h-10 w-10 rounded-lg items-center justify-center"
-                activeOpacity={0.8}>
-                <FontAwesome6 name="sliders" size={21} color={colors.white} />
+                activeOpacity={0.8}
+                onPress={() => setShowFilter(!showFilter)}>
+                <FontAwesome6 
+                  name={showFilter ? 'xmark' : 'sliders'} 
+                  size={21} 
+                  color={colors.white} 
+                />
               </TouchableOpacity>
             </View>
             <ScrollView
@@ -244,6 +287,14 @@ export function HomeScreen() {
               contentContainerStyle={{paddingBottom: 10}}>
               <DashboardIndications data={topProducts} />
             </ScrollView>
+
+            <FilterDropdown
+              visible={showFilter}
+              onClose={() => setShowFilter(false)}
+              options={availableProducts}
+              selectedOptions={selectedFilters}
+              onSelectOption={handleSelectFilter}
+            />
           </View>
 
           <View className="mt-6 ml-7 mr-7">
