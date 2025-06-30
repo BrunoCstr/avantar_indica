@@ -9,6 +9,7 @@ module.exports = {
     extend: {
       colors,
       fontFamily: {
+        sans: ['FamiljenGrotesk-Regular', 'system-ui', 'sans-serif'],
         regular: "FamiljenGrotesk-Regular",
         medium: "FamiljenGrotesk-Medium",
         semiBold: "FamiljenGrotesk-SemiBold",

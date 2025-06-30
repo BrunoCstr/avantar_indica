@@ -33,7 +33,7 @@ import {HomeSkeleton} from '../components/skeletons/HomeSkeleton';
 import {IndicateModal} from '../components/IndicateModal';
 import {WaitingConfirmationScreen} from '../screens/WaitingConfirmationScreen';
 import DashboardIndications from '../components/DashboardIndications';
-import {getTop4ProductsByUser} from '../home/DashboardIndications';
+import {getTop4ProductsByUser} from '../services/home/DashboardIndications';
 import {indicationsDataArray} from '../components/DashboardIndications';
 
 const db = getFirestore(app);
@@ -84,6 +84,7 @@ export function HomeScreen() {
   useEffect(() => {
     if (!userData?.uid) return;
 
+    setIsLoading(true);
     const fetchTopProducts = async () => {
       try {
         const topProducts = await getTop4ProductsByUser(userData.uid);
@@ -91,6 +92,8 @@ export function HomeScreen() {
         console.log(topProducts);
       } catch (error) {
         console.error('Erro ao buscar top produtos:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 

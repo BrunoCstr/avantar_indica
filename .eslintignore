@@ -1,0 +1,13 @@
+node_modules/
+android/
+ios/
+*.config.js
+metro.config.js
+babel.config.js
+jest.config.js
+.prettierrc.js
+react-native.config.js
+coverage/
+build/
+dist/
+*.min.js 
