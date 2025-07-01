@@ -20,13 +20,20 @@ import {getUserBalance} from '../services/wallet/Dashboard';
 import {getUserWithdrawals} from '../services/wallet/Withdrawals';
 import {WithdrawalRequest} from '../services/wallet/Withdrawals';
 import {WalletSkeleton} from '../components/skeletons/WalletSkeleton';
+import {CustomModal} from '../components/CustomModal';
+import {Spinner} from '../components/Spinner';
 
 export function WalletScreen() {
   const [data, setData] = useState<WithdrawalRequest[]>([]);
   const [isLoadingBalance, setIsLoadingBalance] = useState(true);
-  const [isLoadingDashboard, setIsLoadingDashboard] = useState(true);
   const [showBalance, setShowBalance] = useState(true);
   const [balance, setBalance] = useState(0);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState({
+    title: '',
+    description: '',
+  });
+  const [isLoadingButton, setIsLoadingButton] = useState(false);
 
   const {userData} = useAuth();
 
@@ -37,17 +44,18 @@ export function WalletScreen() {
     if (!userData?.uid) return;
 
     setIsLoadingBalance(true);
-    
+
     const fetchData = async () => {
       try {
         const data = await getUserWithdrawals(userData?.uid);
         setData(data);
       } catch (error) {
         console.error('Erro ao buscar dados do usuário:', error);
-        Alert.alert(
-          'Erro',
-          'Não foi possível carregar suas solicitações de saque',
-        );
+        setModalMessage({
+          title: 'Erro',
+          description: 'Não foi possível carregar suas solicitações de saque',
+        });
+        setIsModalVisible(true);
       }
     };
 
@@ -67,6 +75,7 @@ export function WalletScreen() {
   }, [userData?.uid]);
 
   async function handleWithdrawalRequest() {
+    setIsLoadingButton(true);
     if (balance >= 700) {
       try {
         const withdrawalData = {
@@ -81,19 +90,28 @@ export function WalletScreen() {
 
         console.log('withdrawalData', withdrawalData);
 
-        Alert.alert(
-          'Saque solicitado!',
-          `Saque solicitado à unidade: ${userData?.affiliated_to}, você pode acompanhar o status em sua carteira.`,
-        );
+        setModalMessage({
+          title: 'Saque solicitado',
+          description: `Saque solicitado à unidade: ${userData?.unitName}, você pode acompanhar o status em sua carteira!`,
+        });
+        setIsModalVisible(true);
       } catch (error) {
         console.error('Erro ao criar solicitação de saque:', error);
-        Alert.alert('Erro!', 'Erro ao solicitar saque. Tente novamente.');
+        setModalMessage({
+          title: 'Erro!',
+          description: `Erro ao solicitar saque. Tente novamente.`,
+        });
+        setIsModalVisible(true);
+      } finally {
+        setIsLoadingButton(false);
       }
     } else {
-      Alert.alert(
-        'Saldo insuficiente!',
-        'Seu saldo precisa ser maior que R$ 700,00 para realizar o saque.',
-      );
+      setModalMessage({
+        title: 'Saldo insuficiente',
+        description: `O saldo em sua carteira precisa ser no mínimo R$ 700,00 para realizar o saque!`,
+      });
+      setIsModalVisible(true);
+      setIsLoadingButton(false);
     }
   }
 
@@ -231,17 +249,29 @@ export function WalletScreen() {
                 colors={['#9743F8', '#4F00A9']}
                 start={{x: 0, y: 1}}
                 end={{x: 0, y: 0}}>
-                <Text className="text-white font-bold text-4xl">Sacar</Text>
+                <Text className="text-white font-bold text-4xl">
+                  {isLoadingButton ? (
+                    <Spinner size={32} variant="blue" />
+                  ) : (
+                    'Sacar'
+                  )}
+                </Text>
               </LinearGradient>
             </TouchableOpacity>
           </View>
 
           <View className="mt-4 mb-4 ml-5 mr-5">
-            <DashboardWallet onReady={() => {
-              setIsLoadingDashboard(false);
-            }} />
+            <DashboardWallet />
           </View>
         </View>
+
+        <CustomModal
+          visible={isModalVisible}
+          onClose={() => setIsModalVisible(false)}
+          title={modalMessage.title}
+          description={modalMessage.description}
+          buttonText="FECHAR"
+        />
       </View>
     </ImageBackground>
   );

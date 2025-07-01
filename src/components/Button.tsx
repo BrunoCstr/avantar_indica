@@ -13,6 +13,7 @@ interface ButtonProps {
   borderBottomWidth?: number;
   borderRightWidth?: number;
   borderColor?: string;
+  disabled?: boolean;
 }
 
 export function Button({
@@ -26,17 +27,22 @@ export function Button({
   height = 50,
   borderBottomWidth,
   borderRightWidth,
-  borderColor
+  borderColor,
+  disabled = false,
 }: ButtonProps) {
   return (
     <TouchableOpacity
+      disabled={disabled}
       style={{
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: colors[backgroundColor as keyof typeof colors],
+        backgroundColor: disabled
+          ? colors.gray
+          : colors[backgroundColor as keyof typeof colors],
+        opacity: disabled ? 0.5 : 1,
         borderRadius: 10,
         height,
-        width,
+        width: typeof width === 'number' ? width : width === '100%' ? '100%' : undefined,
         borderBottomWidth,
         borderRightWidth,
         borderColor: colors[borderColor as keyof typeof colors]

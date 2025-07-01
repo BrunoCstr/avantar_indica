@@ -26,6 +26,8 @@ import images from '../data/images';
 import {colors} from '../styles/colors';
 import {BackButton} from '../components/BackButton';
 import {CustomModal} from '../components/CustomModal';
+import {Button} from '../components/Button';
+import {useNavigation} from '@react-navigation/native';
 
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -34,6 +36,8 @@ export function ProfileScreen() {
   const {signOut, userData} = useAuth();
 
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
+
+  const navigation = useNavigation();
 
   const selectImage = () => {
     launchImageLibrary({mediaType: 'photo', quality: 0.5}, response => {
@@ -299,8 +303,8 @@ export function ProfileScreen() {
         </TouchableOpacity>
       </View>
 
-      <View className="items-center h-3/5 flex-col gap-3">
-        <View className="bg-white h-[38%] w-4/5 rounded-3xl px-8 py-3 mt-8">
+      <View className="items-center h-3/5 flex-col px-8">
+        <View className="bg-white h-[55%] w-full rounded-3xl px-8 py-6 mt-8">
           <View className="flex-row justify-between items-center">
             <Text className="text-lg font-bold">Informações do usuário</Text>
             <TouchableOpacity
@@ -362,10 +366,9 @@ export function ProfileScreen() {
               </View>
             </View>
           </View>
-        </View>
 
-        <View className="bg-white h-[38%] w-4/5 rounded-3xl px-8 py-5">
-          <View className="flex-row justify-between items-center">
+          {/* Dados para pagamento */}
+          <View className="flex-row justify-between items-center mt-4">
             <Text className="text-lg font-bold">Dados para pagamento</Text>
             <TouchableOpacity
               activeOpacity={0.5}
@@ -404,6 +407,25 @@ export function ProfileScreen() {
               </View>
             </View>
           </View>
+        </View>
+        <View className="w-full flex-col gap-3 mt-6">
+          <Button
+            text="CONFIGURAÇÕES"
+            backgroundColor="orange"
+            onPress={() => navigation.navigate('Settings')}
+            textColor="white"
+            fontSize={25}
+            fontWeight="bold"
+          />
+          <Button
+            text="VENDEDORES"
+            backgroundColor="blue"
+            onPress={() => navigation.navigate('RegisterSellers')}
+            textColor="tertiary_purple"
+            fontSize={25}
+            fontWeight="bold"
+            disabled={userData?.rule !== 'parceiro_indicador' && userData?.rule !== 'admin_franqueadora' && userData?.rule !== 'admin_unidade'}
+          />
         </View>
       </View>
 

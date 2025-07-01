@@ -7,10 +7,13 @@ import {
 import {BottomNavigator} from '../components/BottomNavigator';
 import {Notifications} from '../screens/Notifications';
 import {Rules} from '../screens/RulesScreen';
-import { IndicateInBulkScreen } from '../screens/IndicateInBulkScreen';
-import { WaitingConfirmationScreen } from '../screens/WaitingConfirmationScreen';
-import { useAuth } from '../contexts/Auth';
-import { HomeSkeleton } from '../components/skeletons/HomeSkeleton';
+import {IndicateInBulkScreen} from '../screens/IndicateInBulkScreen';
+import {WaitingConfirmationScreen} from '../screens/WaitingConfirmationScreen';
+import {useAuth} from '../contexts/Auth';
+import {HomeSkeleton} from '../components/skeletons/HomeSkeleton';
+import {RegisterSellers} from '../screens/RegisterSellers';
+import NoPermission from '../screens/NoPermission';
+import Settings from '../screens/Settings';
 
 const Stack = createStackNavigator();
 
@@ -47,7 +50,9 @@ export function AppStack() {
       />
       <Stack.Screen
         name="IndicateInBulk"
-        component={registrationStatus ? IndicateInBulkScreen : WaitingConfirmationScreen}
+        component={
+          registrationStatus ? IndicateInBulkScreen : WaitingConfirmationScreen
+        }
         options={{
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
         }}
@@ -55,6 +60,27 @@ export function AppStack() {
       <Stack.Screen
         name="WaitingConfirmationScreen"
         component={WaitingConfirmationScreen}
+        options={{
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        }}
+      />
+      <Stack.Screen
+        name="RegisterSellers"
+        component={RegisterSellers}
+        options={{
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        }}
+      />
+      <Stack.Screen
+        name="NoPermission"
+        component={NoPermission}
+        options={{
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        }}
+      />
+      <Stack.Screen
+        name="Settings"
+        component={Settings}
         options={{
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
         }}

@@ -3,36 +3,30 @@ import {View, Text, TouchableOpacity, Dimensions} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {getCommissionsByPeriod} from '../services/wallet/Dashboard';
 import {useAuth} from '../contexts/Auth';
+import {Spinner} from './Spinner';
 
 const {width: screenWidth} = Dimensions.get('window');
 
-const DashboardChart = ({onReady}: {onReady?: () => void}) => {
+const DashboardChart = () => {
   const [data, setData] = useState<any>(null);
   const [selectedPeriod, setSelectedPeriod] = useState('Mês');
+  const [isLoading, setIsLoading] = useState(true);
   const {userData} = useAuth();
 
   useEffect(() => {
-    if (!userData?.uid) {
-      if (onReady) {
-        onReady();
-      }
-      return;
-    }
-
     const fetchData = async () => {
       try {
+        setIsLoading(true);
         const data = await getCommissionsByPeriod(userData?.uid);
         setData(data);
       } catch (error) {
         console.log('error', error);
       } finally {
-        if (onReady) {
-          onReady();
-        }
+        setIsLoading(false);
       }
     };
     fetchData();
-  }, [userData?.uid, onReady]);
+  }, [userData?.uid]);
 
   // Função para obter o período atual
   const getCurrentPeriod = () => {
@@ -154,50 +148,58 @@ const DashboardChart = ({onReady}: {onReady?: () => void}) => {
       {/* Área do gráfico */}
       <View className="relative">
         {/* Container das barras */}
-        <View
-          className="flex-row items-end justify-between px-2"
-          style={{height: 200}}>
-          {chartData.map((item, index) => (
-            <View key={index} className="items-center flex-1 mx-1">
-              {/* Valor acima da barra */}
-              <Text
-                className="text-gray-600 mb-2 text-center"
-                style={{
-                  fontSize: 10,
-                }}>
-                {formatCurrency(item.value)}
-              </Text>
+        {isLoading ? (
+          <View className="justify-center items-center" style={{height: 200}}>
+            <Spinner size={34} variant="blue" />
+          </View>
+        ) : (
+          <>
+            <View
+              className="flex-row items-end justify-between px-2"
+              style={{height: 200}}>
+              {chartData.map((item, index) => (
+                <View key={index} className="items-center flex-1 mx-1">
+                  {/* Valor acima da barra */}
+                  <Text
+                    className="text-gray-600 mb-2 text-center"
+                    style={{
+                      fontSize: 10,
+                    }}>
+                    {formatCurrency(item.value)}
+                  </Text>
 
-              {/* Barra do gráfico */}
-              <LinearGradient
-                className="w-[100%] justify-center items-center rounded-xl"
-                colors={
-                  item.value > 0
-                    ? ['#31006A', '#4E00A7']
-                    : ['#E5E7EB', '#E5E7EB']
-                }
-                start={{x: 0, y: 0}}
-                end={{x: 1, y: 0}}>
-                <View
-                  className="rounded-xl"
-                  style={{
-                    height: item.height,
-                    minWidth: 40,
-                  }}
-                />
-              </LinearGradient>
+                  {/* Barra do gráfico */}
+                  <LinearGradient
+                    className="w-[100%] justify-center items-center rounded-xl"
+                    colors={
+                      item.value > 0
+                        ? ['#31006A', '#4E00A7']
+                        : ['#E5E7EB', '#E5E7EB']
+                    }
+                    start={{x: 0, y: 0}}
+                    end={{x: 1, y: 0}}>
+                    <View
+                      className="rounded-xl"
+                      style={{
+                        height: item.height,
+                        minWidth: 40,
+                      }}
+                    />
+                  </LinearGradient>
 
-              {/* Label do período */}
-              <Text
-                className="font-regular text-gray-700 mt-3 text-center"
-                style={{
-                  fontSize: 10,
-                }}>
-                {formatLabel(item.label)}
-              </Text>
+                  {/* Label do período */}
+                  <Text
+                    className="font-regular text-gray-700 mt-3 text-center"
+                    style={{
+                      fontSize: 10,
+                    }}>
+                    {formatLabel(item.label)}
+                  </Text>
+                </View>
+              ))}
             </View>
-          ))}
-        </View>
+          </>
+        )}
       </View>
     </View>
   );
