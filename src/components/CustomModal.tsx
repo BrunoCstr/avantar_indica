@@ -8,8 +8,10 @@ interface ModalProps {
   onPress?: () => void;
   title: string;
   description: string;
-  buttonText: string;
+  buttonText: string | React.ReactNode;
   buttonText2?: string;
+  cancelButtonText?: string;
+  onCancelButtonPress?: () => void;
 }
 
 export function CustomModal({
@@ -20,6 +22,8 @@ export function CustomModal({
   description,
   buttonText,
   buttonText2,
+  cancelButtonText,
+  onCancelButtonPress,
 }: ModalProps) {
   const {width: screenWidth} = Dimensions.get('window');
   const maxModalWidth = screenWidth * 0.75; // 75% da largura da tela
@@ -51,13 +55,28 @@ export function CustomModal({
             
             {/* Botões */}
             <View className="justify-center items-center w-full flex-row gap-2">
+              {cancelButtonText && (
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  className="bg-white_btn_modal rounded-xl h-11 flex-1 py-3"
+                  onPress={onCancelButtonPress}
+                >
+                  <Text className="text-primary_purple text-center font-bold">
+                    {cancelButtonText}
+                  </Text>
+                </TouchableOpacity>
+              )}
               <TouchableOpacity
                 activeOpacity={0.8}
-                className="bg-white_btn_modal rounded-xl h-11 flex-1 py-3"
-                onPress={onClose}>
-                <Text className="text-primary_purple text-center font-bold">
-                  {buttonText}
-                </Text>
+                className="bg-white_btn_modal rounded-xl h-11 flex-1 py-3 justify-center items-center"
+                onPress={onPress ? onPress : onClose}>
+                {typeof buttonText === 'string' ? (
+                  <Text className="text-primary_purple text-center font-bold">
+                    {buttonText}
+                  </Text>
+                ) : (
+                  buttonText
+                )}
               </TouchableOpacity>
               {buttonText2 && (
                 <TouchableOpacity

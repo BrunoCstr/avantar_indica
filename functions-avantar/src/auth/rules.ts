@@ -16,10 +16,12 @@ export const rules = functions.firestore
     }
 
     try {
-      // seta a claim
-      await auth.setCustomUserClaims(uid, {rule: 'nao_definida'});
-      // grava o campo rule no Firestore
-      await snap.ref.set({rule: 'nao_definida'}, {merge: true});
+      if(!data?.rule) {
+        // seta a claim
+        await auth.setCustomUserClaims(uid, {rule: 'nao_definida'});
+        // grava o campo rule no Firestore
+        await snap.ref.set({rule: 'nao_definida'}, {merge: true});
+      }
     } catch (error) {
       console.error('Erro ao definir claim/regra para o usuário:', error);
     }

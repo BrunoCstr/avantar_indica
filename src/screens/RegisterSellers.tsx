@@ -1,37 +1,67 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, ImageBackground, FlatList, TouchableOpacity, TextInput, Modal } from 'react-native';
-import { BackButton } from '../components/BackButton';
-import { Button } from '../components/Button';
-import { colors } from '../styles/colors';
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  ImageBackground,
+  FlatList,
+  TouchableOpacity,
+  TextInput,
+  Modal,
+} from 'react-native';
+import {BackButton} from '../components/BackButton';
+import {Button} from '../components/Button';
+import {colors} from '../styles/colors';
 import images from '../data/images';
-import { getFirestore } from '@react-native-firebase/firestore';
+import {getFirestore} from '@react-native-firebase/firestore';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { BlurView } from '@react-native-community/blur';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { CustomModal } from '../components/CustomModal';
-import { fetchSellersService, createSellerService, toggleSellerActiveService } from '../services/registerSellers/registerSellers';
-import { useAuth } from '../contexts/Auth';
-import { useNavigation } from '@react-navigation/native';
+import {BlurView} from '@react-native-community/blur';
+import {useForm, Controller} from 'react-hook-form';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {z} from 'zod';
+import {CustomModal} from '../components/CustomModal';
+import {
+  fetchSellersService,
+  createSellerService,
+  toggleSellerActiveService,
+  updateSellerService,
+} from '../services/registerSellers/registerSellers';
+import {validatePassword} from '../services/settings/settings';
+import {useAuth} from '../contexts/Auth';
+import {useNavigation} from '@react-navigation/native';
+import {applyMaskTelephone} from '../utils/applyMaskTelephone';
+import {getDefaultProfilePicture} from '../utils/getDefaultProfilePicture';
+import {Spinner} from '../components/Spinner';
+import { SellerSkeleton } from '../components/skeletons/SellerSkeleton';
 
 const db = getFirestore();
 
+// Função para remover máscara do telefone
+function removePhoneMask(phone: string): string {
+  return phone.replace(/\D/g, '');
+}
+
 // Novo schema para cadastro de vendedor sem unidade e termos
-const sellerSignUpSchema = z.object({
-  fullName: z.string().min(3, "Nome é obrigatório"),
-  email: z.string().email("E-mail inválido"),
-  phone: z.string().min(14, "Digite um telefone válido!").max(15, "Digite um telefone válido!").regex(/^\(\d{2}\)\s?\d{4,5}-\d{4}$/, "Formato de telefone inválido!"),
-  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
-  confirmPassword: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "As senhas devem ser iguais!",
-  path:["password"]
-});
+const sellerSignUpSchema = z
+  .object({
+    fullName: z.string().min(3, 'Nome é obrigatório'),
+    email: z.string().email('E-mail inválido'),
+    phone: z
+      .string()
+      .min(14, 'Digite um telefone válido!')
+      .max(15, 'Digite um telefone válido!')
+      .regex(/^\(\d{2}\)\s?\d{4,5}-\d{4}$/, 'Formato de telefone inválido!'),
+    password: z.string().min(1, 'Senha é obrigatória'),
+    profilePicture: z.string().optional(),
+    confirmPassword: z.string().min(1, 'Confirmação de senha é obrigatória'),
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: 'As senhas devem ser iguais!',
+    path: ['password'],
+  });
 
 export function RegisterSellers() {
-  const { userData } = useAuth();
+  const {userData} = useAuth();
   const navigation = useNavigation();
   const [search, setSearch] = useState('');
   const [sellers, setSellers] = useState<any[]>([]);
@@ -39,9 +69,14 @@ export function RegisterSellers() {
   const [isLoading, setIsLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [modalMessage, setModalMessage] = useState({ title: '', description: '' });
+  const [modalMessage, setModalMessage] = useState({
+    title: '',
+    description: '',
+  });
   const [editingSeller, setEditingSeller] = useState<any>(null);
-  const { reset: resetEdit, watch: watchEdit } = useForm({
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const {reset: resetEdit, watch: watchEdit} = useForm({
     resolver: zodResolver(sellerSignUpSchema),
     defaultValues: {
       fullName: '',
@@ -52,16 +87,23 @@ export function RegisterSellers() {
     },
   });
   const [editModalVisible, setEditModalVisible] = useState(false);
+  const [isLoadingRegister, setIsLoadingRegister] = useState(false);
+  const [isLoadingEdit, setIsLoadingEdit] = useState(false);
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+  const [selectedSeller, setSelectedSeller] = useState<any>(null);
+  const [isLoadingToggle, setIsLoadingToggle] = useState(false);
 
   React.useEffect(() => {
     if (
       userData &&
-      !['parceiro_indicador', 'admin_franqueadora', 'admin_unidade'].includes(userData.rule)
+      !['parceiro_indicador', 'admin_franqueadora', 'admin_unidade'].includes(
+        userData.rule,
+      )
     ) {
       // @ts-ignore
       navigation.reset({
         index: 0,
-        routes: [{ name: 'NoPermission' as never }],
+        routes: [{name: 'NoPermission' as never}],
       });
     }
   }, [userData, navigation]);
@@ -76,14 +118,20 @@ export function RegisterSellers() {
     } else {
       setFilteredSellers(
         sellers.filter(seller =>
-          seller.fullName.toLowerCase().includes(search.toLowerCase())
-        )
+          seller.fullName.toLowerCase().includes(search.toLowerCase()),
+        ),
       );
     }
   }, [search, sellers]);
 
   // Formulário
-  const { control, handleSubmit, formState: { errors }, reset, watch } = useForm({
+  const {
+    control,
+    handleSubmit,
+    formState: {errors},
+    reset,
+    watch,
+  } = useForm({
     resolver: zodResolver(sellerSignUpSchema),
     defaultValues: {
       fullName: '',
@@ -95,11 +143,13 @@ export function RegisterSellers() {
   });
 
   async function fetchSellers() {
+    if (!userData?.uid) return;
     setIsLoading(true);
     try {
-      const sellersList = await fetchSellersService();
+      const sellersList = await fetchSellersService(userData?.uid);
       setSellers(sellersList);
       setFilteredSellers(sellersList);
+      console.log(sellersList);
     } catch (error) {
       console.error('Erro ao buscar vendedores:', error);
     } finally {
@@ -107,13 +157,17 @@ export function RegisterSellers() {
     }
   }
 
-  function renderSeller({ item }: { item: any }) {
+  function renderSeller({item}: {item: any}) {
     return (
-      <View className="bg-[#EDE9FF] w-full p-3 mt-2 rounded-xl flex-row items-center justify-between">
+      <View className="bg-fifth_purple border-2 border-blue w-full p-3 mt-2 rounded-xl flex-row items-center justify-between">
         <View>
-          <Text className="text-primary_purple font-bold text-base">{item.fullName}</Text>
-          <Text className="text-gray_dark text-xs">{item.email}</Text>
-          <Text className="text-xs mt-1" style={{ color: item.disabled ? colors.red : colors.green }}>
+          <Text className="text-white font-bold text-base">
+            {item.fullName}
+          </Text>
+          <Text className="text-blue text-xs">{item.email}</Text>
+          <Text
+            className="text-xs mt-1"
+            style={{color: item.disabled ? colors.red : colors.green}}>
             {item.disabled ? 'Inativo' : 'Ativo'}
           </Text>
         </View>
@@ -121,8 +175,15 @@ export function RegisterSellers() {
           <TouchableOpacity onPress={() => handleEdit(item)} className="mr-2">
             <Ionicons name="create-outline" size={22} color={colors.blue} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleToggleActive(item)}>
-            <Ionicons name={item.disabled ? 'checkmark-done' : 'close-circle'} size={22} color={item.disabled ? colors.green : colors.red} />
+          <TouchableOpacity onPress={() => {
+            setSelectedSeller(item);
+            setConfirmModalVisible(true);
+          }}>
+            <Ionicons
+              name={item.disabled ? 'checkmark-done' : 'close-circle'}
+              size={22}
+              color={item.disabled ? colors.green : colors.red}
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -134,54 +195,149 @@ export function RegisterSellers() {
     resetEdit({
       fullName: seller.fullName || '',
       email: seller.email || '',
-      phone: seller.phone || '',
-      password: '********',
-      confirmPassword: '********',
+      phone: seller.phone ? applyMaskTelephone(seller.phone) : '',
+      password: '',
+      confirmPassword: '',
     });
     setEditModalVisible(true);
   }
 
-  async function handleToggleActive(seller: any) {
+  async function handleToggleActiveConfirmed() {
+    if (!selectedSeller) return;
+    setIsLoadingToggle(true);
     try {
-      await toggleSellerActiveService(seller.id, seller.disabled);
+      await toggleSellerActiveService(selectedSeller.id, selectedSeller.disabled, selectedSeller.email);
       fetchSellers();
+      setConfirmModalVisible(false);
+      setSelectedSeller(null);
     } catch (error) {
       console.error('Erro ao atualizar status:', error);
+      setConfirmModalVisible(false);
+      setSelectedSeller(null);
+    } finally {
+      setIsLoadingToggle(false);
     }
   }
 
   // Botão de cadastrar usuário no estilo do BackButton
-  function AddUserButton({ color, borderColor, onPress }: { color?: string; borderColor?: string; onPress?: () => void }) {
+  function AddUserButton({
+    color,
+    borderColor,
+    onPress,
+  }: {
+    color?: string;
+    borderColor?: string;
+    onPress?: () => void;
+  }) {
     return (
       <TouchableOpacity
         className="border-[1px] items-center justify-center rounded-md w-8 h-8"
-        style={{ borderColor: borderColor || colors.primary_purple }}
+        style={{borderColor: borderColor || colors.primary_purple}}
         activeOpacity={0.8}
-        onPress={onPress}
-      >
-        <MaterialIcons name="person-add-alt" size={21} color={color || colors.primary_purple} />
+        onPress={onPress}>
+        <MaterialIcons
+          name="person-add-alt"
+          size={21}
+          color={color || colors.primary_purple}
+        />
       </TouchableOpacity>
     );
   }
 
   async function onSubmit(data: z.infer<typeof sellerSignUpSchema>) {
+    setIsLoadingRegister(true);
     try {
-      const { fullName, email, phone, password } = data;
-      await createSellerService({ fullName, email, phone, password });
+      const {fullName, email, phone, password} = data;
+
+      // Validar força da senha
+      const passwordValidation = validatePassword(password);
+      if (!passwordValidation.isValid) {
+        setModalMessage({
+          title: 'Senha fraca',
+          description: passwordValidation.message,
+        });
+        setIsModalVisible(true);
+        return;
+      }
+
+      const profilePicture = await getDefaultProfilePicture();
+
+      // Remove a máscara do telefone antes de salvar
+      const phoneWithoutMask = removePhoneMask(phone);
+      await createSellerService({
+        fullName,
+        email,
+        phone: phoneWithoutMask,
+        password,
+        affiliated_to: userData?.affiliated_to,
+        unitName: userData?.unitName,
+        profilePicture: profilePicture || undefined,
+        masterUid: userData?.uid,
+      });
       setShowModal(false);
       reset();
+      setShowPassword(false);
+      setShowConfirmPassword(false);
       setModalMessage({
         title: 'Vendedor cadastrado!',
-        description: 'O vendedor foi cadastrado com sucesso.'
+        description: 'O vendedor foi cadastrado com sucesso.',
       });
       setIsModalVisible(true);
       fetchSellers();
     } catch (error: any) {
       setModalMessage({
         title: 'Erro ao cadastrar',
-        description: error.message || 'Não foi possível cadastrar o vendedor.'
+        description: error.message || 'Não foi possível cadastrar o vendedor.',
       });
       setIsModalVisible(true);
+    } finally {
+      setIsLoadingRegister(false);
+    }
+  }
+
+  async function onSubmitEdit(data: z.infer<typeof sellerSignUpSchema>) {
+    setIsLoadingEdit(true);
+    try {
+      const {fullName, email, phone, password} = data;
+
+      // Se a senha foi alterada (não é ''), validar força da senha
+      if (password && password !== '') {
+        const passwordValidation = validatePassword(password);
+        if (!passwordValidation.isValid) {
+          setModalMessage({
+            title: 'Senha fraca',
+            description: passwordValidation.message,
+          });
+          setIsModalVisible(true);
+          return;
+        }
+      }
+
+      // Remove a máscara do telefone antes de salvar
+      const phoneWithoutMask = removePhoneMask(phone);
+      await updateSellerService(editingSeller.id, {
+        fullName,
+        email,
+        phone: phoneWithoutMask,
+        password: password !== '' ? password : undefined,
+        oldEmail: editingSeller.email,
+      });
+      setEditModalVisible(false);
+      resetEdit();
+      setModalMessage({
+        title: 'Vendedor atualizado!',
+        description: 'O vendedor foi atualizado com sucesso.',
+      });
+      setIsModalVisible(true);
+      fetchSellers();
+    } catch (error: any) {
+      setModalMessage({
+        title: 'Erro ao atualizar',
+        description: error.message || 'Não foi possível atualizar o vendedor.',
+      });
+      setIsModalVisible(true);
+    } finally {
+      setIsLoadingEdit(false);
     }
   }
 
@@ -199,12 +355,12 @@ export function RegisterSellers() {
           />
         </View>
         {/* Input de pesquisa com design igual ao StatusScreen */}
-        <View className="flex-row items-center mt-6 w-full h-14 bg-tertiary_purple rounded-xl border-b-4 border-l-2 border-pink px-4 mb-2">
+        <View className="flex-row items-center mt-6 w-full h-14 bg-tertiary_purple rounded-xl border-b-4 border-l-2 border-blue px-4 mb-2">
           <Ionicons
             name="search"
             size={24}
             color={colors.white}
-            style={{ position: 'absolute', left: 20 }}
+            style={{position: 'absolute', left: 20}}
           />
           <TextInput
             style={{
@@ -228,33 +384,70 @@ export function RegisterSellers() {
           renderItem={renderSeller}
           showsVerticalScrollIndicator={false}
           className="mt-4"
-          ListEmptyComponent={isLoading ? null : (
-            <View className="items-center justify-center mt-16">
-              <Text className="text-white text-lg font-bold mb-4">Nenhum vendedor cadastrado</Text>
-              <AddUserButton
-                borderColor={colors.blue}
-                color={colors.blue}
-                onPress={() => setShowModal(true)}
-              />
-              <Text className="text-blue font-semibold mt-2">Cadastrar novo vendedor</Text>
-            </View>
-          )}
+          ListEmptyComponent={
+            isLoading ? (
+              <View className="mt-4">
+                {[...Array(4)].map((_, idx) => (
+                  <SellerSkeleton key={idx} />
+                ))}
+              </View>
+            ) : filteredSellers.length === 0 ? (
+              <View className="items-center justify-center mt-16">
+                <Text className="text-white text-lg font-bold mb-4">
+                  Nenhum vendedor cadastrado
+                </Text>
+                <AddUserButton
+                  borderColor={colors.blue}
+                  color={colors.blue}
+                  onPress={() => setShowModal(true)}
+                />
+                <Text className="text-blue font-semibold mt-2">
+                  Cadastrar novo vendedor
+                </Text>
+              </View>
+            ) : null
+          }
         />
       </View>
+
       {/* Modal de cadastro de vendedor */}
-      <Modal visible={showModal} onRequestClose={() => setShowModal(false)} transparent={true} animationType="fade">
-        <BlurView style={{ flex: 1, backgroundColor: 'transparent' }} blurType="dark" blurAmount={5} reducedTransparencyFallbackColor="transparent">
+      <Modal
+        visible={showModal}
+        onRequestClose={() => {
+          setShowModal(false);
+          reset();
+          setShowPassword(false);
+          setShowConfirmPassword(false);
+        }}
+        transparent={true}
+        animationType="fade">
+        <BlurView
+          style={{flex: 1, backgroundColor: 'transparent'}}
+          blurType="dark"
+          blurAmount={5}
+          reducedTransparencyFallbackColor="transparent">
           <View className="flex-1 justify-center items-center">
             <View className="w-[80%] bg-fifth_purple rounded-2xl border-2 border-blue px-7 py-7">
               <View className="justify-between items-center flex-row">
-                <BackButton onPress={() => setShowModal(false)} color={colors.blue} borderColor={colors.blue} />
-                <Text className="text-blue font-bold text-2xl absolute left-1/2 -translate-x-1/2">Cadastrar</Text>
+                <BackButton
+                  onPress={() => {
+                    setShowModal(false);
+                    reset();
+                    setShowPassword(false);
+                    setShowConfirmPassword(false);
+                  }}
+                  color={colors.blue}
+                  borderColor={colors.blue}
+                />
+                <Text className="text-blue font-bold text-2xl absolute left-1/2 -translate-x-1/2">
+                  Cadastrar
+                </Text>
               </View>
               <View className="flex-col mt-5 gap-2">
                 <Controller
                   control={control}
                   name="fullName"
-                  render={({ field: { onChange, value, onBlur } }) => (
+                  render={({field: {onChange, value, onBlur}}) => (
                     <TextInput
                       placeholder="Nome completo"
                       placeholderTextColor={colors.white_opacity}
@@ -276,11 +469,15 @@ export function RegisterSellers() {
                     />
                   )}
                 />
-                {errors.fullName && <Text className="text-red text-xs mb-1">{errors.fullName.message}</Text>}
+                {errors.fullName && (
+                  <Text className="text-red text-xs mb-1">
+                    {errors.fullName.message}
+                  </Text>
+                )}
                 <Controller
                   control={control}
                   name="email"
-                  render={({ field: { onChange, value, onBlur } }) => (
+                  render={({field: {onChange, value, onBlur}}) => (
                     <TextInput
                       placeholder="E-mail"
                       placeholderTextColor={colors.white_opacity}
@@ -304,16 +501,28 @@ export function RegisterSellers() {
                     />
                   )}
                 />
-                {errors.email && <Text className="text-red text-xs mb-1">{errors.email.message}</Text>}
+                {errors.email && (
+                  <Text className="text-red text-xs mb-1">
+                    {errors.email.message}
+                  </Text>
+                )}
                 <Controller
                   control={control}
                   name="phone"
-                  render={({ field: { onChange, value, onBlur } }) => (
+                  render={({field: {onChange, value, onBlur}}) => (
                     <TextInput
                       placeholder="Telefone"
                       placeholderTextColor={colors.white_opacity}
                       value={value}
-                      onChangeText={onChange}
+                      onChangeText={text => {
+                        // Remove todos os caracteres não numéricos
+                        const numbersOnly = text.replace(/\D/g, '');
+                        // Aplica a máscara se houver números
+                        const maskedValue = numbersOnly
+                          ? applyMaskTelephone(numbersOnly)
+                          : '';
+                        onChange(maskedValue);
+                      }}
                       onBlur={onBlur}
                       keyboardType="phone-pad"
                       style={{
@@ -331,65 +540,117 @@ export function RegisterSellers() {
                     />
                   )}
                 />
-                {errors.phone && <Text className="text-red text-xs mb-1">{errors.phone.message}</Text>}
-                <Controller
-                  control={control}
-                  name="password"
-                  render={({ field: { onChange, value, onBlur } }) => (
-                    <TextInput
-                      placeholder="Senha"
-                      placeholderTextColor={colors.white_opacity}
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      secureTextEntry
-                      style={{
-                        borderWidth: 1,
-                        borderColor: errors.password ? colors.red : colors.blue,
-                        backgroundColor: colors.tertiary_purple_opacity,
-                        color: colors.white_opacity,
-                        borderRadius: 10,
-                        height: 49,
-                        paddingLeft: 20,
-                        fontSize: 13,
-                        marginBottom: 2,
-                        fontFamily: 'FamiljenGrotesk-regular',
-                      }}
+                {errors.phone && (
+                  <Text className="text-red text-xs mb-1">
+                    {errors.phone.message}
+                  </Text>
+                )}
+                <View className="w-full">
+                  <View className="relative">
+                    <Controller
+                      control={control}
+                      name="password"
+                      render={({field: {onChange, value, onBlur}}) => (
+                        <TextInput
+                          placeholder="Senha"
+                          placeholderTextColor={colors.white_opacity}
+                          value={value}
+                          onChangeText={onChange}
+                          onBlur={onBlur}
+                          secureTextEntry={!showPassword}
+                          style={{
+                            borderWidth: 1,
+                            borderColor: errors.password
+                              ? colors.red
+                              : colors.blue,
+                            backgroundColor: colors.tertiary_purple_opacity,
+                            color: colors.white_opacity,
+                            borderRadius: 10,
+                            height: 49,
+                            paddingLeft: 20,
+                            fontSize: 13,
+                            marginBottom: 2,
+                            fontFamily: 'FamiljenGrotesk-regular',
+                          }}
+                        />
+                      )}
                     />
-                  )}
-                />
-                {errors.password && <Text className="text-red text-xs mb-1">{errors.password.message}</Text>}
-                <Controller
-                  control={control}
-                  name="confirmPassword"
-                  render={({ field: { onChange, value, onBlur } }) => (
-                    <TextInput
-                      placeholder="Confirmar senha"
-                      placeholderTextColor={colors.white_opacity}
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      secureTextEntry
-                      style={{
-                        borderWidth: 1,
-                        borderColor: errors.confirmPassword ? colors.red : colors.blue,
-                        backgroundColor: colors.tertiary_purple_opacity,
-                        color: colors.white_opacity,
-                        borderRadius: 10,
-                        height: 49,
-                        paddingLeft: 20,
-                        fontSize: 13,
-                        marginBottom: 2,
-                        fontFamily: 'FamiljenGrotesk-regular',
-                      }}
+                  </View>
+                  <TouchableOpacity
+                    style={{position: 'absolute', right: 20, top: '30%'}}
+                    activeOpacity={0.8}
+                    onPress={() => setShowPassword(!showPassword)}>
+                    <Ionicons
+                      name={showPassword ? 'eye-off' : 'eye'}
+                      size={20}
+                      color="white"
                     />
-                  )}
-                />
-                {errors.confirmPassword && <Text className="text-red text-xs mb-1">{errors.confirmPassword.message}</Text>}
+                  </TouchableOpacity>
+                </View>
+                {errors.password && (
+                  <Text className="text-red text-xs mb-1">
+                    {errors.password.message}
+                  </Text>
+                )}
+                <View className="w-full">
+                  <View className="relative">
+                    <Controller
+                      control={control}
+                      name="confirmPassword"
+                      render={({field: {onChange, value, onBlur}}) => (
+                        <TextInput
+                          placeholder="Confirmar senha"
+                          placeholderTextColor={colors.white_opacity}
+                          value={value}
+                          onChangeText={onChange}
+                          onBlur={onBlur}
+                          secureTextEntry={!showConfirmPassword}
+                          style={{
+                            borderWidth: 1,
+                            borderColor: errors.confirmPassword
+                              ? colors.red
+                              : colors.blue,
+                            backgroundColor: colors.tertiary_purple_opacity,
+                            color: colors.white_opacity,
+                            borderRadius: 10,
+                            height: 49,
+                            paddingLeft: 20,
+                            fontSize: 13,
+                            marginBottom: 2,
+                            fontFamily: 'FamiljenGrotesk-regular',
+                          }}
+                        />
+                      )}
+                    />
+                  </View>
+                  <TouchableOpacity
+                    style={{position: 'absolute', right: 20, top: '30%'}}
+                    activeOpacity={0.8}
+                    onPress={() =>
+                      setShowConfirmPassword(!showConfirmPassword)
+                    }>
+                    <Ionicons
+                      name={showConfirmPassword ? 'eye-off' : 'eye'}
+                      size={20}
+                      color="white"
+                    />
+                  </TouchableOpacity>
+                </View>
+                {errors.confirmPassword && (
+                  <Text className="text-red text-xs mb-1">
+                    {errors.confirmPassword.message}
+                  </Text>
+                )}
                 <View className="pt-5 justify-center items-center w-full">
                   <Button
                     onPress={handleSubmit(onSubmit)}
-                    text="CADASTRAR"
+                    text={
+                      isLoadingRegister ? (
+                        <Spinner size={32} variant="purple" />
+                      ) : (
+                        'CADASTRAR'
+                      )
+                    }
                     backgroundColor="blue"
                     textColor="tertiary_purple"
                     fontWeight="bold"
@@ -401,14 +662,234 @@ export function RegisterSellers() {
             </View>
           </View>
         </BlurView>
-        <CustomModal
-          visible={isModalVisible}
-          onClose={() => setIsModalVisible(false)}
-          title={modalMessage.title}
-          description={modalMessage.description}
-          buttonText="FECHAR"
-        />
       </Modal>
+
+      {/* Modal de edição de vendedor */}
+      <Modal
+        visible={editModalVisible}
+        onRequestClose={() => {
+          setEditModalVisible(false);
+          resetEdit();
+        }}
+        transparent={true}
+        animationType="fade">
+        <BlurView
+          style={{flex: 1, backgroundColor: 'transparent'}}
+          blurType="dark"
+          blurAmount={5}
+          reducedTransparencyFallbackColor="transparent">
+          <View className="flex-1 justify-center items-center">
+            <View className="w-[80%] bg-fifth_purple rounded-2xl border-2 border-blue px-7 py-7">
+              <View className="justify-between items-center flex-row">
+                <BackButton
+                  onPress={() => {
+                    setEditModalVisible(false);
+                    resetEdit();
+                  }}
+                  color={colors.blue}
+                  borderColor={colors.blue}
+                />
+                <Text className="text-blue font-bold text-2xl absolute left-1/2 -translate-x-1/2">
+                  Editar
+                </Text>
+              </View>
+              <View className="flex-col mt-5 gap-2">
+                <TextInput
+                  placeholder="Nome completo"
+                  placeholderTextColor={colors.white_opacity}
+                  value={watchEdit('fullName')}
+                  onChangeText={text =>
+                    resetEdit({...watchEdit(), fullName: text})
+                  }
+                  style={{
+                    borderWidth: 1,
+                    borderColor: colors.blue,
+                    backgroundColor: colors.tertiary_purple_opacity,
+                    color: colors.white_opacity,
+                    borderRadius: 10,
+                    height: 49,
+                    paddingLeft: 20,
+                    fontSize: 13,
+                    marginBottom: 2,
+                    fontFamily: 'FamiljenGrotesk-regular',
+                  }}
+                />
+                <TextInput
+                  placeholder="E-mail"
+                  placeholderTextColor={colors.white_opacity}
+                  value={watchEdit('email')}
+                  onChangeText={text =>
+                    resetEdit({...watchEdit(), email: text})
+                  }
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  style={{
+                    borderWidth: 1,
+                    borderColor: colors.blue,
+                    backgroundColor: colors.tertiary_purple_opacity,
+                    color: colors.white_opacity,
+                    borderRadius: 10,
+                    height: 49,
+                    paddingLeft: 20,
+                    fontSize: 13,
+                    marginBottom: 2,
+                    fontFamily: 'FamiljenGrotesk-regular',
+                  }}
+                />
+                <TextInput
+                  placeholder="Telefone"
+                  placeholderTextColor={colors.white_opacity}
+                  value={watchEdit('phone')}
+                  onChangeText={text => {
+                    // Remove todos os caracteres não numéricos
+                    const numbersOnly = text.replace(/\D/g, '');
+                    // Aplica a máscara se houver números
+                    const maskedValue = numbersOnly
+                      ? applyMaskTelephone(numbersOnly)
+                      : '';
+                    resetEdit({...watchEdit(), phone: maskedValue});
+                  }}
+                  keyboardType="phone-pad"
+                  style={{
+                    borderWidth: 1,
+                    borderColor: colors.blue,
+                    backgroundColor: colors.tertiary_purple_opacity,
+                    color: colors.white_opacity,
+                    borderRadius: 10,
+                    height: 49,
+                    paddingLeft: 20,
+                    fontSize: 13,
+                    marginBottom: 2,
+                    fontFamily: 'FamiljenGrotesk-regular',
+                  }}
+                />
+                {/* Inputs de senha e confirmação de senha para edição */}
+                <View className="w-full">
+                  <View className="relative">
+                    <TextInput
+                      placeholder="Digite a nova senha"
+                      placeholderTextColor={colors.white_opacity}
+                      value={watchEdit('password') || ''}
+                      onChangeText={text =>
+                        resetEdit({...watchEdit(), password: text})
+                      }
+                      secureTextEntry={!showPassword}
+                      style={{
+                        borderWidth: 1,
+                        borderColor: colors.blue,
+                        backgroundColor: colors.tertiary_purple_opacity,
+                        color: colors.white_opacity,
+                        borderRadius: 10,
+                        height: 49,
+                        paddingLeft: 20,
+                        fontSize: 13,
+                        marginBottom: 2,
+                        fontFamily: 'FamiljenGrotesk-regular',
+                      }}
+                    />
+                  </View>
+                </View>
+                <View className="w-full">
+                  <View className="relative">
+                    <TextInput
+                      placeholder="Confirme a senha"
+                      placeholderTextColor={colors.white_opacity}
+                      value={watchEdit('confirmPassword') || ''}
+                      onChangeText={text =>
+                        resetEdit({...watchEdit(), confirmPassword: text})
+                      }
+                      secureTextEntry={!showConfirmPassword}
+                      style={{
+                        borderWidth: 1,
+                        borderColor: colors.blue,
+                        backgroundColor: colors.tertiary_purple_opacity,
+                        color: colors.white_opacity,
+                        borderRadius: 10,
+                        height: 49,
+                        paddingLeft: 20,
+                        fontSize: 13,
+                        marginBottom: 2,
+                        fontFamily: 'FamiljenGrotesk-regular',
+                      }}
+                    />
+                  </View>
+                </View>
+                {/* Mensagem de erro de senha fraca */}
+                {watchEdit('password') &&
+                  watchEdit('password') !== '********' &&
+                  watchEdit('password').length > 0 &&
+                  (() => {
+                    const passwordValidation = validatePassword(
+                      watchEdit('password'),
+                    );
+                    if (!passwordValidation.isValid) {
+                      return (
+                        <Text className="text-red text-xs mb-1">
+                          {passwordValidation.message}
+                        </Text>
+                      );
+                    }
+                    return null;
+                  })()}
+                {/* Mensagem de erro de confirmação de senha */}
+                {watchEdit('password') &&
+                  watchEdit('password') !== '********' &&
+                  watchEdit('confirmPassword') !== watchEdit('password') && (
+                    <Text className="text-red text-xs mb-1">
+                      As senhas devem ser iguais!
+                    </Text>
+                  )}
+                <View className="pt-5 justify-center items-center w-full">
+                  <Button
+                    onPress={() => onSubmitEdit(watchEdit())}
+                    text={
+                      isLoadingEdit ? (
+                        <Spinner size={32} variant="purple" />
+                      ) : (
+                        'SALVAR'
+                      )
+                    }
+                    backgroundColor="blue"
+                    textColor="tertiary_purple"
+                    fontWeight="bold"
+                    fontSize={18}
+                    width="100%"
+                  />
+                </View>
+              </View>
+            </View>
+          </View>
+        </BlurView>
+      </Modal>
+
+      {/* CustomModal global para sucesso/erro */}
+      <CustomModal
+        visible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        title={modalMessage.title}
+        description={modalMessage.description}
+        buttonText="FECHAR"
+      />
+
+      {/* Modal de confirmação de ativação/inativação */}
+      <CustomModal
+        visible={confirmModalVisible}
+        onClose={() => {
+          setConfirmModalVisible(false);
+          setSelectedSeller(null);
+        }}
+        title={selectedSeller?.disabled ? 'Ativar vendedor' : 'Inativar vendedor'}
+        description={selectedSeller?.disabled
+          ? 'Deseja realmente ativar este vendedor?'
+          : 'Deseja realmente inativar este vendedor?'}
+        buttonText={isLoadingToggle ? <Spinner size={24} variant="blue" /> : 'Confirmar'}
+        onPress={handleToggleActiveConfirmed}
+        cancelButtonText="Cancelar"
+        onCancelButtonPress={() => {
+          setConfirmModalVisible(false);
+          setSelectedSeller(null);
+        }}
+      />
     </ImageBackground>
   );
 }

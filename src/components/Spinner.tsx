@@ -45,7 +45,7 @@ export const Spinner: React.FC<SpinnerProps> = ({
     spinner: {
       width: size,
       height: size,
-      borderRadius: size / 2,
+      borderRadius: 9999,
       borderWidth: thickness,
       borderTopColor: variant === "purple" ? "#4A04A5" : "#3E0085",
       borderRightColor: variant === "purple" ? "#C252F2" : "#29F3DF",

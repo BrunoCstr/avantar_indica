@@ -1,8 +1,9 @@
 import {TouchableOpacity, Text} from 'react-native';
 import {colors} from '../styles/colors';
+import { ReactNode } from 'react';
 
 interface ButtonProps {
-  text: string;
+  text: string | ReactNode;
   backgroundColor: string;
   textColor?: string;
   fontWeight?: any;
