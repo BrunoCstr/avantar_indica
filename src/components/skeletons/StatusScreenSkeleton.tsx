@@ -53,42 +53,16 @@ const StatusScreenSkeleton = () => {
       source={images.bg_white}
       className="flex-1"
       resizeMode="cover">
-      <View
-        style={{
-          flex: 1,
-          marginLeft: 20,
-          marginRight: 20,
-          marginBottom: 100,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}>
+      <View className="flex-1 px-5 pt-4 pb-32">
         {/* Header */}
-        <View
-          style={{
-            alignItems: 'center',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            width: '100%',
-            marginTop: 40,
-          }}>
-          <SkeletonBox width={30} height={30} />
-          <SkeletonBox width={80} height={28} borderRadius={8} />
+        <View className="items-center flex-row justify-between w-full mt-12">
+          <SkeletonBox width={40} height={40} borderRadius={20} />
+          <SkeletonBox width={100} height={36} borderRadius={8} />
           <View style={{width: 40}} />
         </View>
 
-        {/* Campo de busca */}
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginTop: 40,
-            width: '100%',
-            height: 64,
-            backgroundColor: '#3E0085',
-            borderRadius: 12,
-            paddingHorizontal: 16,
-          }}
-          className="border-b-4 border-l-2 border-pink rounded-xl">
+        {/* Barra de Pesquisa */}
+        <View className="flex-row items-center w-full h-16 bg-tertiary_purple rounded-xl border-b-4 border-l-2 border-pink px-4 mt-8">
           <SkeletonBox
             width={24}
             height={24}
@@ -97,7 +71,7 @@ const StatusScreenSkeleton = () => {
           />
           <View style={{flex: 1, marginLeft: 16, marginRight: 16}}>
             <SkeletonBox
-              width="70%"
+              width="60%"
               height={18}
               borderRadius={6}
               style={{backgroundColor: '#A78BFA'}}
@@ -111,58 +85,75 @@ const StatusScreenSkeleton = () => {
           />
         </View>
 
-        {/* Container da lista */}
-        <View
-          style={{
-            backgroundColor: 'transparent',
-            borderWidth: 2,
-            borderColor: '#3E0085',
-            alignItems: 'center',
-            width: '100%',
-            borderRadius: 16,
-            marginTop: 16,
-            height: '68%',
-          }}>
-          {/* Header da tabela */}
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              padding: 12,
-              paddingLeft: 40,
-              paddingRight: 40,
-              borderTopLeftRadius: 16,
-              borderTopRightRadius: 16,
-              width: '100%',
-            }}>
-            <SkeletonBox width={60} height={20} borderRadius={6} />
-            <SkeletonBox width={60} height={20} borderRadius={6} />
-          </View>
-
-          {/* Lista de itens */}
-          <View style={{width: '100%', paddingHorizontal: 16}}>
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(item => (
+        {/* Cards de Estatísticas */}
+        <View className="mt-4 mb-1 w-full h-20">
+          <View className="flex-row justify-between gap-3 px-1 w-full space-x-2">
+            {[1, 2, 3, 4].map((item, index) => (
               <View
-                key={item}
-                style={{justifyContent: 'center', alignItems: 'center'}}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    backgroundColor: 'transparent',
-                    width: '93%',
-                    paddingHorizontal: 8,
-                    paddingVertical: 12,
-                    borderBottomWidth: 2,
-                    alignItems: 'center',
-                    borderBottomColor: '#3E0085',
-                  }}>
-                  <SkeletonBox width={120} height={16} borderRadius={4} />
-                  <SkeletonBox width={80} height={14} borderRadius={4} />
-                </View>
+                key={index}
+                className="bg-white rounded-xl p-3 shadow-lg flex-1"
+                style={{
+                  shadowColor: '#000',
+                  shadowOffset: {width: 0, height: 2},
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                  elevation: 5,
+                }}>
+                <SkeletonBox width="100%" height={24} borderRadius={6} />
+                <SkeletonBox 
+                  width="80%" 
+                  height={12} 
+                  borderRadius={4} 
+                  style={{marginTop: 4, alignSelf: 'center'}}
+                />
               </View>
             ))}
           </View>
+        </View>
+
+        {/* Lista de Status */}
+        <View className="rounded-2xl flex-1 overflow-hidden">
+          {[1, 2, 3, 4, 5, 6, 7, 8].map(item => (
+            <View
+              key={item}
+              className="bg-white rounded-xl mb-2 mx-2"
+              style={{
+                shadowColor: '#000',
+                shadowOffset: {width: 2, height: 2},
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 5,
+              }}>
+              <View className="flex-row items-center p-4">
+                {/* Avatar */}
+                <SkeletonBox
+                  width={48}
+                  height={48}
+                  borderRadius={24}
+                  style={{marginRight: 16}}
+                />
+
+                {/* Informações */}
+                <View className="flex-1">
+                  <View className="flex-row items-center justify-between mb-1">
+                    <SkeletonBox width="60%" height={16} borderRadius={4} />
+                    <SkeletonBox width={40} height={12} borderRadius={4} />
+                  </View>
+                  <SkeletonBox 
+                    width="80%" 
+                    height={14} 
+                    borderRadius={4} 
+                    style={{marginBottom: 8}}
+                  />
+                  <SkeletonBox 
+                    width="40%" 
+                    height={20} 
+                    borderRadius={10}
+                  />
+                </View>
+              </View>
+            </View>
+          ))}
         </View>
       </View>
     </ImageBackground>

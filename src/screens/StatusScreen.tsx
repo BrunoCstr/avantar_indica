@@ -1,5 +1,10 @@
-import React, {useState} from 'react';
-import {ImageBackground, Text, View, TouchableOpacity} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {
+  ImageBackground,
+  Text,
+  View,
+  TouchableOpacity,
+} from 'react-native';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -9,19 +14,22 @@ import {FlatList, TextInput} from 'react-native-gesture-handler';
 import {BackButton} from '../components/BackButton';
 import {FilterDropdown} from '../components/FilterDropdown';
 import {StatusScreenSkeleton} from '../components/skeletons/StatusScreenSkeleton';
+import {useAuth} from '../contexts/Auth';
+import {
+  getOpportunitiesByUserId,
+  filterOpportunities,
+  getStatusStats,
+  Opportunity,
+} from '../services/status/status';
+import {formatTimeAgo} from '../utils/formatTimeToDistance';
 
 export function StatusScreen() {
+  const {userData} = useAuth();
   const [search, setSearch] = useState('');
-
   const [showFilter, setShowFilter] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-
-  const [isLoading, setIsLoading] = useState(false); 
-
-  // Temporario até integrar o Backend
-  // setTimeout(() => {
-  //   setIsLoading(false);
-  // }, 1000)
+  const [isLoading, setIsLoading] = useState(true);
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
 
   const filterOptions = [
     'FECHADO',
@@ -32,36 +40,33 @@ export function StatusScreen() {
     'NÃO INTERESSOU',
     'INICIO DE PROPOSTA',
     'PROPOSTA APRESENTADA',
+    'SEGURO RECUSADO',
   ];
 
-  const dataSimulation = [
-    {id: 1, indication_name: 'Bruno de Castro', status: 'FECHADO'},
-    {id: 2, indication_name: 'Alan Turing', status: 'FECHADO'},
-    {id: 3, indication_name: 'Neymar da Silva', status: 'FECHADO'},
-    {id: 4, indication_name: 'Romário Silva', status: 'PROPOSTA APRESENTADA'},
-    {id: 5, indication_name: 'Edmundo Santos', status: 'PROPOSTA APRESENTADA'},
-    {id: 6, indication_name: 'Pablo Vegetti', status: 'PROPOSTA APRESENTADA'},
-    {id: 7, indication_name: 'Ada Lovelace', status: 'AGUARDANDO CLIENTE'},
-    {id: 8, indication_name: 'Bill Gates', status: 'INICIO DE PROPOSTA'},
-    {id: 10, indication_name: 'Vasco da Gama', status: 'INICIO DE PROPOSTA'},
-    {id: 11, indication_name: 'Elon Musk', status: 'INICIO DE PROPOSTA'},
-    {id: 12, indication_name: 'Mark Zuckerberg', status: 'AGUARDANDO CLIENTE'},
-    {id: 13, indication_name: 'Maradona', status: 'NÃO FECHADO'},
-    {id: 14, indication_name: 'Pelé', status: 'NÃO FECHADO'},
-    {id: 15, indication_name: 'Kauan Martins', status: 'NÃO INTERESSOU'},
-    {id: 16, indication_name: 'Lucas Neves', status: 'NÃO INTERESSOU'},
-    {id: 17, indication_name: 'Davi Teixeira', status: 'NÃO INTERESSOU'},
-    {id: 18, indication_name: 'Fagundes Geraldo', status: 'NÃO FECHADO'},
-    {id: 19, indication_name: 'Antônio Fagundes', status: 'PENDENTE CONTATO'},
-    {id: 20, indication_name: 'Machado de Assis', status: 'PENDENTE CONTATO'},
-    {id: 21, indication_name: 'Patrick Bateman', status: 'PENDENTE CONTATO'},
-    {id: 22, indication_name: 'Thomas Shelby', status: 'PENDENTE CONTATO'},
-    {id: 23, indication_name: 'Arthur Shelby', status: 'CONTATO REALIZADO'},
-    {id: 24, indication_name: 'Rick Grimes', status: 'CONTATO REALIZADO'},
-    {id: 25, indication_name: 'Negan', status: 'CONTATO REALIZADO'},
-    {id: 26, indication_name: 'Maggie Rhe', status: 'CONTATO REALIZADO'},
-    {id: 27, indication_name: 'Josaci Oliveira', status: 'CONTATO REALIZADO'},
-  ];
+  // Carregar oportunidades do usuário
+  useEffect(() => {
+    const loadOpportunities = async () => {
+      if (!userData?.uid) return;
+      
+      try {
+        setIsLoading(true);
+        const userOpportunities = await getOpportunitiesByUserId(userData.uid);
+        setOpportunities(userOpportunities);
+      } catch (error) {
+        console.error('Erro ao carregar oportunidades:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadOpportunities();
+  }, [userData?.uid]);
+
+  // Filtrar dados baseado na busca e filtros selecionados
+  const filteredData = filterOpportunities(opportunities, search, selectedFilters);
+
+  // Calcular estatísticas
+  const stats = getStatusStats(opportunities);
 
   const handleSelectFilter = (option: string) => {
     if (selectedFilters.includes(option)) {
@@ -71,15 +76,66 @@ export function StatusScreen() {
     }
   };
 
-  const filteredData = dataSimulation.filter(item => {
-    const matchStatus =
-      selectedFilters.length > 0 ? selectedFilters.includes(item.status) : true;
+  // Função para obter as iniciais do nome
+  const getInitials = (name: string) => {
+    const names = name.split(' ');
+    const initials = names.map(n => n[0]).join('');
+    return initials.substring(0, 2).toUpperCase();
+  };
 
-    const matchSearch = item.indication_name
-      .toLowerCase()
-      .includes(search.toLowerCase());
-    return matchStatus && matchSearch;
-  });
+  // Função para obter a cor do status
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'FECHADO':
+        return colors.green;
+      case 'NÃO FECHADO':
+        return colors.red;
+      case 'AGUARDANDO CLIENTE':
+        return colors.primary_purple;
+      case 'CONTATO REALIZADO':
+        return colors.primary_purple;
+      case 'PENDENTE CONTATO':
+        return colors.orange;
+      case 'NÃO INTERESSOU':
+        return colors.red;
+      case 'INICIO DE PROPOSTA':
+        return colors.primary_purple;
+      case 'PROPOSTA APRESENTADA':
+        return colors.primary_purple;
+      case 'SEGURO RECUSADO':
+        return colors.red;
+      default:
+        return colors.black;
+    }
+  };
+
+  // Função para obter cor de fundo do status
+  const getStatusBgColor = (status: string) => {
+    switch (status) {
+      case 'FECHADO':
+        return '#dcfce7';
+      case 'NÃO FECHADO':
+        return '#fee2e2';
+      case 'AGUARDANDO CLIENTE':
+        return '#E6DBFF';
+      case 'CONTATO REALIZADO':
+        return '#E6DBFF';
+      case 'PENDENTE CONTATO':
+        return '#fed7aa';
+      case 'NÃO INTERESSOU':
+        return '#fee2e2';
+      case 'INICIO DE PROPOSTA':
+        return '#E6DBFF';
+      case 'PROPOSTA APRESENTADA':
+        return '#E6DBFF';
+      case 'SEGURO RECUSADO':
+        return '#fee2e2';
+      default:
+        return '#f3f4f6';
+    }
+  };
+
+
 
   return (
     <ImageBackground
@@ -89,8 +145,9 @@ export function StatusScreen() {
       {isLoading ? (
         <StatusScreenSkeleton />
       ) : (
-        <View className="flex-1 ml-5 mr-5 mb-10 justify-center items-center">
-          <View className="items-center flex-row justify-between w-full">
+        <View className="flex-1 px-5 pt-4 pb-32">
+          {/* Header */}
+          <View className="items-center flex-row justify-between w-full mt-12">
             <BackButton
               color={colors.tertiary_purple}
               borderColor={colors.tertiary_purple}
@@ -100,11 +157,11 @@ export function StatusScreen() {
             </Text>
             <View>
               <Text></Text>
-            </View>{' '}
-            {/* Para o texto ficar no centro com o justify-between */}
+            </View>
           </View>
 
-          <View className="flex-row items-center mt-10 w-full h-16 bg-tertiary_purple rounded-xl border-b-4 border-l-2 border-pink px-4">
+          {/* Barra de Pesquisa */}
+          <View className="flex-row items-center w-full h-16 bg-tertiary_purple rounded-xl border-b-4 border-l-2 border-pink px-4 mt-8">
             <Ionicons
               name="search"
               size={24}
@@ -139,41 +196,105 @@ export function StatusScreen() {
             />
           </View>
 
-          <View className="bg-transparent border-2 border-tertiary_purple items-center w-full rounded-2xl mt-4 h-[60%]">
-            <View className="flex-row justify-between p-3 pl-10 pr-10 rounded-t-2xl w-full">
-              <Text className="text-2xl font-bold text-tertiary_purple">
-                Nome
-              </Text>
-              <Text className="text-2xl font-bold text-tertiary_purple">
-                Status
-              </Text>
+          <View className="mt-4 mb-1 w-full h-20">
+            <View className="flex-row justify-between gap-3 px-1 w-full space-x-2">
+              {[
+                {label: 'Pendente', value: stats['PENDENTE CONTATO'] || 0},
+                {
+                  label: 'Em contato',
+                  value:
+                    (stats['PROPOSTA APRESENTADA'] || 0) +
+                    (stats['CONTATO REALIZADO'] || 0) +
+                    (stats['AGUARDANDO CLIENTE'] || 0) +
+                    (stats['INICIO DE PROPOSTA'] || 0),
+                },
+                {label: 'Fechados', value: stats['FECHADO'] || 0},
+                {
+                  label: 'Não fechado',
+                  value:
+                    (stats['NÃO FECHADO'] || 0) +
+                    (stats['SEGURO RECUSADO'] || 0) +
+                    (stats['NÃO INTERESSOU'] || 0),
+                },
+              ].map((item, index) => (
+                <View
+                  key={index}
+                  className="bg-white rounded-xl p-3 shadow-lg flex-1"
+                  style={{
+                    shadowColor: '#000',
+                    shadowOffset: {width: 0, height: 2},
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 5,
+                  }}>
+                  <Text className="text-2xl font-bold text-tertiary_purple text-center">
+                    {item.value}
+                  </Text>
+                  <Text className="text-xs text-gray-600 text-center mt-1">
+                    {item.label}
+                  </Text>
+                </View>
+              ))}
             </View>
+          </View>
 
+          {/* Lista de Status */}
+          <View className="rounded-2xl flex-1 overflow-hidden" style={{}}>
             <FlatList
               data={filteredData}
               showsVerticalScrollIndicator={false}
-              keyExtractor={item => item.indication_name}
+              keyExtractor={item => item.id.toString()}
+              contentContainerStyle={{paddingVertical: 8, paddingBottom: 20}}
               renderItem={({item}) => (
-                <View className="justify-center items-center">
-                  <View className="flex-row justify-between bg-transparent w-[93%] px-2 py-3 border-b-2 items-center border-tertiary_purple">
-                    <Text className="text-black text-lg font-bold">
-                      {item.indication_name}
-                    </Text>
-                    <Text
-                      className="font-bold text-sm"
-                      style={{
-                        color:
-                          item.status === 'FECHADO'
-                            ? colors.green
-                            : item.status === 'NÃO FECHADO'
-                              ? colors.red
-                              : colors.black,
-                      }}>
-                      {item.status}
-                    </Text>
+                <TouchableOpacity
+                  className="bg-white rounded-xl mb-2 mx-2"
+                  activeOpacity={0.7}
+                  style={{
+                    shadowColor: '#000',
+                    shadowOffset: {width: 2, height: 2},
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 5, // necessário para Android
+                  }}>
+                  <View className="flex-row items-center p-4">
+                    {/* Avatar */}
+                    <View
+                      className="w-12 h-12 rounded-full items-center justify-center mr-4"
+                      style={{backgroundColor: colors.tertiary_purple}}>
+                      <Text className="text-white font-bold text-sm">
+                        {getInitials(item.name)}
+                      </Text>
+                    </View>
+
+                    {/* Informações */}
+                    <View className="flex-1">
+                      <View className="flex-row items-center justify-between mb-1">
+                        <Text className="text-gray-900 font-bold text-base flex-1">
+                          {item.name}
+                        </Text>
+                        <Text className="text-xs text-gray-400 ml-2">
+                          {item.updatedAt}
+                        </Text>
+                      </View>
+                      <Text className="text-gray-500 text-sm mb-2">
+                        {item.product}
+                      </Text>
+                      <View
+                        className="self-start px-3 py-1 w-auto rounded-full"
+                        style={{
+                          backgroundColor: getStatusBgColor(item.status),
+                        }}>
+                        <Text
+                          className="text-xs font-semibold"
+                          style={{color: getStatusColor(item.status)}}>
+                          {item.status}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
-                </View>
+                </TouchableOpacity>
               )}
+              ItemSeparatorComponent={() => <View className="h-1" />}
             />
           </View>
         </View>
