@@ -1,4 +1,3 @@
-
 import React, {useCallback, useEffect, useState} from 'react';
 import {
   Text,
@@ -41,7 +40,6 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import {colors} from '../styles/colors';
 import {HomeSkeleton} from '../components/skeletons/HomeSkeleton';
 import {IndicateModal} from '../components/IndicateModal';
-import {WaitingConfirmationScreen} from '../screens/WaitingConfirmationScreen';
 import DashboardIndications from '../components/DashboardIndications';
 import {getTop4ProductsByUser} from '../services/home/DashboardIndications';
 import {indicationsDataArray} from '../components/DashboardIndications';
@@ -131,8 +129,8 @@ export function HomeScreen() {
     if (selectedFilters.length === 0) {
       setTopProducts(allProducts);
     } else {
-      const filtered = allProducts.filter(product => 
-        selectedFilters.includes(product.product)
+      const filtered = allProducts.filter(product =>
+        selectedFilters.includes(product.product),
       );
       setTopProducts(filtered);
     }
@@ -274,10 +272,10 @@ export function HomeScreen() {
                 className="bg-primary_purple h-10 w-10 rounded-lg items-center justify-center"
                 activeOpacity={0.8}
                 onPress={() => setShowFilter(!showFilter)}>
-                <FontAwesome6 
-                  name={showFilter ? 'xmark' : 'sliders'} 
-                  size={21} 
-                  color={colors.white} 
+                <FontAwesome6
+                  name={showFilter ? 'xmark' : 'sliders'}
+                  size={21}
+                  color={colors.white}
                 />
               </TouchableOpacity>
             </View>

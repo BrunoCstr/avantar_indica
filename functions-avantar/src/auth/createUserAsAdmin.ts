@@ -37,7 +37,10 @@ export const createUserAsAdmin = functions.https.onCall(
       rule,
       profilePicture,
       masterUid,
+      commission,
     } = data;
+
+    console.log('Comissão recebida na Cloud Function:', commission, typeof commission);
 
     if (!fullName || !email || !phone || !password || !rule || !masterUid) {
       throw new functions.https.HttpsError(
@@ -81,6 +84,7 @@ export const createUserAsAdmin = functions.https.onCall(
           disabled: false,
           createdBy: requesterUid,
           masterUid: masterUid,
+          commission: commission || null,
         });
 
       return userRecord.uid;

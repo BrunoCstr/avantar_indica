@@ -16,7 +16,7 @@ export function StatusScreen() {
   const [showFilter, setShowFilter] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
-  const [isLoading, setIsLoading] = useState(true); 
+  const [isLoading, setIsLoading] = useState(false); 
 
   // Temporario até integrar o Backend
   // setTimeout(() => {

@@ -28,6 +28,7 @@ import {BackButton} from '../components/BackButton';
 import {CustomModal} from '../components/CustomModal';
 import {Button} from '../components/Button';
 import {useNavigation} from '@react-navigation/native';
+import {applyMaskTelephone} from '../utils/applyMaskTelephone';
 
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -84,13 +85,15 @@ export function ProfileScreen() {
   const [isEditingPaymentInfo, setIsEditingPaymentInfo] = useState(false);
 
   const [editedName, setEditedName] = useState(userData?.displayName || '');
-  const [editedPhone, setEditedPhone] = useState(userData?.phone || '');
+  const [editedPhone, setEditedPhone] = useState(
+    applyMaskTelephone(userData?.phone || ''),
+  );
   const [editedPixKey, setEditedPixKey] = useState(userData?.pixKey || '');
 
   useEffect(() => {
     if (isEditingUserInfo && userData) {
       setEditedName(userData.displayName || '');
-      setEditedPhone(userData.phone || '');
+      setEditedPhone(applyMaskTelephone(userData.phone || ''));
     }
   }, [isEditingUserInfo, userData]);
 
@@ -105,9 +108,11 @@ export function ProfileScreen() {
   const [isNameValid, setIsNameValid] = useState(true);
 
   function validatePhone(phone: string) {
-    setEditedPhone(phone);
-    const rawPhone = phone.replace(/\D/g, '');
-
+    // Aplica máscara visualmente
+    const masked = applyMaskTelephone(phone);
+    setEditedPhone(masked);
+    // Valida o telefone sem máscara
+    const rawPhone = masked.replace(/\D/g, '');
     const isValid = rawPhone.length >= 10 && rawPhone.length <= 11;
     setIsPhoneValid(isValid);
   }
@@ -134,8 +139,11 @@ export function ProfileScreen() {
         description: 'Entre em contato com o suporte.',
       });
 
+    // Remove máscara para comparar e salvar
+    const rawPhone = editedPhone.replace(/\D/g, '');
     const noChanges =
-      editedName === userData.displayName && editedPhone === userData.phone;
+      editedName === userData.displayName &&
+      rawPhone === (userData.phone || '').replace(/\D/g, '');
 
     if (noChanges) {
       setIsEditingUserInfo(false);
@@ -157,7 +165,7 @@ export function ProfileScreen() {
           promises.push(
             updateDoc(doc(db, 'users', userData.uid), {
               fullName: editedName,
-              phone: editedPhone,
+              phone: rawPhone, // Salva sem máscara
             }),
           );
 
@@ -165,7 +173,7 @@ export function ProfileScreen() {
 
           // Atualiza os dados no contexto/local
           userData.displayName = editedName;
-          userData.phone = editedPhone;
+          userData.phone = rawPhone;
         }
 
         setIsEditingUserInfo(false);
@@ -361,7 +369,9 @@ export function ProfileScreen() {
                     keyboardType="phone-pad"
                   />
                 ) : (
-                  <Text className="text-base font-bold">{userData?.phone}</Text>
+                  <Text className="text-base font-bold">
+                    {applyMaskTelephone(userData?.phone || '')}
+                  </Text>
                 )}
               </View>
             </View>
@@ -424,7 +434,11 @@ export function ProfileScreen() {
             textColor="tertiary_purple"
             fontSize={25}
             fontWeight="bold"
-            disabled={userData?.rule !== 'parceiro_indicador' && userData?.rule !== 'admin_franqueadora' && userData?.rule !== 'admin_unidade'}
+            disabled={
+              userData?.rule !== 'parceiro_indicador' &&
+              userData?.rule !== 'admin_franqueadora' &&
+              userData?.rule !== 'admin_unidade'
+            }
           />
         </View>
       </View>

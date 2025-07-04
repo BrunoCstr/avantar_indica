@@ -109,6 +109,16 @@ android {
         }
     }
 
+    // Adicionando splits para gerar APKs para todas as ABIs e um APK universal
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+            universalApk true // Gera um APK universal
+        }
+    }
+
     sourceSets {
         main {
             assets.srcDirs = ['src/main/assets', 'src/main/assets/images']

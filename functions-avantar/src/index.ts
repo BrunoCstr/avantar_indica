@@ -8,5 +8,6 @@ export {registrationsApproved} from './notifications/registrationsApproved';
 export {indicated} from './notifications/indicated';
 export {createUserAsAdmin} from './auth/createUserAsAdmin';
 export {updateUserPassword} from './auth/updateUserPassword';
+export {indicatedInBulk} from './notifications/indicateInBulk';
 export * from './auth/updateUserEmail';
 export * from './auth/toggleUserActive';

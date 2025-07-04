@@ -20,6 +20,7 @@ export async function createSellerService({
   unitName,
   profilePicture,
   masterUid,
+  commission,
 }: {
   fullName: string;
   email: string;
@@ -29,6 +30,7 @@ export async function createSellerService({
   unitName?: string;
   profilePicture?: string;
   masterUid?: string;
+  commission?: number;
 }) {
   try {
     // Usar Cloud Function para criar usuário sem fazer login
@@ -42,6 +44,7 @@ export async function createSellerService({
       rule: 'sub_indicador',
       profilePicture: profilePicture,
       masterUid: masterUid,
+      commission,
     });
 
     return result.data;
@@ -87,7 +90,7 @@ export async function toggleSellerActiveService(
 
 export async function updateSellerService(
   sellerId: string,
-  data: {fullName: string; email: string; phone: string; password?: string; oldEmail?: string},
+  data: {fullName: string; email: string; phone: string; password?: string; oldEmail?: string; commission?: number},
 ) {
   // Atualizar e-mail no Auth se mudou
   if (data.oldEmail && data.oldEmail !== data.email) {
@@ -110,6 +113,7 @@ export async function updateSellerService(
       fullName: data.fullName,
       email: data.email,
       phone: data.phone.replace(/\D/g, ''),
+      commission: data.commission,
     });
 
   // Se uma nova senha foi fornecida, atualizar no Auth via Cloud Function

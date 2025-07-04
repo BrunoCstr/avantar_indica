@@ -1,6 +1,7 @@
 import React from 'react';
 import {View, Text} from 'react-native';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import IndicationsEmpty from '../assets/images/indications_empty.svg';
 
 type indicationsData = {
   product: string;
@@ -78,7 +79,19 @@ const DashboardIndicacoes = ({data}: {data: indicationsDataArray}) => {
 
   return (
     <View>
-      <View className="gap-4">{indications.map(renderIndicacaoItem)}</View>
+      {indications.length === 0 ? (
+        <View className="items-center justify-center py-12 px-4">
+          <IndicationsEmpty width={48} height={48} style={{ marginBottom: 12, opacity: 0.7 }} />
+          <Text className="text-lg font-bold text-fifth_purple mb-1 text-center">
+            Nenhuma indicação encontrada
+          </Text>
+          <Text className="text-sm text-gray-500 text-center">
+            Você ainda não possui indicações registradas. Quando você indicar alguém, elas aparecerão aqui!
+          </Text>
+        </View>
+      ) : (
+        <View className="gap-4">{indications.map(renderIndicacaoItem)}</View>
+      )}
     </View>
   );
 };

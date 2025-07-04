@@ -54,6 +54,10 @@ const sellerSignUpSchema = z
     password: z.string().min(1, 'Senha é obrigatória'),
     profilePicture: z.string().optional(),
     confirmPassword: z.string().min(1, 'Confirmação de senha é obrigatória'),
+    commission: z.number()
+      .min(0, 'Comissão deve ser entre 0 e 100')
+      .max(100, 'Comissão deve ser entre 0 e 100')
+      .refine((val) => !isNaN(val), 'Comissão deve ser um número válido'),
   })
   .refine(data => data.password === data.confirmPassword, {
     message: 'As senhas devem ser iguais!',
@@ -84,6 +88,7 @@ export function RegisterSellers() {
       phone: '',
       password: '',
       confirmPassword: '',
+      commission: 0,
     },
   });
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -139,6 +144,7 @@ export function RegisterSellers() {
       phone: '',
       password: '',
       confirmPassword: '',
+      commission: 0,
     },
   });
 
@@ -165,6 +171,9 @@ export function RegisterSellers() {
             {item.fullName}
           </Text>
           <Text className="text-blue text-xs">{item.email}</Text>
+          {item.commission && (
+            <Text className="text-blue text-xs">Comissão: {item.commission}%</Text>
+          )}
           <Text
             className="text-xs mt-1"
             style={{color: item.disabled ? colors.red : colors.green}}>
@@ -198,6 +207,7 @@ export function RegisterSellers() {
       phone: seller.phone ? applyMaskTelephone(seller.phone) : '',
       password: '',
       confirmPassword: '',
+      commission: seller.commission || 0,
     });
     setEditModalVisible(true);
   }
@@ -247,7 +257,9 @@ export function RegisterSellers() {
   async function onSubmit(data: z.infer<typeof sellerSignUpSchema>) {
     setIsLoadingRegister(true);
     try {
-      const {fullName, email, phone, password} = data;
+      const {fullName, email, phone, password, commission} = data;
+
+      console.log('Valor da comissão recebido:', commission, typeof commission);
 
       // Validar força da senha
       const passwordValidation = validatePassword(password);
@@ -269,6 +281,7 @@ export function RegisterSellers() {
         email,
         phone: phoneWithoutMask,
         password,
+        commission,
         affiliated_to: userData?.affiliated_to,
         unitName: userData?.unitName,
         profilePicture: profilePicture || undefined,
@@ -298,7 +311,7 @@ export function RegisterSellers() {
   async function onSubmitEdit(data: z.infer<typeof sellerSignUpSchema>) {
     setIsLoadingEdit(true);
     try {
-      const {fullName, email, phone, password} = data;
+      const {fullName, email, phone, password, commission} = data;
 
       // Se a senha foi alterada (não é ''), validar força da senha
       if (password && password !== '') {
@@ -315,12 +328,15 @@ export function RegisterSellers() {
 
       // Remove a máscara do telefone antes de salvar
       const phoneWithoutMask = removePhoneMask(phone);
+      console.log('Valor da comissão na edição:', commission, typeof commission);
+      
       await updateSellerService(editingSeller.id, {
         fullName,
         email,
         phone: phoneWithoutMask,
         password: password !== '' ? password : undefined,
         oldEmail: editingSeller.email,
+        commission,
       });
       setEditModalVisible(false);
       resetEdit();
@@ -545,6 +561,52 @@ export function RegisterSellers() {
                     {errors.phone.message}
                   </Text>
                 )}
+                <Controller
+                  control={control}
+                  name="commission"
+                  render={({ field: { onChange, value, onBlur } }) => (
+                    <TextInput
+                      keyboardType="numeric"
+                      placeholder="Comissão (%)"
+                      placeholderTextColor={colors.white_opacity}
+                      value={value !== undefined && value !== null ? String(value) : ''}
+                      onChangeText={text => {
+                        // Permite apenas números, vírgula e ponto
+                        const onlyNumbers = text.replace(/[^0-9.,]/g, '');
+                        const normalized = onlyNumbers.replace(',', '.');
+                        // Se o texto estiver vazio, define como 0, senão converte para número
+                        const numValue = normalized === '' ? 0 : parseFloat(normalized);
+                        
+                        // Valida se o valor está entre 0 e 100
+                        if (numValue >= 0 && numValue <= 100) {
+                          console.log('Valor da comissão sendo definido:', numValue, typeof numValue);
+                          onChange(numValue);
+                        } else if (normalized !== '') {
+                          // Se o valor estiver fora do range, não atualiza o campo
+                          console.log('Valor fora do range (0-100):', numValue);
+                        }
+                      }}
+                      onBlur={onBlur}
+                      style={{
+                        borderWidth: 1,
+                        borderColor: errors.commission ? colors.red : colors.blue,
+                        backgroundColor: colors.tertiary_purple_opacity,
+                        color: colors.white_opacity,
+                        borderRadius: 10,
+                        height: 49,
+                        paddingLeft: 20,
+                        fontSize: 13,
+                        marginBottom: 2,
+                        fontFamily: 'FamiljenGrotesk-regular',
+                      }}
+                    />
+                  )}
+                />
+                {errors.commission && (
+                  <Text className="text-red text-xs mb-1">
+                    {errors.commission.message}
+                  </Text>
+                )}
                 <View className="w-full">
                   <View className="relative">
                     <Controller
@@ -763,7 +825,40 @@ export function RegisterSellers() {
                     fontFamily: 'FamiljenGrotesk-regular',
                   }}
                 />
-                {/* Inputs de senha e confirmação de senha para edição */}
+                <TextInput
+                  placeholder="Comissão (%)"
+                  placeholderTextColor={colors.white_opacity}
+                  value={watchEdit('commission') !== undefined && watchEdit('commission') !== null ? String(watchEdit('commission')) : ''}
+                  onChangeText={text => {
+                    // Permite apenas números, vírgula e ponto
+                    const onlyNumbers = text.replace(/[^0-9.,]/g, '');
+                    const normalized = onlyNumbers.replace(',', '.');
+                    // Se o texto estiver vazio, define como 0, senão converte para número
+                    const numValue = normalized === '' ? 0 : parseFloat(normalized);
+                    
+                    // Valida se o valor está entre 0 e 100
+                    if (numValue >= 0 && numValue <= 100) {
+                      console.log('Valor da comissão sendo definido (edição):', numValue, typeof numValue);
+                      resetEdit({...watchEdit(), commission: numValue});
+                    } else if (normalized !== '') {
+                      // Se o valor estiver fora do range, não atualiza o campo
+                      console.log('Valor fora do range (0-100) na edição:', numValue);
+                    }
+                  }}
+                  keyboardType="numeric"
+                  style={{
+                    borderWidth: 1,
+                    borderColor: colors.blue,
+                    backgroundColor: colors.tertiary_purple_opacity,
+                    color: colors.white_opacity,
+                    borderRadius: 10,
+                    height: 49,
+                    paddingLeft: 20,
+                    fontSize: 13,
+                    marginBottom: 2,
+                    fontFamily: 'FamiljenGrotesk-regular',
+                  }}
+                />
                 <View className="w-full">
                   <View className="relative">
                     <TextInput

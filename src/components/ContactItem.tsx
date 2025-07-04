@@ -1,12 +1,12 @@
 import React from 'react';
 import {Text, TouchableOpacity, View} from 'react-native';
-import { applyMaskTelephone } from '../utils/applyMaskTelephone';
+import { formatPhoneForDisplay } from '../utils/formatPhoneNumber';
 
 import { colors } from '../styles/colors';
 
 export function ConctactItem({contact, selected, onToggle}: any) {
   const telephone = contact.phoneNumbers[0]?.number;
-  const telephoneFormatted = applyMaskTelephone(telephone)
+  const telephoneFormatted = formatPhoneForDisplay(telephone)
 
   return (
     <View className="mt-2">

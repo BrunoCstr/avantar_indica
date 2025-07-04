@@ -5,15 +5,18 @@ import {defineSecret} from 'firebase-functions/params';
 
 const EMAIL_USER = defineSecret('EMAIL_USER');
 const EMAIL_PASS = defineSecret('EMAIL_PASS');
-const WEBHOOK_BOTCONVERSA = defineSecret('WEBHOOK_BOTCONVERSA');
+const WEBHOOK_BOTCONVERSA = defineSecret('WEBHOOK_BOTCONVERSA_EM_MASSA');
 
-export const indicated = functions.firestore.onDocumentCreated(
-  {document: 'indications/{indicationId}', secrets: [EMAIL_USER, EMAIL_PASS, WEBHOOK_BOTCONVERSA]},
+export const indicatedInBulk = functions.firestore.onDocumentCreated(
+  {
+    document: 'packagedIndications/{packagedIndicationId}',
+    secrets: [EMAIL_USER, EMAIL_PASS, WEBHOOK_BOTCONVERSA],
+  },
   async event => {
     // Pegando os dados da indicação
-    const newIndication = event.data?.data();
+    const newPackagedIndication = event.data?.data();
 
-    if (!newIndication) {
+    if (!newPackagedIndication) {
       console.error('Dados do documento não encontrados');
       return;
     }
@@ -22,7 +25,7 @@ export const indicated = functions.firestore.onDocumentCreated(
     const docRef = admin
       .firestore()
       .collection('units')
-      .doc(newIndication.unitId);
+      .doc(newPackagedIndication.unitId);
     const doc = await docRef.get();
 
     if (!doc.exists) {
@@ -46,7 +49,7 @@ export const indicated = functions.firestore.onDocumentCreated(
     const mailOptions = {
       from: 'noreply@indica.avantar.com.br',
       to: unitData?.email,
-      subject: '📬 Você recebeu uma nova indicação!',
+      subject: '📬 Você recebeu uma nova indicação em massa!',
       html: `
       <br>
          <div style="text-align: center;">
@@ -86,15 +89,12 @@ export const indicated = functions.firestore.onDocumentCreated(
         </style>
         <div class='container'>
           <div style="font-family: familjen grotesk;" class="div">
-            <h1 style='color:#6600CC; font-size: 24px'>Você recebeu uma nova indicação!</h1>
-            <p>Olá! Acabamos de receber uma nova indicação atribuída à sua unidade.</p>
+            <h1 style='color:#6600CC; font-size: 24px'>Você recebeu uma nova indicação em massa!</h1>
+            <p>Olá! Acabamos de receber uma nova indicação em massa atribuída à sua unidade.</p>
             <p>Segue os dados:</p>
             <div class='indication'>
-              <span>Indicador: ${newIndication.indicator_name}</span>
-              <span>Nome do Indicado: ${newIndication.name}</span>
-              <span>Telefone do Indicado: ${newIndication.phone}</span>
-              <span>Produto desejado: ${newIndication.product}</span>
-              <span>Observações: ${newIndication.observations}</span>
+              <span>Indicador: ${newPackagedIndication.indicator_name}</span>
+              <span>Quantidade de Indicações enviadas: ${newPackagedIndication.indications.length}</span>
             </div>
             <p></p>
             <a class='anchorLink' href="indica.avantar.com.br">👉 Acesse agora o painel para conferir os detalhes...</a>
@@ -118,11 +118,8 @@ export const indicated = functions.firestore.onDocumentCreated(
     const unitName = unitData?.name;
 
     const payload = {
-      indicator_name: newIndication.indicator_name,
-      indication_phone: newIndication.phone,
-      indication_name: newIndication.name,
-      indication_product: newIndication.product,
-      indication_observations: newIndication.observations,
+      indicator_name: newPackagedIndication.indicatorName,
+      quantity_of_indications: newPackagedIndication.indications.length,
       unit_name: unitName,
       unit_phone: unitPhone,
     };

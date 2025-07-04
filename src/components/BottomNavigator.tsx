@@ -13,6 +13,7 @@ import {ProfileScreen} from '../screens/ProfileScreen';
 import {colors} from '../styles/colors';
 import {IndicateModal} from './IndicateModal';
 import images from '../data/images';
+import PlusIcon from '../assets/images/plus.svg';
 import { useAuth } from '../contexts/Auth';
 import {WaitingConfirmationScreen} from '../screens/WaitingConfirmationScreen';
 
@@ -125,15 +126,7 @@ export function BottomNavigator() {
                     shadowOpacity: 0.25,
                     shadowRadius: 3.84,
                   }}>
-                  <Image
-                    source={images.plus}
-                    style={{
-                      width: 24,
-                      height: 24,
-                      tintColor: colors.primary_purple, // Cor do ícone
-                    }}
-                    resizeMode="contain"
-                  />
+                  <PlusIcon width={24} height={24} color={colors.primary_purple} />
                 </TouchableOpacity>
               </View>
             ),

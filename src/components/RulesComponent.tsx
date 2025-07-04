@@ -39,6 +39,23 @@ const ExpandableSection = ({
   );
 };
 
+export interface CommissioningParameters {
+  cashbackPerProduct: {
+    auto: number;
+    consorcio: number;
+    empresarial: number;
+    vida: number;
+  };
+  commissionPerProduct: {
+    auto: number;
+    consorcio: number;
+    empresarial: number;
+    vida: number;
+  };
+  defaultCashback: number;
+  defaultCommission: number;
+}
+
 interface RulesComponentProps {
   title: string;
   titleDescription: string;
@@ -46,15 +63,42 @@ interface RulesComponentProps {
   titleDescription2: string;
   description2: string;
   rewards: string;
+  titleDescription3: string;
+  description3: string; 
+  bonusParameters?: CommissioningParameters;
+  unitName: string;
+  updatedAt: string;
 }
+
 export function RulesComponent({
   title,
   titleDescription,
   description,
   titleDescription2,
-  description2,
+  description2  ,
+  titleDescription3,
+  description3,
   rewards,
+  bonusParameters,
+  unitName,
+  updatedAt,
 }: RulesComponentProps) {
+
+  // Função para formatar datas do Firestore ou objeto Timestamp
+  const formatDate = (timestamp: any) => {
+    if (!timestamp) return '';
+    if (typeof timestamp === 'string') return timestamp;
+    if (timestamp.toDate) {
+      // Firestore Timestamp
+      return timestamp.toDate().toLocaleDateString('pt-BR');
+    }
+    if (timestamp._seconds) {
+      // Objeto bruto
+      return new Date(timestamp._seconds * 1000).toLocaleDateString('pt-BR');
+    }
+    return String(timestamp);
+  };
+
   return (
     <ScrollView className="flex-1 bg-gray-100 w-full">
       <ExpandableSection title={title}>
@@ -71,6 +115,12 @@ export function RulesComponent({
             </Text>
             <Text className="text-white font-regular mt-1 text-sm">
               {description2}
+            </Text>
+            <Text className="text-blue font-bold text-base mt-3">
+              {titleDescription3}
+            </Text>
+            <Text className="text-white font-regular text-sm">
+              {description3}
             </Text>
           </>
         ) : (
@@ -89,6 +139,52 @@ export function RulesComponent({
         <Text className="text-white font-regular text-sm">
         {rewards}
         </Text>
+      </ExpandableSection>
+
+      <ExpandableSection title="BONIFICAÇÃO">
+        <View>
+          <Text className="text-white font-bold text-lg">
+            Parâmetros de bonificação
+          </Text>
+          <Text className="text-blue font-bold">
+            {unitName}
+          </Text>
+          <Text className="text-blue font-bold text-base mt-2">
+            Cashback por produto:
+          </Text>
+          {bonusParameters?.cashbackPerProduct && (
+            <View className='flex-col'>
+              <Text className='text-white font-regular text-sm'>Auto: {bonusParameters?.cashbackPerProduct?.auto}</Text>
+              <Text className='text-white font-regular text-sm'>Consórcio: {bonusParameters?.cashbackPerProduct?.consorcio}</Text>
+              <Text className='text-white font-regular text-sm'>Empresarial: {bonusParameters?.cashbackPerProduct?.empresarial}</Text>
+              <Text className='text-white font-regular text-sm'>Vida: {bonusParameters?.cashbackPerProduct?.vida}</Text>
+            </View>
+          )}
+          <Text className="text-blue font-bold text-base mt-2">
+            Comissão por produto:
+          </Text>
+          {bonusParameters?.commissionPerProduct && (
+            <View className='flex-col'>
+              <Text className='text-white font-regular text-sm'>Auto: {bonusParameters?.commissionPerProduct?.auto}%</Text>
+              <Text className='text-white font-regular text-sm'>Consórcio: {bonusParameters?.commissionPerProduct?.consorcio}%</Text>
+              <Text className='text-white font-regular text-sm'>Empresarial: {bonusParameters?.commissionPerProduct?.empresarial}%</Text>
+              <Text className='text-white font-regular text-sm'>Vida: {bonusParameters?.commissionPerProduct?.vida}%</Text>
+            </View>
+          )}
+
+          <Text className="text-white font-regular text-base mt-2">
+            <Text className='text-blue font-bold'>Demais ramos (comissão):</Text> {bonusParameters?.defaultCommission}%
+          </Text>
+        
+
+          <Text className="text-white font-regular text-base mt-2">
+            <Text className='text-blue font-bold'>Demais ramos (cashback):</Text> {bonusParameters?.defaultCashback}
+          </Text>
+
+          <Text className="text-white font-bold text-base mt-2">
+            Última atualização: {formatDate(updatedAt)}
+          </Text>
+        </View>
       </ExpandableSection>
     </ScrollView>
   );
