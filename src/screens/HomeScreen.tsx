@@ -9,6 +9,9 @@ import {
 } from 'react-native';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import type {StackNavigationProp} from '@react-navigation/stack';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import IndicarIcon from '../assets/images/indicar_icon.svg';
+import IndicarEmMassaIcon from '../assets/images/indicar_em_massa_icon.svg';
 
 type RootStackParamList = {
   IndicateInBulk: undefined;
@@ -44,12 +47,14 @@ import DashboardIndications from '../components/DashboardIndications';
 import {getTop4ProductsByUser} from '../services/home/DashboardIndications';
 import {indicationsDataArray} from '../components/DashboardIndications';
 import {FilterDropdown} from '../components/FilterDropdown';
+import {useBottomNavigationPadding} from '../hooks/useBottomNavigationPadding';
 
 const db = getFirestore();
 
 export function HomeScreen() {
   const {userData, registrationStatus} = useAuth();
   const navigation = useNavigation<NavigationProp>();
+  const {paddingBottom} = useBottomNavigationPadding();
 
   const [isLoading, setIsLoading] = useState(true);
   const [topProducts, setTopProducts] = useState<indicationsDataArray>([]);
@@ -183,7 +188,9 @@ export function HomeScreen() {
       {isLoading ? (
         <HomeSkeleton />
       ) : (
-        <>
+        <View 
+          className="flex-1 justify-center"
+          style={{paddingBottom}}>
           <View className="grid-cols-3 flex-row items-center mt-10 ml-7 mr-7">
             <View>
               <TouchableOpacity
@@ -225,7 +232,7 @@ export function HomeScreen() {
                   : navigation.navigate('WaitingConfirmationScreen');
               }}>
               <View className="bg-transparent flex-row border-[1.5px] rounded-lg border-blue justify-center items-center pr-8 pl-8 pt-6 pb-6">
-                <Image source={images.indicar_icon} />
+                <IndicarIcon />
                 <Text className="text-white text-bold text-2xl ml-1.5">
                   INDICAR
                 </Text>
@@ -235,7 +242,7 @@ export function HomeScreen() {
               activeOpacity={0.8}
               onPress={() => navigation.navigate('IndicateInBulk')}>
               <View className="bg-transparent flex-row border-[1.5px] rounded-lg border-blue justify-center items-center pr-9 pl-9 pt-3 pb-3">
-                <Image source={images.indicar_em_massa_icon} />
+                <IndicarEmMassaIcon />
                 <View>
                   <Text className="text-white text-bold text-2xl ml-1.5">
                     INDICAR
@@ -314,7 +321,7 @@ export function HomeScreen() {
             visible={showModal}
             onClose={() => setShowModal(false)}
           />
-        </>
+        </View>
       )}
     </ImageBackground>
   );

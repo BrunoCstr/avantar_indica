@@ -22,14 +22,18 @@ import {
   Opportunity,
 } from '../services/status/status';
 import {formatTimeAgo} from '../utils/formatTimeToDistance';
+import {useBottomNavigationPadding} from '../hooks/useBottomNavigationPadding';
 
 export function StatusScreen() {
   const {userData} = useAuth();
+  const {paddingBottom} = useBottomNavigationPadding();
   const [search, setSearch] = useState('');
   const [showFilter, setShowFilter] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+
+
 
   const filterOptions = [
     'FECHADO',
@@ -135,8 +139,6 @@ export function StatusScreen() {
     }
   };
 
-
-
   return (
     <ImageBackground
       source={images.bg_white}
@@ -145,7 +147,9 @@ export function StatusScreen() {
       {isLoading ? (
         <StatusScreenSkeleton />
       ) : (
-        <View className="flex-1 px-5 pt-4 pb-32">
+        <View 
+          className="flex-1 px-5 pt-4"
+          style={{paddingBottom}}>
           {/* Header */}
           <View className="items-center flex-row justify-between w-full mt-12">
             <BackButton
@@ -230,7 +234,7 @@ export function StatusScreen() {
                   <Text className="text-2xl font-bold text-tertiary_purple text-center">
                     {item.value}
                   </Text>
-                  <Text className="text-xs text-gray-600 text-center mt-1">
+                  <Text className="text-xs text-black text-center mt-1">
                     {item.label}
                   </Text>
                 </View>
@@ -251,7 +255,7 @@ export function StatusScreen() {
                 <Text className="text-lg font-bold text-tertiary_purple mb-2 text-center">
                   Nenhuma oportunidade encontrada
                 </Text>
-                <Text className="text-sm text-gray-500 text-center">
+                <Text className="text-sm text-black text-center">
                   {search || selectedFilters.length > 0 
                     ? 'Nenhuma oportunidade corresponde aos filtros aplicados. Tente ajustar sua busca.'
                     : 'Você ainda não possui oportunidades registradas. Quando você indicar alguém, elas aparecerão aqui!'
@@ -288,14 +292,14 @@ export function StatusScreen() {
                       {/* Informações */}
                       <View className="flex-1">
                         <View className="flex-row items-center justify-between mb-1">
-                          <Text className="text-gray-900 font-bold text-base flex-1">
+                          <Text className="text-black font-bold text-base flex-1">
                             {item.name}
                           </Text>
-                          <Text className="text-xs text-gray-400 ml-2">
+                          <Text className="text-xs text-black ml-2">
                             {item.updatedAt}
                           </Text>
                         </View>
-                        <Text className="text-gray-500 text-sm mb-2">
+                        <Text className="text-black text-sm mb-2">
                           {item.product}
                         </Text>
                         <View

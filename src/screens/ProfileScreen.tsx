@@ -19,6 +19,14 @@ import storage from '@react-native-firebase/storage';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import type {StackNavigationProp} from '@react-navigation/stack';
+
+type RootStackParamList = {
+  Settings: undefined;
+  RegisterSellers: undefined;
+};
+
+type NavigationProp = StackNavigationProp<RootStackParamList>;
 
 
 import {useAuth} from '../contexts/Auth';
@@ -29,16 +37,18 @@ import {CustomModal} from '../components/CustomModal';
 import {Button} from '../components/Button';
 import {useNavigation} from '@react-navigation/native';
 import {applyMaskTelephone} from '../utils/applyMaskTelephone';
+import {useBottomNavigationPadding} from '../hooks/useBottomNavigationPadding';
 
 const db = getFirestore();
 const auth = getAuth();
 
 export function ProfileScreen() {
   const {signOut, userData} = useAuth();
+  const {paddingBottom} = useBottomNavigationPadding();
 
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
 
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp>();
 
   const selectImage = () => {
     launchImageLibrary({mediaType: 'photo', quality: 0.5}, response => {
@@ -278,7 +288,9 @@ export function ProfileScreen() {
   };
 
   return (
-    <View className="flex-1 bg-fifth_purple justify-center">
+    <View 
+      className="flex-1 bg-fifth_purple justify-center"
+      style={{paddingBottom}}>
       <View className="flex-row justify-between mr-7 ml-7">
         <BackButton />
 
@@ -305,7 +317,7 @@ export function ProfileScreen() {
               className="h-32 w-32 rounded-full border-2 border-white"
             />
             <View className="absolute -right-1 bg-white w-9 h-9 rounded-lg items-center justify-center">
-              <MaterialIcons name="edit" size={25} />
+              <MaterialIcons name="edit" size={25} color={colors.black} />
             </View>
           </View>
         </TouchableOpacity>
@@ -314,7 +326,7 @@ export function ProfileScreen() {
       <View className="items-center h-3/5 flex-col px-8">
         <View className="bg-white h-[55%] w-full rounded-3xl px-8 py-6 mt-8">
           <View className="flex-row justify-between items-center">
-            <Text className="text-lg font-bold">Informações do usuário</Text>
+            <Text className="text-lg text-black font-bold">Informações do usuário</Text>
             <TouchableOpacity
               activeOpacity={0.5}
               onPress={() =>
@@ -322,7 +334,7 @@ export function ProfileScreen() {
                   ? handleSaveUserInfo()
                   : setIsEditingUserInfo(true)
               }>
-              <Text className="font-regular text-lg">
+              <Text className="font-regular text-lg text-black">
                 {isEditingUserInfo ? 'Salvar' : 'Editar'}
               </Text>
             </TouchableOpacity>
@@ -333,19 +345,19 @@ export function ProfileScreen() {
             <View className="flex-row items-center gap-2">
               <FontAwesome name="user" size={25} color={colors.black} />
               <View className="flex-1">
-                <Text className="text-sm font-regular">Nome</Text>
+                <Text className="text-sm font-regular text-black">Nome</Text>
                 {isEditingUserInfo ? (
                   <TextInput
                     value={editedName}
                     onChangeText={validateName}
-                    className={`text-base font-bold p-0 m-0 ${!isNameValid ? 'text-red' : ''}`}
+                    className={`text-base font-bold p-0 m-0 text-black ${!isNameValid ? 'text-red' : ''}`}
                     style={{
                       lineHeight: 21,
                       includeFontPadding: false,
                     }}
                   />
                 ) : (
-                  <Text className="text-base font-bold">
+                  <Text className="text-base font-bold text-black">
                     {userData?.displayName}
                   </Text>
                 )}
@@ -356,7 +368,7 @@ export function ProfileScreen() {
             <View className="flex-row items-center gap-2">
               <FontAwesome name="phone-square" size={22} color={colors.black} />
               <View className="flex-1">
-                <Text className="text-sm font-regular">Telefone</Text>
+                <Text className="text-sm font-regular text-black">Telefone</Text>
                 {isEditingUserInfo ? (
                   <TextInput
                     value={editedPhone}
@@ -369,7 +381,7 @@ export function ProfileScreen() {
                     keyboardType="phone-pad"
                   />
                 ) : (
-                  <Text className="text-base font-bold">
+                  <Text className="text-base font-bold text-black">
                     {applyMaskTelephone(userData?.phone || '')}
                   </Text>
                 )}
@@ -379,7 +391,7 @@ export function ProfileScreen() {
 
           {/* Dados para pagamento */}
           <View className="flex-row justify-between items-center mt-4">
-            <Text className="text-lg font-bold">Dados para pagamento</Text>
+            <Text className="text-lg font-bold text-black">Dados para pagamento</Text>
             <TouchableOpacity
               activeOpacity={0.5}
               onPress={() =>
@@ -387,7 +399,7 @@ export function ProfileScreen() {
                   ? handleSavePaymentInfo()
                   : setIsEditingPaymentInfo(true)
               }>
-              <Text className="font-regular text-lg">
+              <Text className="font-regular text-lg text-black">
                 {isEditingPaymentInfo ? 'Salvar' : 'Editar'}
               </Text>
             </TouchableOpacity>
@@ -398,7 +410,7 @@ export function ProfileScreen() {
             <View className="flex-row items-center gap-2">
               <MaterialIcons name="pix" size={24} color={colors.black} />
               <View className="flex-1">
-                <Text className="text-sm font-regular">Chave pix</Text>
+                <Text className="text-sm font-regular text-black">Chave pix</Text>
                 {isEditingPaymentInfo ? (
                   <TextInput
                     value={editedPixKey}
@@ -410,7 +422,7 @@ export function ProfileScreen() {
                     }}
                   />
                 ) : (
-                  <Text className="text-base font-bold">
+                  <Text className="text-base font-bold text-black">
                     {userData?.pixKey || 'Não cadastrado'}
                   </Text>
                 )}

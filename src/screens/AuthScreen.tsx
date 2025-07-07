@@ -10,6 +10,7 @@ import {
 import images from '../data/images';
 import {useNavigation} from '@react-navigation/native';
 import messaging from '@react-native-firebase/messaging';
+import LogoAvantarSeguros from '../assets/images/avantar_seguros_consorcios_planos_de_saude.svg';
 
 export function AuthScreen() {
   const navigation = useNavigation();
@@ -32,7 +33,7 @@ export function AuthScreen() {
       className="flex-1 justify-center items-center"
       resizeMode="cover">
       <View className="mt-8 ml-7 mr-7">
-        <Image source={images.avantar_logo_seguros}></Image>
+        <LogoAvantarSeguros />
       </View>
       <View className="flex-1 pl-7 pr-7 w-full mb-10 justify-end">
         <View>

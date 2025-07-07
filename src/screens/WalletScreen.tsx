@@ -22,8 +22,11 @@ import {WithdrawalRequest} from '../services/wallet/Withdrawals';
 import {WalletSkeleton} from '../components/skeletons/WalletSkeleton';
 import {CustomModal} from '../components/CustomModal';
 import {Spinner} from '../components/Spinner';
+import {useBottomNavigationPadding} from '../hooks/useBottomNavigationPadding';
 
 export function WalletScreen() {
+  const {userData} = useAuth();
+  const {paddingBottom} = useBottomNavigationPadding();
   const [data, setData] = useState<WithdrawalRequest[]>([]);
   const [isLoadingBalance, setIsLoadingBalance] = useState(true);
   const [showBalance, setShowBalance] = useState(true);
@@ -35,9 +38,6 @@ export function WalletScreen() {
   });
   const [isLoadingButton, setIsLoadingButton] = useState(false);
 
-  const {userData} = useAuth();
-
-  // Verifica se todos os dados necessários foram carregados
   const isLoading = isLoadingBalance; // Só depende do balance agora
 
   useEffect(() => {
@@ -121,7 +121,9 @@ export function WalletScreen() {
 
   return (
     <ImageBackground source={images.bg_white} className="flex-1">
-      <View className="flex-1 mt-10">
+      <View 
+        className="flex-1 mt-10"
+        style={{paddingBottom}}>
         <View>
           <View className="justify-between items-center flex-row ml-5 mr-5">
             <BackButton borderColor="#4A04A5" color="#4A04A5" />

@@ -1,10 +1,24 @@
-import React, {useState} from 'react';
-import {View, TouchableWithoutFeedback, TouchableOpacity, Image} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {View, TouchableWithoutFeedback, TouchableOpacity, Image, Keyboard, Dimensions} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
+import type {StackNavigationProp} from '@react-navigation/stack';
+
+type RootStackParamList = {
+  WaitingConfirmationScreen: undefined;
+  IndicateInBulk: undefined;
+  Rules: undefined;
+  Status: undefined;
+  Settings: undefined;
+  RegisterSellers: undefined;
+  NoPermission: undefined;
+  Notifications: undefined;
+};
+
+type NavigationProp = StackNavigationProp<RootStackParamList>;
 
 import {HomeScreen} from '../screens/HomeScreen';
 import {WalletScreen} from '../screens/WalletScreen';
@@ -22,7 +36,31 @@ const Tab = createBottomTabNavigator();
 export function BottomNavigator() {
   const { registrationStatus } = useAuth();
   const [showModal, setShowModal] = useState(false);
-  const navigation = useNavigation();
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const navigation = useNavigation<NavigationProp>();
+
+  // Margem lateral da bottom navigation
+  const sideMargin = 28;
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        setKeyboardVisible(true);
+      },
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setKeyboardVisible(false);
+      },
+    );
+
+    return () => {
+      keyboardDidHideListener?.remove();
+      keyboardDidShowListener?.remove();
+    };
+  }, []);
 
   return (
     <>
@@ -33,13 +71,23 @@ export function BottomNavigator() {
             borderRadius: 20,
             height: 65,
             position: 'absolute',
-            marginBottom: 30,
-            marginLeft: 28,
-            marginRight: 28,
+            bottom: keyboardVisible ? -100 : 30,
+            left: sideMargin,
+            right: sideMargin,
             justifyContent: 'center',
             alignItems: 'center',
-            paddingBottom: 0, // Remove padding que pode desalinhar
-            paddingTop: 0,    // Remove padding que pode desalinhar
+            paddingBottom: 0,
+            paddingTop: 0,
+            elevation: 8,
+            shadowColor: '#000',
+            shadowOffset: {
+              width: 0,
+              height: 4,
+            },
+            shadowOpacity: keyboardVisible ? 0 : 0.3,
+            shadowRadius: 4,
+            transform: [{translateY: keyboardVisible ? 100 : 0}],
+            zIndex: 1000,
           },
           tabBarShowLabel: false,
           headerShown: false,
@@ -64,8 +112,8 @@ export function BottomNavigator() {
             return (
               <IconComponent
                 name={iconName}
-                size={28} // Tamanho mais consistente
-                color={focused ? colors.primary_purple : colors.gray} // Cor baseada no foco
+                size={28}
+                color={focused ? colors.primary_purple : colors.gray}
               />
             );
           },
@@ -81,7 +129,7 @@ export function BottomNavigator() {
                   flex: 1,
                   justifyContent: 'center',
                   alignItems: 'center',
-                  height: '100%', // Usa toda a altura disponível
+                  height: '100%',
                 }}>
                 {props.children}
               </TouchableOpacity>
@@ -108,17 +156,17 @@ export function BottomNavigator() {
                   onPress={() => {
                     registrationStatus 
                       ? setShowModal(true) 
-                      : navigation.navigate('WaitingConfirmation') // Corrigido aqui
+                      : navigation.navigate('WaitingConfirmationScreen')
                   }}
                   style={{
                     justifyContent: 'center',
                     alignItems: 'center',
-                    width: 55, // Tamanho mais proporcional
+                    width: 55,
                     height: 55,
-                    borderRadius: 27.5, // Metade da width/height para círculo perfeito
+                    borderRadius: 27.5,
                     backgroundColor: colors.blue,
-                    elevation: 3, // Sombra no Android
-                    shadowColor: '#000', // Sombra no iOS
+                    elevation: 3,
+                    shadowColor: '#000',
                     shadowOffset: {
                       width: 0,
                       height: 2,

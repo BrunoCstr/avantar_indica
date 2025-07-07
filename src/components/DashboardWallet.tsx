@@ -135,7 +135,7 @@ const DashboardChart = () => {
               <View className={`w-24 h-6 items-center justify-center`}>
                 <Text
                   className={`text-sm font-semiBold text-center ${
-                    selectedPeriod === period ? 'text-white' : 'text-gray-600'
+                    selectedPeriod === period ? 'text-white' : 'text-black'
                   }`}>
                   {period}
                 </Text>
@@ -161,7 +161,7 @@ const DashboardChart = () => {
                 <View key={index} className="items-center flex-1 mx-1">
                   {/* Valor acima da barra */}
                   <Text
-                    className="text-gray-600 mb-2 text-center"
+                    className="text-black mb-2 text-center"
                     style={{
                       fontSize: 10,
                     }}>
@@ -189,7 +189,7 @@ const DashboardChart = () => {
 
                   {/* Label do período */}
                   <Text
-                    className="font-regular text-gray-700 mt-3 text-center"
+                    className="font-regular text-black mt-3 text-center"
                     style={{
                       fontSize: 10,
                     }}>

@@ -51,12 +51,12 @@ const DashboardIndicacoes = ({data}: {data: indicationsDataArray}) => {
       </View>
 
       <View className="flex-1 mr-4">
-        <Text className="text-base font-semibold text-gray-800 mb-2">
+        <Text className="text-base font-semibold text-black mb-2">
           {item.product}
         </Text>
 
         <View className="flex-row items-center gap-3">
-          <View className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+          <View className="flex-1 h-1.5 bg-gray rounded-full overflow-hidden">
             <View
               className="h-full rounded-full"
               style={{
@@ -65,13 +65,13 @@ const DashboardIndicacoes = ({data}: {data: indicationsDataArray}) => {
               }}
             />
           </View>
-          <Text className="text-xs text-gray-500 font-medium min-w-8">
+          <Text className="text-xs text-black font-medium min-w-8">
             {item.percentage}%
           </Text>
         </View>
       </View>
 
-      <Text className="text-2xl font-bold text-gray-800 min-w-10 text-right">
+      <Text className="text-2xl font-bold text-black min-w-10 text-right">
         {item.count}
       </Text>
     </View>
@@ -85,7 +85,7 @@ const DashboardIndicacoes = ({data}: {data: indicationsDataArray}) => {
           <Text className="text-lg font-bold text-fifth_purple mb-1 text-center">
             Nenhuma indicação encontrada
           </Text>
-          <Text className="text-sm text-gray-500 text-center">
+          <Text className="text-sm text-black text-center">
             Você ainda não possui indicações registradas. Quando você indicar alguém, elas aparecerão aqui!
           </Text>
         </View>
