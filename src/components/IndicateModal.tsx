@@ -1,6 +1,6 @@
 
 import React, {useEffect, useState} from 'react';
-import {Alert, Modal, View, Text, TextInput} from 'react-native';
+import { Modal, View, Text, TextInput, KeyboardAvoidingView, Platform} from 'react-native';
 import {BlurView} from '@react-native-community/blur';
 import {indicationSchema, IndicationSchema} from '../schemas/validationSchema';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -115,8 +115,10 @@ export function IndicateModal({visible, onClose}: ModalProps) {
         blurType="dark"
         blurAmount={5}
         reducedTransparencyFallbackColor="transparent">
-        <View className="flex-1 justify-center items-center">
-          <View className="w-[80%] bg-fifth_purple rounded-2xl border-2 border-blue px-7 py-7">
+        <KeyboardAvoidingView 
+          className="flex-1 justify-center items-center px-5"
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View className="w-full max-w-sm bg-fifth_purple rounded-2xl border-2 border-blue px-7 py-7">
             <View className="justify-between items-center flex-row">
               <BackButton onPress={onClose} />
               <Text className="text-blue font-bold text-3xl absolute left-1/2 -translate-x-1/2">
@@ -244,7 +246,7 @@ export function IndicateModal({visible, onClose}: ModalProps) {
               </View>
             </View>
           </View>
-        </View>
+                </KeyboardAvoidingView>
       </BlurView>
 
       <CustomModal

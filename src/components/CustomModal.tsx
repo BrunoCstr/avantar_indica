@@ -1,5 +1,5 @@
 import React from 'react';
-import {Modal, View, Text, TouchableOpacity, ScrollView, Dimensions} from 'react-native';
+import {Modal, View, Text, TouchableOpacity, ScrollView, Dimensions, KeyboardAvoidingView, Platform} from 'react-native';
 import {BlurView} from '@react-native-community/blur';
 
 interface ModalProps {
@@ -35,7 +35,9 @@ export function CustomModal({
         blurType="dark"
         blurAmount={5}
         reducedTransparencyFallbackColor="transparent">
-        <View className="flex-1 justify-center items-center px-4">
+        <KeyboardAvoidingView 
+          className="flex-1 justify-center items-center px-4"
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View 
             style={{
               maxWidth: maxModalWidth,
@@ -44,12 +46,12 @@ export function CustomModal({
             className="bg-[#FFF] rounded-2xl border-2 border-blue px-5 py-5">
             
             {/* Título */}
-            <Text className="text-lg font-bold text-center mb-3">
+            <Text className="text-lg font-bold text-black text-center mb-3">
               {title}
             </Text>
             
             {/* Descrição */}
-            <Text className="text-base font-regular text-center text-gray-500 mb-5">
+            <Text className="text-base font-regular text-black text-center text-gray-500 mb-5">
               {description}
             </Text>
             
@@ -90,7 +92,7 @@ export function CustomModal({
               )}
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </BlurView>
     </Modal>
   );

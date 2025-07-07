@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Dimensions } from 'react-native';
-import ContentLoader, { Rect } from 'react-content-loader/native';
 
 export function IndicateInBulkSkeleton() {
   const { width } = Dimensions.get('window');
@@ -8,38 +7,63 @@ export function IndicateInBulkSkeleton() {
 
   return (
     <View style={{ flex: 1, marginHorizontal: 20, marginTop: 40 }}>
-      <ContentLoader
-        speed={1.2}
-        width={`${contentWidth}`}
-        height={800}
-        viewBox={`0 0 ${contentWidth} 800`}
-        backgroundColor="#D8CDE8"
-        foregroundColor="#EFEAF6"
-      >
-        {/* Header */}
-        <Rect x="0" y="0" rx="8" ry="8" width={30} height={32} /> {/* BackButton */}
-        <Rect x={`${contentWidth / 2 - 100}`} y="0" rx="8" ry="8" width={200} height={32} /> {/* Título */}
+      {/* Header */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <View style={{ width: 30, height: 32, backgroundColor: '#D8CDE8', borderRadius: 8 }} />
+        <View style={{ width: 200, height: 32, backgroundColor: '#D8CDE8', borderRadius: 8 }} />
+        <View style={{ width: 30 }} />
+      </View>
 
-        {/* Texto "Selecione os contatos:" */}
-        <Rect x={`${contentWidth / 2 - 75}`} y="60" rx="4" ry="4" width={150} height={20} />
+      {/* Texto "Selecione os contatos:" */}
+      <View style={{ alignItems: 'center', marginBottom: 20 }}>
+        <View style={{ width: 150, height: 20, backgroundColor: '#D8CDE8', borderRadius: 4 }} />
+      </View>
 
-        {/* Input de busca */}
-        <Rect x="0" y="90" rx="10" ry="10" width={`${contentWidth}`} height={55} />
+      {/* Input de busca */}
+      <View style={{ width: contentWidth, height: 55, backgroundColor: '#D8CDE8', borderRadius: 10, marginBottom: 20 }} />
 
-        {/* Lista de contatos (6 itens simulados) */}
+      {/* Lista de contatos (6 itens simulados) */}
+      <View style={{ flex: 1 }}>
         {[...Array(6)].map((_, i) => {
-          const yOffset = 160 + i * 80;
           return (
-            <React.Fragment key={i}>
-              <Rect x="10" y={`${yOffset + 5}`} rx="6" ry="6" width={`${contentWidth - 80}`} height={18} />
-              <Rect x="10" y={`${yOffset + 30}`} rx="6" ry="6" width={`${contentWidth - 120}`} height={14} />
-            </React.Fragment>
+            <View key={i} style={{ marginBottom: 16 }}>
+              <View style={{ 
+                backgroundColor: '#EFEAF6', 
+                borderRadius: 8, 
+                padding: 12, 
+                borderWidth: 1, 
+                borderColor: '#D8CDE8' 
+              }}>
+                <View style={{ 
+                  width: contentWidth - 80, 
+                  height: 18, 
+                  backgroundColor: '#D8CDE8', 
+                  borderRadius: 6, 
+                  marginBottom: 8 
+                }} />
+                <View style={{ 
+                  width: contentWidth - 120, 
+                  height: 14, 
+                  backgroundColor: '#D8CDE8', 
+                  borderRadius: 6, 
+                  marginBottom: 8 
+                }} />
+                <View style={{ 
+                  width: contentWidth - 160, 
+                  height: 14, 
+                  backgroundColor: '#D8CDE8', 
+                  borderRadius: 6 
+                }} />
+              </View>
+            </View>
           );
         })}
+      </View>
 
-        {/* Botão "ENVIAR" */}
-        <Rect x="0" y="700" rx="12" ry="12" width={`${contentWidth}`} height={60} />
-      </ContentLoader>
+      {/* Botão "ENVIAR" */}
+      <View style={{ marginTop: 'auto', marginBottom: 40 }}>
+        <View style={{ width: contentWidth, height: 60, backgroundColor: '#D8CDE8', borderRadius: 12 }} />
+      </View>
     </View>
   );
 }
