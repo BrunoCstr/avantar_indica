@@ -8,7 +8,10 @@ const EMAIL_PASS = defineSecret('EMAIL_PASS');
 const WEBHOOK_BOTCONVERSA = defineSecret('WEBHOOK_BOTCONVERSA');
 
 export const indicated = functions.firestore.onDocumentCreated(
-  {document: 'indications/{indicationId}', secrets: [EMAIL_USER, EMAIL_PASS, WEBHOOK_BOTCONVERSA]},
+  {
+    document: 'indications/{indicationId}',
+    secrets: [EMAIL_USER, EMAIL_PASS, WEBHOOK_BOTCONVERSA],
+  },
   async event => {
     // Pegando os dados da indicação
     const newIndication = event.data?.data();
@@ -31,6 +34,75 @@ export const indicated = functions.firestore.onDocumentCreated(
     }
 
     const unitData = doc.data();
+
+    // Buscando usuários admin_unidade da unidade que recebeu a indicação
+    try {
+      const usersQuery = admin
+        .firestore()
+        .collection('users')
+        .where('affiliated_to', '==', newIndication.unitId)
+        .where('rule', '==', 'admin_unidade');
+
+      const usersSnapshot = await usersQuery.get();
+
+      // Criando notificações para cada admin_unidade encontrado
+      for (const userDoc of usersSnapshot.docs) {
+        const userData = userDoc.data();
+        const userId = userDoc.id;
+
+        // Criando notificação na subcoleção notifications
+        try {
+          await admin
+            .firestore()
+            .collection(`users/${userId}/notifications`)
+            .add({
+              title: '🔔 Nova indicação recebida!',
+              body: 'Você acabou de receber uma nova indicação. Acesse o app para ver os detalhes e entrar em contato com o cliente.',
+              read: false,
+              createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            });
+
+          // Enviando push notification se o usuário tem fcmToken
+          if (userData.fcmToken) {
+            const payload = {
+              token: userData.fcmToken,
+              notification: {
+                title: '🔔 Nova indicação recebida!',
+                body: 'Você acabou de receber uma nova indicação. Acesse o app para ver os detalhes e entrar em contato com o cliente.',
+              },
+              android: {
+                notification: {
+                  icon: 'ic_notification',
+                  color: '#6600CC',
+                },
+              },
+              apns: {
+                payload: {
+                  aps: {
+                    badge: 1,
+                    sound: 'default',
+                  },
+                },
+              },
+            };
+
+            try {
+              await admin.messaging().send(payload);
+            } catch (error) {
+              console.error('Erro ao enviar push notification:', error);
+            }
+          }
+        } catch (error) {
+          console.error(
+            'Erro ao criar notificação para usuário:',
+            userId,
+            error,
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao buscar usuários admin_unidade:', error);
+    }
 
     // Mandando o email para a unidade que recebeu a indicação
     const transporter = nodemailer.createTransport({

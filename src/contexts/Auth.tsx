@@ -201,8 +201,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
           notificationsPreferences: {
             campaigns: true,
             withdraw: true,
-            status: true
-          }
+            status: true,
+          },
         },
         {merge: true},
       );
@@ -213,12 +213,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         await auth().currentUser?.delete();
       }
       console.error('Erro ao criar usuário:', err);
-      
+
       // Se for erro de validação de senha, retornar código específico
       if (err.message && err.message.includes('A senha deve conter:')) {
         return 'auth/weak-password';
       }
-      
+
       return err.code;
     }
   }
@@ -230,22 +230,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         password,
       );
       const user = userCredential.user;
+      
+      // Atualizar o documento do usuário diretamente
+      const userRef = doc(db, 'users', user.uid);
+      
+      // Solicitar permissões de notificação e obter FCM token
+      let fcmToken = null;
+      try {
+        await messaging().requestPermission();
+        fcmToken = await messaging().getToken();
+        console.log('FCM Token obtido durante login:', fcmToken);
+      } catch (fcmError) {
+        console.warn('Erro ao obter FCM token durante login:', fcmError);
+      }
 
-      const usersRef = collection(db, 'users');
-      const q = query(usersRef, where('uid', '==', user.uid));
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach(async docSnap => {
-        await updateDoc(doc(db, 'users', docSnap.id), {isFirstLogin: false});
+      // Atualizar o documento do usuário
+      await updateDoc(userRef, {
+        isFirstLogin: false,
+        fcmToken: fcmToken,
       });
-
+      
+      console.log('Login realizado com sucesso e FCM token atualizado para o usuário:', user.uid);
     } catch (err: any) {
       console.error('Erro ao logar o usuário:', err);
-      
+
       // Se for erro de validação de senha, retornar código específico
       if (err.message && err.message.includes('A senha deve conter:')) {
         return 'auth/weak-password';
       }
-      
+
       return err.code;
     }
   }

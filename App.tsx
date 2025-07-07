@@ -7,6 +7,7 @@ import './global.css';
 import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
 import {globalStyles} from './src/styles/globalStyles';
 import RNBootSplash from 'react-native-bootsplash';
+import messaging from '@react-native-firebase/messaging';
 
 // Ignorar warnings específicos que podem estar causando problemas
 LogBox.ignoreLogs([
@@ -27,17 +28,49 @@ TextInput.defaultProps = {
   style: [globalStyles.defaultInput, TextInput.defaultProps?.style],
 };
 
+// Função para configurar FCM
+async function setupFCM() {
+  try {
+    // Solicitar permissões de notificação
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+    if (enabled) {
+      console.log('Permissões de notificação concedidas');
+      
+      // Obter o token inicial
+      const token = await messaging().getToken();
+      console.log('FCM Token inicial:', token);
+      
+      // Configurar listener para mudanças no token
+      messaging().onTokenRefresh(token => {
+        console.log('FCM Token renovado:', token);
+      });
+    } else {
+      console.log('Permissões de notificação negadas');
+    }
+  } catch (error) {
+    console.error('Erro ao configurar FCM:', error);
+  }
+}
+
 export default function App() {
   useEffect(() => {
-    const hideSplash = async () => {
+    const initializeApp = async () => {
       try {
+        // Configurar FCM
+        await setupFCM();
+        
+        // Esconder splash screen
         await RNBootSplash.hide({ fade: true });
       } catch (error) {
-        console.warn('Error hiding splash screen:', error);
+        console.warn('Error during app initialization:', error);
       }
     };
     
-    hideSplash();
+    initializeApp();
   }, []);
 
   return (

@@ -35,6 +35,71 @@ export const indicatedInBulk = functions.firestore.onDocumentCreated(
 
     const unitData = doc.data();
 
+    // Buscando usuários admin_unidade da unidade que recebeu a indicação
+    try {
+      const usersQuery = admin
+        .firestore()
+        .collection('users')
+        .where('affiliated_to', '==', newPackagedIndication.unitId)
+        .where('rule', '==', 'admin_unidade');
+
+      const usersSnapshot = await usersQuery.get();
+
+      // Criando notificações para cada admin_unidade encontrado
+      for (const userDoc of usersSnapshot.docs) {
+        const userData = userDoc.data();
+        const userId = userDoc.id;
+
+        // Criando notificação na subcoleção notifications
+        try {
+          await admin
+            .firestore()
+            .collection(`users/${userId}/notifications`)
+            .add({
+              title: '🔔 Nova indicação em massa recebida!',
+              body: `Você acabou de receber ${newPackagedIndication.indications.length} novas indicações. Acesse o app para ver os detalhes e entrar em contato com os clientes.`,
+              read: false,
+              createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            });
+
+          // Enviando push notification se o usuário tem fcmToken
+          if (userData.fcmToken) {
+            const payload = {
+              token: userData.fcmToken,
+              notification: {
+                title: '🔔 Nova indicação em massa recebida!',
+                body: `Você acabou de receber ${newPackagedIndication.indications.length} novas indicações. Acesse o app para ver os detalhes e entrar em contato com os clientes.`,
+              },
+              android: {
+                notification: {
+                  icon: 'ic_notification',
+                  color: '#6600CC',
+                },
+              },
+              apns: {
+                payload: {
+                  aps: {
+                    badge: 1,
+                    sound: 'default',
+                  },
+                },
+              },
+            };
+
+            try {
+              await admin.messaging().send(payload);
+            } catch (error) {
+              console.error('Erro ao enviar push notification:', error);
+            }
+          }
+        } catch (error) {
+          console.error('Erro ao criar notificação para usuário:', userId, error);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao buscar usuários admin_unidade:', error);
+    }
+
     // Mandando o email para a unidade que recebeu a indicação
     const transporter = nodemailer.createTransport({
       host: 'smtp.dreamhost.com',
