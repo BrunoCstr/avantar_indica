@@ -24,7 +24,7 @@ export function IndicateInBulkSkeleton() {
 
       {/* Lista de contatos (6 itens simulados) */}
       <View style={{ flex: 1 }}>
-        {[...Array(6)].map((_, i) => {
+        {[...Array(5)].map((_, i) => {
           return (
             <View key={i} style={{ marginBottom: 16 }}>
               <View style={{ 
