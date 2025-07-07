@@ -35,6 +35,18 @@ const DashboardIndicacoes = ({data}: {data: indicationsDataArray}) => {
         return 'ship';
       case 'RESIDENCIAL':
         return 'house-chimney';
+      case 'PRODUTOS FINANCEIROS':
+        return 'money-check-dollar';
+      case 'RURAL':
+        return 'plant-wilt';
+      case 'SAÚDE':
+        return 'heart-pulse';
+      case 'SERVICOS':
+        return 'screwdriver-wrench';
+      case 'GARANTIA E RESPONSABILIDADES':
+        return 'shield-halved';
+      case 'CONSÓRCIO':
+        return 'money-check';
       default:
         return 'shield-halved';
     }

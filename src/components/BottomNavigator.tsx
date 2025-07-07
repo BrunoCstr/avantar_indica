@@ -76,8 +76,9 @@ export function BottomNavigator() {
             right: sideMargin,
             justifyContent: 'center',
             alignItems: 'center',
-            paddingBottom: 0,
-            paddingTop: 0,
+            paddingHorizontal: 12,
+            paddingBottom: 8,
+            paddingTop: 8,
             elevation: 8,
             shadowColor: '#000',
             shadowOffset: {
@@ -130,6 +131,7 @@ export function BottomNavigator() {
                   justifyContent: 'center',
                   alignItems: 'center',
                   height: '100%',
+                  paddingHorizontal: 8,
                 }}>
                 {props.children}
               </TouchableOpacity>
