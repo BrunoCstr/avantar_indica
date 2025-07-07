@@ -32,19 +32,19 @@
 		<true/>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string/>
+	<string></string>
 	<key>NSContactsUsageDescription</key>
-    <string>Precisamos acessar seus contatos para importar nome e telefone.</string>
+	<string>Precisamos acessar seus contatos para importar nome e telefone.</string>
 	<key>NSUserTrackingUsageDescription</key>
-    <string>Este app usará notificações para mantê-lo informado</string>
+	<string>Este app usará notificações para mantê-lo informado</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-    <string>Preciso de permissão para acessar sua galeria de fotos</string>
-    <key>NSCameraUsageDescription</key>
-    <string>Preciso de permissão para tirar fotos</string>
-    <key>UIBackgroundModes</key>
-    <array>
-    <string>remote-notification</string>
-    </array>
+	<string>Preciso de permissão para acessar sua galeria de fotos</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Preciso de permissão para tirar fotos</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>BootSplash</string>
 	<key>UIRequiredDeviceCapabilities</key>

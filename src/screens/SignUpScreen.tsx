@@ -37,6 +37,7 @@ export function SignUpScreen() {
   const [showPassword, setShowPassword] = useState(true);
   const [showConfirmPassword, setShowConfirmPassword] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [modalMessage, setModalMessage] = useState({
     title: '',
     description: '',
@@ -82,8 +83,9 @@ export function SignUpScreen() {
     const {confirmPassword, ...dataFiltred} = data;
 
     const unit = units.find(u => u.unitId === dataFiltred.affiliated_to);
-    const unitName = unit?.name ?? "";
+    const unitName = unit?.name ?? '';
 
+    setIsLoading(true);
     try {
       const errorCode = await signUp(
         dataFiltred.fullName,
@@ -91,7 +93,7 @@ export function SignUpScreen() {
         dataFiltred.password,
         dataFiltred.affiliated_to,
         dataFiltred.phone,
-        unitName
+        unitName,
       );
 
       if (errorCode) {
@@ -111,7 +113,8 @@ export function SignUpScreen() {
           case 'auth/weak-password':
             setModalMessage({
               title: 'Senha fraca',
-              description: 'A senha deve conter:\n• Pelo menos 8 caracteres\n• Pelo menos uma letra maiúscula\n• Pelo menos uma letra minúscula\n• Pelo menos um número\n• Pelo menos um caractere especial (!@#$%^&*(),.?":{}|<>)\n• Não pode ser uma senha comum',
+              description:
+                'A senha deve conter:\n• Pelo menos 8 caracteres\n• Pelo menos uma letra maiúscula\n• Pelo menos uma letra minúscula\n• Pelo menos um número\n• Pelo menos um caractere especial (!@#$%^&*(),.?":{}|<>)\n• Não pode ser uma senha comum',
             });
             break;
           case 'auth/operation-not-allowed':
@@ -135,6 +138,13 @@ export function SignUpScreen() {
         }
 
         setIsModalVisible(true);
+      } else {
+        // Se não há erro, mostrar mensagem de sucesso
+        setModalMessage({
+          title: 'Quase lá!',
+          description: 'Verifique seu e-mail para validar seu cadastro!',
+        });
+        setIsModalVisible(true);
       }
     } catch (error: any) {
       // Capturar erro de validação de senha com mensagem detalhada
@@ -146,12 +156,14 @@ export function SignUpScreen() {
         setIsModalVisible(true);
         return;
       }
-      
+
       setModalMessage({
         title: 'Falha ao cadastrar o usuário',
         description: 'Erro desconhecido, entre em contato com o suporte!',
       });
       setIsModalVisible(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -339,7 +351,8 @@ export function SignUpScreen() {
                   textColor="tertiary_purple"
                   height={55}
                   fontSize={25}
-                  fontWeight='bold'
+                  fontWeight="bold"
+                  isLoading={isLoading}
                 />
               </View>
 

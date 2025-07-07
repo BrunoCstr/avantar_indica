@@ -3,7 +3,7 @@
     <item>
         <bitmap
             android:gravity="center"
-            android:src="@mipmap/ic_splash_logo"
+            android:src="@drawable/bootsplash_logo"
              />
     </item>
 </layer-list>

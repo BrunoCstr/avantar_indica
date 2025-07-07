@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {View, TouchableWithoutFeedback, TouchableOpacity, Image, Keyboard, Dimensions} from 'react-native';
+import {View, TouchableOpacity, Keyboard, Dimensions} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -26,7 +26,6 @@ import {StatusScreen} from '../screens/StatusScreen';
 import {ProfileScreen} from '../screens/ProfileScreen';
 import {colors} from '../styles/colors';
 import {IndicateModal} from './IndicateModal';
-import images from '../data/images';
 import PlusIcon from '../assets/images/plus.svg';
 import { useAuth } from '../contexts/Auth';
 import {WaitingConfirmationScreen} from '../screens/WaitingConfirmationScreen';
@@ -41,6 +40,7 @@ export function BottomNavigator() {
 
   // Margem lateral da bottom navigation
   const sideMargin = 28;
+  const screenWidth = Dimensions.get('window').width;
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -72,8 +72,8 @@ export function BottomNavigator() {
             height: 65,
             position: 'absolute',
             bottom: keyboardVisible ? -100 : 30,
-            left: sideMargin,
-            right: sideMargin,
+            width: screenWidth - (sideMargin * 2),
+            alignSelf: 'center',
             justifyContent: 'center',
             alignItems: 'center',
             paddingHorizontal: 12,

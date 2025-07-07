@@ -41,7 +41,7 @@ interface AuthContextData {
     phone: string,
     unitName: string,
   ) => Promise<string | null>;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<string | null>;
   signOut: () => Promise<void>;
   registrationStatus: boolean;
   forgotPassword: (email: string) => Promise<string | null>;
@@ -237,39 +237,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       querySnapshot.forEach(async docSnap => {
         await updateDoc(doc(db, 'users', docSnap.id), {isFirstLogin: false});
       });
+
     } catch (err: any) {
-      switch (err.code) {
-        case 'auth/invalid-email':
-          Alert.alert('Falha ao realizar o login', 'E-mail inválido!');
-          break;
-        case 'auth/user-disabled':
-          Alert.alert('Falha ao realizar o login', 'Conta desativada.');
-          break;
-        case 'auth/user-not-found':
-          Alert.alert('Falha ao realizar o login', 'Usuário não encontrado.');
-          break;
-        case 'auth/wrong-password':
-          Alert.alert('Falha ao realizar o login', 'Senha incorreta.');
-          break;
-        case 'auth/too-many-requests':
-          Alert.alert(
-            'Falha ao realizar o login',
-            'Muitas tentativas. Tente novamente mais tarde.',
-          );
-          break;
-        case 'auth/network-request-failed':
-          Alert.alert(
-            'Falha ao realizar o login',
-            'Falha de conexão com a rede.',
-          );
-          break;
-        case 'auth/invalid-credential':
-          Alert.alert('Falha ao realizar o login', 'Credenciais inválidas.');
-          break;
-        default:
-          Alert.alert('Erro desconhecido', 'entre em contato com o suporte!');
-          console.error(err);
+      console.error('Erro ao logar o usuário:', err);
+      
+      // Se for erro de validação de senha, retornar código específico
+      if (err.message && err.message.includes('A senha deve conter:')) {
+        return 'auth/weak-password';
       }
+      
+      return err.code;
     }
   }
 
