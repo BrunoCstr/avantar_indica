@@ -1,4 +1,4 @@
-import app from '../../firebaseConfig';
+
 import React, {useEffect, useState} from 'react';
 import {Alert, Modal, View, Text, TextInput} from 'react-native';
 import {BlurView} from '@react-native-community/blur';
@@ -22,7 +22,7 @@ import {BackButton} from '../components/BackButton';
 import {CustomModal} from '../components/CustomModal';
 import {useAuth} from '../contexts/Auth';
 
-const db = getFirestore(app);
+const db = getFirestore();
 
 interface ModalProps {
   visible: boolean;

@@ -19,13 +19,12 @@ import {
 import {formatDistanceToNow} from 'date-fns';
 import {ptBR} from 'date-fns/locale';
 
-import app from '../../firebaseConfig';
 import {colors} from '../styles/colors';
 import images from '../data/images';
 import {NotificationsSkeleton} from '../components/skeletons/NotificationsSkeleton';
 import {BackButton} from '../components/BackButton';
 
-const db = getFirestore(app);
+const db = getFirestore();
 
 export function Notifications() {
   const {userData} = useAuth();

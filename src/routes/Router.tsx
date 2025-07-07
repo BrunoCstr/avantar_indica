@@ -11,12 +11,18 @@ export function Router() {
   const [appReady, setAppReady] = useState(false);
 
   useEffect(() => {
-    if (!isLoading) {
-      setTimeout(() => {
-        BootSplash.hide({fade: true})
+    const initializeApp = async () => {
+      if (!isLoading) {
+        try {
+          await BootSplash.hide({fade: true});
+        } catch (error) {
+          console.warn('Error hiding bootsplash:', error);
+        }
         setAppReady(true);
-      }, 500);
-    }
+      }
+    };
+
+    initializeApp();
   }, [isLoading]);
 
   if(!appReady) return null

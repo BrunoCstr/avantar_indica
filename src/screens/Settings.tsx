@@ -51,6 +51,7 @@ export function Settings() {
     description: '',
   });
   const [modalButtonText2, setModalButtonText2] = useState('');
+  const [modalCancelButtonText, setModalCancelButtonText] = useState('');
   const [showDeactivateModal, setShowDeactivateModal] = useState(false);
   const {userData} = useAuth();
 
@@ -80,6 +81,7 @@ export function Settings() {
           'Para desabilitar, você será direcionado para as configurações do sistema.',
       });
       setModalButtonText2('CONFIGURAÇÕES');
+      setModalCancelButtonText('CANCELAR');
       setIsModalVisible(true);
     } else {
       if (CONTACTS_PERMISSION) {
@@ -109,12 +111,16 @@ export function Settings() {
         title: 'Sucesso',
         description: 'Preferências de notificação atualizadas!',
       });
+      setModalButtonText2('');
+      setModalCancelButtonText('');
       setIsModalVisible(true);
     } catch (error) {
       setModalMessage({
         title: 'Erro',
         description: 'Não foi possível atualizar as preferências.',
       });
+      setModalButtonText2('');
+      setModalCancelButtonText('');
       setIsModalVisible(true);
     }
   };
@@ -127,6 +133,7 @@ export function Settings() {
         description: 'Preencha todos os campos para alterar a senha.',
       });
       setModalButtonText2('');
+      setModalCancelButtonText('');
       setIsModalVisible(true);
       return;
     }
@@ -137,6 +144,7 @@ export function Settings() {
         description: 'A nova senha e a confirmação não coincidem.',
       });
       setModalButtonText2('');
+      setModalCancelButtonText('');
       setIsModalVisible(true);
       return;
     }
@@ -149,6 +157,7 @@ export function Settings() {
         description: passwordValidation.message,
       });
       setModalButtonText2('');
+      setModalCancelButtonText('');
       setIsModalVisible(true);
       return;
     }
@@ -166,6 +175,7 @@ export function Settings() {
         description: 'Senha alterada com sucesso!',
       });
       setModalButtonText2('');
+      setModalCancelButtonText('');
       setIsModalVisible(true);
     } catch (error: any) {
       setModalMessage({
@@ -173,6 +183,7 @@ export function Settings() {
         description: error.message || 'Erro ao alterar senha. Tente novamente.',
       });
       setModalButtonText2('');
+      setModalCancelButtonText('');
       setIsModalVisible(true);
     }
   };
@@ -189,6 +200,7 @@ export function Settings() {
         description: 'Sua conta foi desativada com sucesso. Você será redirecionado para a tela de login.',
       });
       setModalButtonText2('');
+      setModalCancelButtonText('');
       setIsModalVisible(true);
       
       // O usuário será automaticamente redirecionado para login após o signOut
@@ -198,6 +210,7 @@ export function Settings() {
         description: 'Não foi possível desativar a conta. Tente novamente.',
       });
       setModalButtonText2('');
+      setModalCancelButtonText('');
       setIsModalVisible(true);
     }
   };
@@ -586,12 +599,13 @@ export function Settings() {
         onClose={() => {
           setIsModalVisible(false);
           setModalButtonText2('');
+          setModalCancelButtonText('');
         }}
         title={modalMessage.title}
         description={modalMessage.description}
-        buttonText="CANCELAR"
+        buttonText={modalButtonText2 ? "CANCELAR" : "FECHAR"}
         buttonText2={modalButtonText2}
-        onPress={() => openSettings()}
+        onPress={modalButtonText2 ? () => openSettings() : undefined}
       />
       <CustomModal
         visible={showDeactivateModal}

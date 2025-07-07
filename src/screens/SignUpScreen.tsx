@@ -26,11 +26,11 @@ import images from '../data/images';
 import {Button} from '../components/Button';
 import {useAuth} from '../contexts/Auth';
 import {colors} from '../styles/colors';
-import app from '../../firebaseConfig';
+
 import {BackButton} from '../components/BackButton';
 import {CustomModal} from '../components/CustomModal';
 
-const db = getFirestore(app);
+const db = getFirestore();
 
 export function SignUpScreen() {
   const [units, setUnits] = useState<any[]>([]);
@@ -84,55 +84,73 @@ export function SignUpScreen() {
     const unit = units.find(u => u.unitId === dataFiltred.affiliated_to);
     const unitName = unit?.name ?? "";
 
-    const errorCode = await signUp(
-      dataFiltred.fullName,
-      dataFiltred.email,
-      dataFiltred.password,
-      dataFiltred.affiliated_to,
-      dataFiltred.phone,
-      unitName
-    );
+    try {
+      const errorCode = await signUp(
+        dataFiltred.fullName,
+        dataFiltred.email,
+        dataFiltred.password,
+        dataFiltred.affiliated_to,
+        dataFiltred.phone,
+        unitName
+      );
 
-    if (errorCode) {
-      switch (errorCode) {
-        case 'auth/email-already-in-use':
-          setModalMessage({
-            title: 'Falha ao cadastrar o usuário',
-            description: 'E-mail já cadastrado.',
-          });
-          break;
-        case 'auth/invalid-email':
-          setModalMessage({
-            title: 'Falha ao cadastrar o usuário',
-            description: 'E-mail inválido.',
-          });
-          break;
-        case 'auth/weak-password':
-          setModalMessage({
-            title: 'Falha ao cadastrar o usuário',
-            description: 'Senha muito fraca.',
-          });
-          break;
-        case 'auth/operation-not-allowed':
-          setModalMessage({
-            title: 'Falha ao cadastrar o usuário',
-            description:
-              'Criação de conta com e-mail e senha não está habilitada.',
-          });
-          break;
-        case 'auth/network-request-failed':
-          setModalMessage({
-            title: 'Falha ao cadastrar o usuário',
-            description: 'Falha de conexão com a rede.',
-          });
-          break;
-        default:
-          setModalMessage({
-            title: 'Falha ao cadastrar o usuário',
-            description: 'Erro desconhecido, entre em contato com o suporte!',
-          });
+      if (errorCode) {
+        switch (errorCode) {
+          case 'auth/email-already-in-use':
+            setModalMessage({
+              title: 'Falha ao cadastrar o usuário',
+              description: 'E-mail já cadastrado.',
+            });
+            break;
+          case 'auth/invalid-email':
+            setModalMessage({
+              title: 'Falha ao cadastrar o usuário',
+              description: 'E-mail inválido.',
+            });
+            break;
+          case 'auth/weak-password':
+            setModalMessage({
+              title: 'Senha fraca',
+              description: 'A senha deve conter:\n• Pelo menos 8 caracteres\n• Pelo menos uma letra maiúscula\n• Pelo menos uma letra minúscula\n• Pelo menos um número\n• Pelo menos um caractere especial (!@#$%^&*(),.?":{}|<>)\n• Não pode ser uma senha comum',
+            });
+            break;
+          case 'auth/operation-not-allowed':
+            setModalMessage({
+              title: 'Falha ao cadastrar o usuário',
+              description:
+                'Criação de conta com e-mail e senha não está habilitada.',
+            });
+            break;
+          case 'auth/network-request-failed':
+            setModalMessage({
+              title: 'Falha ao cadastrar o usuário',
+              description: 'Falha de conexão com a rede.',
+            });
+            break;
+          default:
+            setModalMessage({
+              title: 'Falha ao cadastrar o usuário',
+              description: 'Erro desconhecido, entre em contato com o suporte!',
+            });
+        }
+
+        setIsModalVisible(true);
       }
-
+    } catch (error: any) {
+      // Capturar erro de validação de senha com mensagem detalhada
+      if (error.message && error.message.includes('A senha deve conter:')) {
+        setModalMessage({
+          title: 'Senha fraca',
+          description: error.message,
+        });
+        setIsModalVisible(true);
+        return;
+      }
+      
+      setModalMessage({
+        title: 'Falha ao cadastrar o usuário',
+        description: 'Erro desconhecido, entre em contato com o suporte!',
+      });
       setIsModalVisible(true);
     }
   };

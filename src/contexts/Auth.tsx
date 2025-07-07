@@ -1,33 +1,22 @@
-import app from '../../firebaseConfig';
 import React, {createContext, useContext, useEffect, useState} from 'react';
 import {Alert} from 'react-native';
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  updateProfile,
-  deleteUser,
-  signOut,
-  onAuthStateChanged,
-  sendPasswordResetEmail,
-} from '@react-native-firebase/auth';
-import {
+import auth from '@react-native-firebase/auth';
+import firestore, {
   collection,
+  doc,
   setDoc,
   query,
   where,
   getDocs,
-  getFirestore,
-  serverTimestamp,
   updateDoc,
-  doc,
   onSnapshot,
+  serverTimestamp,
 } from '@react-native-firebase/firestore';
 import {getDefaultProfilePicture} from '../utils/getDefaultProfilePicture';
 import messaging from '@react-native-firebase/messaging';
+import {validatePassword} from '../services/settings/settings';
 
-const auth = getAuth(app);
-const db = getFirestore(app);
+const db = firestore();
 
 interface UserData {
   displayName: string;
@@ -76,76 +65,96 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
   useEffect(() => {
     let unsubscribeSnapshot: (() => void) | null = null;
-    const unsubscribe = onAuthStateChanged(auth, async (user: any) => {
-      setIsLoading(true);
+    const unsubscribe = auth().onAuthStateChanged(async (user: any) => {
+      try {
+        setIsLoading(true);
 
-      if (unsubscribeSnapshot) {
-        unsubscribeSnapshot();
-        unsubscribeSnapshot = null;
-      }
+        if (unsubscribeSnapshot) {
+          unsubscribeSnapshot();
+          unsubscribeSnapshot = null;
+        }
 
-      if (user) {
-        try {
-          await user.reload(); // Recarrega pq pode ser que o token esteja armazenado no cache.
-          const idTokenResult = await user.getIdTokenResult();
+        if (user) {
+          try {
+            await user.reload(); // Recarrega pq pode ser que o token esteja armazenado no cache.
+            const idTokenResult = await user.getIdTokenResult();
 
-          if (idTokenResult.claims.disabled) {
-            await signOut(auth);
+            if (idTokenResult.claims.disabled) {
+              await auth().signOut();
+              return;
+            }
+
+            if (!idTokenResult) {
+              throw new Error('Usuário inválido!');
+            }
+
+            setIsUserAuthenticated(true);
+
+            const userRef = doc(db, 'users', user.uid);
+            unsubscribeSnapshot = onSnapshot(
+              userRef,
+              snapshot => {
+                try {
+                  if (snapshot.exists) {
+                    const data = snapshot.data()!;
+                    setregistrationStatus(data.registration_status);
+                    setUserData({
+                      displayName: data.fullName,
+                      email: data.email,
+                      isFirstLogin: data.isFirstLogin,
+                      affiliated_to: data.affiliated_to,
+                      uid: data.uid,
+                      profilePicture: data.profilePicture,
+                      phone: data.phone,
+                      pixKey: data.pixKey,
+                      unitName: data.unitName,
+                      rule: data.rule,
+                    });
+                  }
+                } catch (error) {
+                  console.error('Erro ao processar dados do usuário:', error);
+                } finally {
+                  setIsLoading(false);
+                }
+              },
+              error => {
+                console.error('Erro no snapshot:', error);
+                setIsLoading(false);
+              },
+            );
+          } catch (err) {
+            console.error('Erro ao processar usuário autenticado:', err);
+            await auth().signOut();
+            const userRef = doc(db, 'users', user.uid);
+            await updateDoc(userRef, {
+              fcmToken: null,
+            });
+            setIsUserAuthenticated(false);
+            setregistrationStatus(false);
+            setUserData(null);
+            setIsLoading(false);
           }
-
-          if (!idTokenResult) {
-            throw new Error('Usuário inválido!');
-          }
-
-          setIsUserAuthenticated(true);
-
-          const userRef = doc(db, 'users', user.uid);
-          unsubscribeSnapshot = onSnapshot(
-            userRef,
-            snapshot => {
-              if (snapshot.exists) {
-                const data = snapshot.data()!;
-                setregistrationStatus(data.registration_status);
-                setUserData({
-                  displayName: data.fullName,
-                  email: data.email,
-                  isFirstLogin: data.isFirstLogin,
-                  affiliated_to: data.affiliated_to,
-                  uid: data.uid,
-                  profilePicture: data.profilePicture,
-                  phone: data.phone,
-                  pixKey: data.pixKey,
-                  unitName: data.unitName,
-                  rule: data.rule,
-                });
-              }
-              setIsLoading(false);
-            },
-            error => {
-              console.error('Erro no snapshot:', error);
-              setIsLoading(false);
-            },
-          );
-        } catch (err) {
-          await signOut(auth);
-          const userRef = doc(db, 'users', user.uid);
-          await updateDoc(userRef, {
-            fcmToken: null,
-          });
+        } else {
           setIsUserAuthenticated(false);
           setregistrationStatus(false);
           setUserData(null);
+          setIsLoading(false);
         }
-      } else {
+      } catch (error) {
+        console.error('Erro geral no contexto de autenticação:', error);
         setIsUserAuthenticated(false);
         setregistrationStatus(false);
         setUserData(null);
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      if (unsubscribeSnapshot) {
+        unsubscribeSnapshot();
+      }
+      unsubscribe();
+    };
   }, []);
 
   async function signUp(
@@ -157,8 +166,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     unitName: string,
   ) {
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
+      // Validar força da senha antes de criar o usuário
+      const passwordValidation = validatePassword(password);
+      if (!passwordValidation.isValid) {
+        throw new Error(passwordValidation.message);
+      }
+
+      const userCredential = await auth().createUserWithEmailAndPassword(
         email,
         password,
       );
@@ -184,24 +198,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
           pixKey: null,
           unitName: unitName,
           disabled: false,
+          notificationsPreferences: {
+            campaigns: true,
+            withdraw: true,
+            status: true
+          }
         },
         {merge: true},
       );
 
-      await updateProfile(user, {displayName: fullName});
+      await user.updateProfile({displayName: fullName});
     } catch (err: any) {
-      if (auth.currentUser) {
-        await deleteUser(auth.currentUser);
+      if (auth().currentUser) {
+        await auth().currentUser?.delete();
       }
       console.error('Erro ao criar usuário:', err);
+      
+      // Se for erro de validação de senha, retornar código específico
+      if (err.message && err.message.includes('A senha deve conter:')) {
+        return 'auth/weak-password';
+      }
+      
       return err.code;
     }
   }
 
   async function signIn(email: string, password: string) {
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
+      const userCredential = await auth().signInWithEmailAndPassword(
         email,
         password,
       );
@@ -251,7 +275,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
   async function handleSignOut() {
     try {
-      const currentUser = auth.currentUser;
+      const currentUser = auth().currentUser;
 
       if (!currentUser) {
         throw new Error('Nenhum usuário autenticado no momento.');
@@ -262,7 +286,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         fcmToken: null,
       });
 
-      await signOut(auth);
+      await auth().signOut();
     } catch (err: any) {
       switch (err.code) {
         case 'auth/no-current-user':
@@ -284,7 +308,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
   async function forgotPassword(email: string) {
     try {
-      await sendPasswordResetEmail(auth, email);
+      await auth().sendPasswordResetEmail(email);
       return null;
     } catch (err: any) {
       return err.code;

@@ -69,7 +69,7 @@ export function CustomModal({
               <TouchableOpacity
                 activeOpacity={0.8}
                 className="bg-white_btn_modal rounded-xl h-11 flex-1 py-3 justify-center items-center"
-                onPress={onPress ? onPress : onClose}>
+                onPress={buttonText2 && !cancelButtonText ? onClose : (onPress ? onPress : onClose)}>
                 {typeof buttonText === 'string' ? (
                   <Text className="text-primary_purple text-center font-bold">
                     {buttonText}

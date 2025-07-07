@@ -259,8 +259,6 @@ export function RegisterSellers() {
     try {
       const {fullName, email, phone, password, commission} = data;
 
-      console.log('Valor da comissão recebido:', commission, typeof commission);
-
       // Validar força da senha
       const passwordValidation = validatePassword(password);
       if (!passwordValidation.isValid) {

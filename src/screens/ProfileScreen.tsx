@@ -20,7 +20,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
-import app from '../../firebaseConfig';
+
 import {useAuth} from '../contexts/Auth';
 import images from '../data/images';
 import {colors} from '../styles/colors';
@@ -30,8 +30,8 @@ import {Button} from '../components/Button';
 import {useNavigation} from '@react-navigation/native';
 import {applyMaskTelephone} from '../utils/applyMaskTelephone';
 
-const db = getFirestore(app);
-const auth = getAuth(app);
+const db = getFirestore();
+const auth = getAuth();
 
 export function ProfileScreen() {
   const {signOut, userData} = useAuth();

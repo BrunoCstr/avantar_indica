@@ -6,9 +6,7 @@ import {getFirestore, doc, updateDoc} from '@react-native-firebase/firestore';
 import gStyles from '../styles/gStyles';
 import images from '../data/images';
 import {useAuth} from '../contexts/Auth';
-import app from '../../firebaseConfig';
-
-const db = getFirestore(app);
+const db = getFirestore();
 
 export function WaitingConfirmationScreen() {
   const {userData} = useAuth();

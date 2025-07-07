@@ -240,62 +240,82 @@ export function StatusScreen() {
 
           {/* Lista de Status */}
           <View className="rounded-2xl flex-1 overflow-hidden" style={{}}>
-            <FlatList
-              data={filteredData}
-              showsVerticalScrollIndicator={false}
-              keyExtractor={item => item.id.toString()}
-              contentContainerStyle={{paddingVertical: 8, paddingBottom: 20}}
-              renderItem={({item}) => (
-                <TouchableOpacity
-                  className="bg-white rounded-xl mb-2 mx-2"
-                  activeOpacity={0.7}
-                  style={{
-                    shadowColor: '#000',
-                    shadowOffset: {width: 2, height: 2},
-                    shadowOpacity: 0.1,
-                    shadowRadius: 4,
-                    elevation: 5, // necessário para Android
-                  }}>
-                  <View className="flex-row items-center p-4">
-                    {/* Avatar */}
-                    <View
-                      className="w-12 h-12 rounded-full items-center justify-center mr-4"
-                      style={{backgroundColor: colors.tertiary_purple}}>
-                      <Text className="text-white font-bold text-sm">
-                        {getInitials(item.name)}
-                      </Text>
-                    </View>
-
-                    {/* Informações */}
-                    <View className="flex-1">
-                      <View className="flex-row items-center justify-between mb-1">
-                        <Text className="text-gray-900 font-bold text-base flex-1">
-                          {item.name}
-                        </Text>
-                        <Text className="text-xs text-gray-400 ml-2">
-                          {item.updatedAt}
-                        </Text>
-                      </View>
-                      <Text className="text-gray-500 text-sm mb-2">
-                        {item.product}
-                      </Text>
+            {filteredData.length === 0 ? (
+              <View className="flex-1 justify-center items-center p-10">
+                <FontAwesome6
+                  name="clipboard-list"
+                  size={60}
+                  color={colors.tertiary_purple}
+                  style={{marginBottom: 16, opacity: 0.7}}
+                />
+                <Text className="text-lg font-bold text-tertiary_purple mb-2 text-center">
+                  Nenhuma oportunidade encontrada
+                </Text>
+                <Text className="text-sm text-gray-500 text-center">
+                  {search || selectedFilters.length > 0 
+                    ? 'Nenhuma oportunidade corresponde aos filtros aplicados. Tente ajustar sua busca.'
+                    : 'Você ainda não possui oportunidades registradas. Quando você indicar alguém, elas aparecerão aqui!'
+                  }
+                </Text>
+              </View>
+            ) : (
+              <FlatList
+                data={filteredData}
+                showsVerticalScrollIndicator={false}
+                keyExtractor={item => item.id.toString()}
+                contentContainerStyle={{paddingVertical: 8, paddingBottom: 20}}
+                renderItem={({item}) => (
+                  <TouchableOpacity
+                    className="bg-white rounded-xl mb-2 mx-2"
+                    activeOpacity={0.7}
+                    style={{
+                      shadowColor: '#000',
+                      shadowOffset: {width: 2, height: 2},
+                      shadowOpacity: 0.1,
+                      shadowRadius: 4,
+                      elevation: 5, // necessário para Android
+                    }}>
+                    <View className="flex-row items-center p-4">
+                      {/* Avatar */}
                       <View
-                        className="self-start px-3 py-1 w-auto rounded-full"
-                        style={{
-                          backgroundColor: getStatusBgColor(item.status),
-                        }}>
-                        <Text
-                          className="text-xs font-semibold"
-                          style={{color: getStatusColor(item.status)}}>
-                          {item.status}
+                        className="w-12 h-12 rounded-full items-center justify-center mr-4"
+                        style={{backgroundColor: colors.tertiary_purple}}>
+                        <Text className="text-white font-bold text-sm">
+                          {getInitials(item.name)}
                         </Text>
                       </View>
+
+                      {/* Informações */}
+                      <View className="flex-1">
+                        <View className="flex-row items-center justify-between mb-1">
+                          <Text className="text-gray-900 font-bold text-base flex-1">
+                            {item.name}
+                          </Text>
+                          <Text className="text-xs text-gray-400 ml-2">
+                            {item.updatedAt}
+                          </Text>
+                        </View>
+                        <Text className="text-gray-500 text-sm mb-2">
+                          {item.product}
+                        </Text>
+                        <View
+                          className="self-start px-3 py-1 w-auto rounded-full"
+                          style={{
+                            backgroundColor: getStatusBgColor(item.status),
+                          }}>
+                          <Text
+                            className="text-xs font-semibold"
+                            style={{color: getStatusColor(item.status)}}>
+                            {item.status}
+                          </Text>
+                        </View>
+                      </View>
                     </View>
-                  </View>
-                </TouchableOpacity>
-              )}
-              ItemSeparatorComponent={() => <View className="h-1" />}
-            />
+                  </TouchableOpacity>
+                )}
+                ItemSeparatorComponent={() => <View className="h-1" />}
+              />
+            )}
           </View>
         </View>
       )}
