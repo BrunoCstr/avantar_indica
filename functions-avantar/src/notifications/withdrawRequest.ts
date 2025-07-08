@@ -5,18 +5,20 @@ import {defineSecret} from 'firebase-functions/params';
 
 const EMAIL_USER = defineSecret('EMAIL_USER');
 const EMAIL_PASS = defineSecret('EMAIL_PASS');
-const WEBHOOK_BOTCONVERSA = defineSecret('WEBHOOK_BOTCONVERSA');
+const WEBHOOK_BOTCONVERSA = defineSecret(
+  'WEBHOOK_BOTCONVERSA_SOLICITACAO_SAQUE',
+);
 
-export const indicated = functions.firestore.onDocumentCreated(
+export const withdrawRequest = functions.firestore.onDocumentCreated(
   {
-    document: 'indications/{indicationId}',
+    document: 'withdrawals/{withdrawId}',
     secrets: [EMAIL_USER, EMAIL_PASS, WEBHOOK_BOTCONVERSA],
   },
   async event => {
     // Pegando os dados da indicação
-    const newIndication = event.data?.data();
+    const newWithdrawal = event.data?.data();
 
-    if (!newIndication) {
+    if (!newWithdrawal) {
       console.error('Dados do documento não encontrados');
       return;
     }
@@ -25,7 +27,7 @@ export const indicated = functions.firestore.onDocumentCreated(
     const docRef = admin
       .firestore()
       .collection('units')
-      .doc(newIndication.unitId);
+      .doc(newWithdrawal.unitId);
     const doc = await docRef.get();
 
     if (!doc.exists) {
@@ -40,7 +42,7 @@ export const indicated = functions.firestore.onDocumentCreated(
       const usersQuery = admin
         .firestore()
         .collection('users')
-        .where('affiliated_to', '==', newIndication.unitId)
+        .where('affiliated_to', '==', newWithdrawal.unitId)
         .where('rule', 'in', ['admin_unidade', 'admin_franqueadora']);
 
       const usersSnapshot = await usersQuery.get();
@@ -52,18 +54,18 @@ export const indicated = functions.firestore.onDocumentCreated(
 
         // Criando notificação na subcoleção notifications
         try {
-          const notificationRef = admin
+          const withdrawRequestRef = admin
             .firestore()
             .collection(`users/${userId}/notifications`)
             .doc();
 
-          await notificationRef.set({
-            title: '👤 Nova indicação recebida!',
-            body: 'Você acabou de receber uma nova indicação. Acesse o app para ver os detalhes e entrar em contato com o cliente.',
+          await withdrawRequestRef.set({
+            title: '💰 Nova solicitação de saque recebida!',
+            body: `Você acabou de receber uma nova solicitação de saque. Acesse o painel para ver os detalhes.`,
             read: false,
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
-            documentId: notificationRef.id,
-            type: 'indication_received',
+            documentId: withdrawRequestRef.id,
+            type: 'withdraw_request',
           });
 
           // Enviando push notification se o usuário tem fcmToken
@@ -71,8 +73,8 @@ export const indicated = functions.firestore.onDocumentCreated(
             const payload = {
               token: userData.fcmToken,
               notification: {
-                title: '👤 Nova indicação recebida!',
-                body: 'Você acabou de receber uma nova indicação. Acesse o app para ver os detalhes e entrar em contato com o cliente.',
+                title: '💰Nova solicitação de saque recebida!',
+                body: `Você acabou de receber uma nova solicitação de saque. Acesse o painel para ver os detalhes.`,
               },
               android: {
                 notification: {
@@ -122,7 +124,7 @@ export const indicated = functions.firestore.onDocumentCreated(
     const mailOptions = {
       from: 'noreply@indica.avantar.com.br',
       to: unitData?.email,
-      subject: '👤 Você recebeu uma nova indicação!',
+      subject: '💰 Você recebeu uma nova solicitação de saque!',
       html: `
       <br>
          <div style="text-align: center;">
@@ -162,15 +164,12 @@ export const indicated = functions.firestore.onDocumentCreated(
         </style>
         <div class='container'>
           <div style="font-family: familjen grotesk;" class="div">
-            <h1 style='color:#6600CC; font-size: 24px'>Você recebeu uma nova indicação!</h1>
-            <p>Olá! Acabamos de receber uma nova indicação atribuída à sua unidade.</p>
+            <h1 style='color:#6600CC; font-size: 24px'>Você recebeu uma nova solicitação de saque!</h1>
+            <p>Olá! Acabamos de receber uma nova solicitação de saque atribuída à sua unidade.</p>
             <p>Segue os dados:</p>
             <div class='indication'>
-              <span>Indicador: ${newIndication.indicator_name}</span>
-              <span>Nome do Indicado: ${newIndication.name}</span>
-              <span>Telefone do Indicado: ${newIndication.phone}</span>
-              <span>Produto desejado: ${newIndication.product}</span>
-              <span>Observações: ${newIndication.observations}</span>
+              <span>Usuário: ${newWithdrawal.fullName}</span>
+              <span>Valor: R$ ${newWithdrawal.amount}</span>
             </div>
             <p></p>
             <a class='anchorLink' href="indica.avantar.com.br">👉 Acesse agora o painel para conferir os detalhes...</a>
@@ -194,11 +193,8 @@ export const indicated = functions.firestore.onDocumentCreated(
     const unitName = unitData?.name;
 
     const payload = {
-      indicator_name: newIndication.indicator_name,
-      indication_phone: newIndication.phone,
-      indication_name: newIndication.name,
-      indication_product: newIndication.product,
-      indication_observations: newIndication.observations,
+      name: newWithdrawal.fullName,
+      amount: newWithdrawal.amount,
       unit_name: unitName,
       unit_phone: unitPhone,
     };

@@ -37,6 +37,7 @@ export function IndicateModal({visible, onClose}: ModalProps) {
     title: '',
     description: '',
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -70,6 +71,7 @@ export function IndicateModal({visible, onClose}: ModalProps) {
 
   const onSubmit = async (data: IndicationSchema) => {
     try {
+      setIsLoading(true);
       const cleanedPhone = data.phone.replace(/\D/g, '');
 
       // Sempre quando algum arquivo for criado aqui, mandar um e-mail e uma notificação para a unidade. (Cloud Functions)
@@ -105,6 +107,8 @@ export function IndicateModal({visible, onClose}: ModalProps) {
       setIsModalVisible(true);
 
       console.error('Erro ao enviar a indicação:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -255,6 +259,7 @@ export function IndicateModal({visible, onClose}: ModalProps) {
         title={modalMessage.title}
         description={modalMessage.description}
         buttonText="FECHAR"
+        isLoading={isLoading}
       />
     </Modal>
   );

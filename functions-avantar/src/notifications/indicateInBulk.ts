@@ -41,7 +41,7 @@ export const indicatedInBulk = functions.firestore.onDocumentCreated(
         .firestore()
         .collection('users')
         .where('affiliated_to', '==', newPackagedIndication.unitId)
-        .where('rule', '==', 'admin_unidade');
+        .where('rule', 'in', ['admin_unidade', 'admin_franqueadora']);
 
       const usersSnapshot = await usersQuery.get();
 
@@ -52,23 +52,27 @@ export const indicatedInBulk = functions.firestore.onDocumentCreated(
 
         // Criando notificação na subcoleção notifications
         try {
-          await admin
+          const notificationRef = admin
             .firestore()
             .collection(`users/${userId}/notifications`)
-            .add({
-              title: '🔔 Nova indicação em massa recebida!',
-              body: `Você acabou de receber ${newPackagedIndication.indications.length} novas indicações. Acesse o app para ver os detalhes e entrar em contato com os clientes.`,
-              read: false,
-              createdAt: admin.firestore.FieldValue.serverTimestamp(),
-            });
+            .doc();
+
+          await notificationRef.set({
+            title: '📦 Nova indicação em massa recebida!',
+            body: `Você acabou de receber ${newPackagedIndication.indications.length} novas indicações. Acesse o painel para ver os detalhes e entrar em contato com os clientes.`,
+            read: false,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            documentId: notificationRef.id,
+            type: 'mass_indication_received',
+          });
 
           // Enviando push notification se o usuário tem fcmToken
           if (userData.fcmToken) {
             const payload = {
               token: userData.fcmToken,
               notification: {
-                title: '🔔 Nova indicação em massa recebida!',
-                body: `Você acabou de receber ${newPackagedIndication.indications.length} novas indicações. Acesse o app para ver os detalhes e entrar em contato com os clientes.`,
+                title: '📦 Nova indicação em massa recebida!',
+                body: `Você acabou de receber ${newPackagedIndication.indications.length} novas indicações. Acesse o painel para ver os detalhes e entrar em contato com os clientes.`,
               },
               android: {
                 notification: {
@@ -93,7 +97,11 @@ export const indicatedInBulk = functions.firestore.onDocumentCreated(
             }
           }
         } catch (error) {
-          console.error('Erro ao criar notificação para usuário:', userId, error);
+          console.error(
+            'Erro ao criar notificação para usuário:',
+            userId,
+            error,
+          );
         }
       }
     } catch (error) {
@@ -114,11 +122,11 @@ export const indicatedInBulk = functions.firestore.onDocumentCreated(
     const mailOptions = {
       from: 'noreply@indica.avantar.com.br',
       to: unitData?.email,
-      subject: '📬 Você recebeu uma nova indicação em massa!',
+      subject: '📦 Você recebeu uma nova indicação em massa!',
       html: `
       <br>
          <div style="text-align: center;">
-          <img src="https://drive.google.com/uc?export=view&id=1-Dn95-HdeVuA0Sxcm50xFjrjtEdCPEwC" style="width:300px; margin: 0 auto;">
+          <img src="https://dashboard.avantar.com.br/images/1.png" style="width:300px; margin: 0 auto;">
          </div>
         <br>
         <br>

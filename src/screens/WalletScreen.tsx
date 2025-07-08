@@ -23,6 +23,8 @@ import {WalletSkeleton} from '../components/skeletons/WalletSkeleton';
 import {CustomModal} from '../components/CustomModal';
 import {Spinner} from '../components/Spinner';
 import {useBottomNavigationPadding} from '../hooks/useBottomNavigationPadding';
+import {WithdrawalAmountModal} from '../components/WithdrawalAmountModal';
+import {createWithdrawalRequest} from '../services/wallet/Withdrawals';
 
 export function WalletScreen() {
   const {userData} = useAuth();
@@ -37,6 +39,7 @@ export function WalletScreen() {
     description: '',
   });
   const [isLoadingButton, setIsLoadingButton] = useState(false);
+  const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
 
   const isLoading = isLoadingBalance; // Só depende do balance agora
 
@@ -75,42 +78,82 @@ export function WalletScreen() {
   }, [userData?.uid]);
 
   async function handleWithdrawalRequest() {
-    setIsLoadingButton(true);
+    // Verificar se o usuário tem chave PIX cadastrada
+    if (!userData?.pixKey || userData.pixKey.trim() === '') {
+      setModalMessage({
+        title: 'Chave PIX não cadastrada',
+        description: 'Para realizar um saque, você precisa cadastrar sua chave PIX no perfil. Acesse Configurações > Perfil para atualizar.',
+      });
+      setIsModalVisible(true);
+      return;
+    }
+
     if (balance >= 700) {
-      try {
-        const withdrawalData = {
-          amount: balance,
-          fullName: userData?.displayName || '',
-          pixKey: userData?.pixKey || '',
-          rule: userData?.rule || '',
-          unitId: userData?.affiliated_to || '',
-          unitName: userData?.unitName || '',
-          userId: userData?.uid || '',
-        };
-
-        console.log('withdrawalData', withdrawalData);
-
-        setModalMessage({
-          title: 'Saque solicitado',
-          description: `Saque solicitado à unidade: ${userData?.unitName}, você pode acompanhar o status em sua carteira!`,
-        });
-        setIsModalVisible(true);
-      } catch (error) {
-        console.error('Erro ao criar solicitação de saque:', error);
-        setModalMessage({
-          title: 'Erro!',
-          description: `Erro ao solicitar saque. Tente novamente.`,
-        });
-        setIsModalVisible(true);
-      } finally {
-        setIsLoadingButton(false);
-      }
+      setShowWithdrawalModal(true);
     } else {
       setModalMessage({
         title: 'Saldo insuficiente',
         description: `O saldo em sua carteira precisa ser no mínimo R$ 700,00 para realizar o saque!`,
       });
       setIsModalVisible(true);
+    }
+  }
+
+  async function handleConfirmWithdrawal(amount: number) {
+    setIsLoadingButton(true);
+    setShowWithdrawalModal(false);
+
+    try {
+      const withdrawalData = {
+        amount: amount,
+        fullName: userData?.displayName || '',
+        pixKey: userData?.pixKey || '',
+        rule: userData?.rule || '',
+        unitId: userData?.affiliated_to || '',
+        unitName: userData?.unitName || '',
+        userId: userData?.uid || '',
+      };
+
+      // Criar a solicitação no banco de dados
+      await createWithdrawalRequest(withdrawalData);
+
+      setModalMessage({
+        title: 'Saque solicitado',
+        description: `Saque de ${new Intl.NumberFormat('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+        }).format(
+          amount,
+        )} foi solicitado à unidade: ${userData?.unitName}, você pode acompanhar o status em sua carteira!`,
+      });
+      setIsModalVisible(true);
+
+      // Recarregar os dados da carteira
+      if (userData?.uid) {
+        const data = await getUserWithdrawals(userData.uid);
+        setData(data);
+        
+        // Recarregar o saldo atualizado
+        const updatedBalance = await getUserBalance(userData.uid);
+        setBalance(updatedBalance);
+      }
+    } catch (error) {
+      console.error('Erro ao criar solicitação de saque:', error);
+      
+      // Verificar se é erro de chave PIX
+      if (error instanceof Error && error.message === 'Chave PIX não cadastrada') {
+        setModalMessage({
+          title: 'Chave PIX não cadastrada',
+          description: 'Para realizar um saque, você precisa cadastrar sua chave PIX no perfil. Acesse Perfil > Dados para Pagamento para atualizar.',
+        });
+      } else {
+        setModalMessage({
+          title: 'Erro!',
+          description: `Erro ao solicitar saque. Tente novamente.`,
+        });
+      }
+      setIsModalVisible(true);
+    } finally {
       setIsLoadingButton(false);
     }
   }
@@ -121,9 +164,7 @@ export function WalletScreen() {
 
   return (
     <ImageBackground source={images.bg_white} className="flex-1">
-      <View 
-        className="flex-1 mt-10"
-        style={{paddingBottom}}>
+      <View className="flex-1 mt-10" style={{paddingBottom}}>
         <View>
           <View className="justify-between items-center flex-row ml-5 mr-5">
             <BackButton borderColor="#4A04A5" color="#4A04A5" />
@@ -273,6 +314,14 @@ export function WalletScreen() {
           title={modalMessage.title}
           description={modalMessage.description}
           buttonText="FECHAR"
+        />
+
+        <WithdrawalAmountModal
+          visible={showWithdrawalModal}
+          onClose={() => setShowWithdrawalModal(false)}
+          onConfirm={handleConfirmWithdrawal}
+          balance={balance}
+          isLoading={isLoadingButton}
         />
       </View>
     </ImageBackground>

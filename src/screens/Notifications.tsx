@@ -128,11 +128,11 @@ export function Notifications() {
             <FlatList
               className="mt-5"
               data={showUnread ? unreadNotifications : readNotifications}
-              keyExtractor={item => item.id || "Não possui"}
+              keyExtractor={item => item.documentId || "Não possui"}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{paddingBottom: 60}}
               renderItem={({item}) => (
-                <View className="flex-row">
+                <View className="flex-row mb-2">
                   <View className="w-full h-25 flex-row items-center bg-primary_purple p-4 rounded-2xl gap-3">
                     <MaterialIcons
                       name="notifications-active"

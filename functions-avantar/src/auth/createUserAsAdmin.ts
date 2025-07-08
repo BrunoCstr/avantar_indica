@@ -94,6 +94,7 @@ export const createUserAsAdmin = functions.https.onCall(
             withdraw: true,
             status: true,
           },
+          balance: 0,
         });
 
       return userRecord.uid;

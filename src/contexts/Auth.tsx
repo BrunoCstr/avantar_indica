@@ -203,6 +203,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
             withdraw: true,
             status: true,
           },
+          balance: 0,
         },
         {merge: true},
       );

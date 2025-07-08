@@ -11,7 +11,9 @@ export interface WithdrawalRequest {
 }
 
 // Função para obter todas as solicitações de saque do usuário
-export const getUserWithdrawals = async (userId: string): Promise<WithdrawalRequest[]> => {
+export const getUserWithdrawals = async (
+  userId: string,
+): Promise<WithdrawalRequest[]> => {
   try {
     const querySnapshot = await firestore()
       .collection('withdrawals')
@@ -20,8 +22,8 @@ export const getUserWithdrawals = async (userId: string): Promise<WithdrawalRequ
       .get();
 
     const withdrawals: WithdrawalRequest[] = [];
-    
-    querySnapshot.forEach((doc) => {
+
+    querySnapshot.forEach(doc => {
       const data = doc.data();
       withdrawals.push({
         withdrawId: data.withdrawId,
@@ -67,6 +69,32 @@ export const createWithdrawalRequest = async (
   try {
     const now = firestore.Timestamp.now();
 
+    // Buscar o documento do usuário para obter o saldo atual
+    const userDoc = await firestore()
+      .collection('users')
+      .doc(withdrawalData.userId)
+      .get();
+
+    if (!userDoc.exists) {
+      throw new Error('Usuário não encontrado');
+    }
+
+    const userData = userDoc.data();
+    const currentBalance = userData?.balance || 0;
+
+    // Verificar se o usuário tem saldo suficiente
+    if (currentBalance < withdrawalData.amount) {
+      throw new Error('Saldo insuficiente para realizar o saque');
+    }
+
+    // Verificar se o usuário tem chave PIX cadastrada
+    if (!withdrawalData.pixKey || withdrawalData.pixKey.trim() === '') {
+      throw new Error('Chave PIX não cadastrada');
+    }
+
+    // Calcular o novo saldo
+    const newBalance = currentBalance - withdrawalData.amount;
+
     const withdrawalDoc = {
       amount: withdrawalData.amount,
       createdAt: now,
@@ -81,19 +109,31 @@ export const createWithdrawalRequest = async (
       withdrawId: '',
     };
 
-    // Criar o documento na coleção withdrawals
-    const docRef = await firestore()
-      .collection('withdrawals')
-      .add(withdrawalDoc);
+    // Usar uma transação para garantir consistência dos dados
+    const result = await firestore().runTransaction(async transaction => {
+      // Criar o documento na coleção withdrawals
+      const docRef = firestore().collection('withdrawals').doc();
+      transaction.set(docRef, withdrawalDoc);
+
+      // Atualizar o saldo do usuário
+      transaction.update(
+        firestore().collection('users').doc(withdrawalData.userId),
+        {
+          balance: newBalance,
+          updatedAt: now,
+        },
+      );
+
+      return docRef.id;
+    });
 
     // Atualizar o documento com o withdrawId
-    await firestore().collection('withdrawals').doc(docRef.id).update({
-      withdrawId: docRef.id,
+    await firestore().collection('withdrawals').doc(result).update({
+      withdrawId: result,
       updatedAt: firestore.Timestamp.now(),
     });
 
-    console.log('Solicitação de saque criada com sucesso:', docRef.id);
-    return docRef.id;
+    return result;
   } catch (error) {
     console.error('Erro ao criar solicitação de saque:', error);
     throw new Error('Falha ao criar solicitação de saque');

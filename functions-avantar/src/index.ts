@@ -9,5 +9,6 @@ export {indicated} from './notifications/indicated';
 export {createUserAsAdmin} from './auth/createUserAsAdmin';
 export {updateUserPassword} from './auth/updateUserPassword';
 export {indicatedInBulk} from './notifications/indicateInBulk';
+export {withdrawRequest} from './notifications/withdrawRequest';
 export * from './auth/updateUserEmail';
 export * from './auth/toggleUserActive';
