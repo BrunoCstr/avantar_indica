@@ -41,6 +41,7 @@ export function BottomNavigator() {
   // Margem lateral da bottom navigation
   const sideMargin = 28;
   const screenWidth = Dimensions.get('window').width;
+  const tabBarWidth = screenWidth - (sideMargin * 2);
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -72,8 +73,9 @@ export function BottomNavigator() {
             height: 65,
             position: 'absolute',
             bottom: keyboardVisible ? -100 : 30,
-            left: sideMargin,
-            right: sideMargin,
+            marginHorizontal: sideMargin,
+            left: 0,
+            right: 0,
             justifyContent: 'center',
             alignItems: 'center',
             paddingHorizontal: 12,

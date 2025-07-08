@@ -6,6 +6,10 @@ import {
   TextInput,
   TouchableOpacity,
   Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {
@@ -288,180 +292,192 @@ export function ProfileScreen() {
   };
 
   return (
-    <View 
-      className="flex-1 bg-fifth_purple justify-center"
-      style={{paddingBottom}}>
-      <View className="flex-row justify-between mr-7 ml-7">
-        <BackButton />
+    <KeyboardAvoidingView
+      className="flex-1"
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <TouchableWithoutFeedback>
+        <ScrollView
+          contentContainerStyle={{flexGrow: 1}}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}>
+          <View 
+            className="flex-1 bg-fifth_purple justify-center"
+            style={{paddingBottom}}>
+            <View className="flex-row justify-between mr-7 ml-7">
+              <BackButton />
 
-        <TouchableOpacity
-          className="items-center justify-center"
-          activeOpacity={0.8}
-          onPress={() => signOut()}>
-          <Ionicons name="exit-outline" size={35} color={colors.red} />
-        </TouchableOpacity>
-      </View>
+              <TouchableOpacity
+                className="items-center justify-center"
+                activeOpacity={0.8}
+                onPress={() => signOut()}>
+                <Ionicons name="exit-outline" size={35} color={colors.red} />
+              </TouchableOpacity>
+            </View>
 
-      <View className="items-center">
-        <TouchableOpacity activeOpacity={0.9} onPress={selectImage}>
-          <Text className="text-white text-2xl font-bold text-center mb-4">
-            Perfil
-          </Text>
-          <View className="justify-end">
-            <Image
-              source={
-                profilePicture
-                  ? {uri: profilePicture}
-                  : images.default_profile_picture
-              }
-              className="h-32 w-32 rounded-full border-2 border-white"
+            <View className="items-center">
+              <TouchableOpacity activeOpacity={0.9} onPress={selectImage}>
+                <Text className="text-white text-2xl font-bold text-center mb-4">
+                  Perfil
+                </Text>
+                <View className="justify-end">
+                  <Image
+                    source={
+                      profilePicture
+                        ? {uri: profilePicture}
+                        : images.default_profile_picture
+                    }
+                    className="h-32 w-32 rounded-full border-2 border-white"
+                  />
+                  <View className="absolute -right-1 bg-white w-9 h-9 rounded-lg items-center justify-center">
+                    <MaterialIcons name="edit" size={25} color={colors.black} />
+                  </View>
+                </View>
+              </TouchableOpacity>
+            </View>
+
+            <View className="items-center flex-col px-8">
+              <View className="bg-white w-full rounded-3xl px-8 py-6 mt-8">
+                <View className="flex-row justify-between items-center">
+                  <Text className="text-lg text-black font-bold">Informações do usuário</Text>
+                  <TouchableOpacity
+                    activeOpacity={0.5}
+                    onPress={() =>
+                      isEditingUserInfo
+                        ? handleSaveUserInfo()
+                        : setIsEditingUserInfo(true)
+                    }>
+                    <Text className="font-regular text-lg text-black">
+                      {isEditingUserInfo ? 'Salvar' : 'Editar'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View className="flex-col mt-1 gap-1">
+                  {/* Nome */}
+                  <View className="flex-row items-center gap-2">
+                    <FontAwesome name="user" size={25} color={colors.black} />
+                    <View className="flex-1">
+                      <Text className="text-sm font-regular text-black">Nome</Text>
+                      {isEditingUserInfo ? (
+                        <TextInput
+                          value={editedName}
+                          onChangeText={validateName}
+                          className={`text-base font-bold p-0 m-0 text-black ${!isNameValid ? 'text-red' : ''}`}
+                          style={{
+                            lineHeight: 21,
+                            includeFontPadding: false,
+                          }}
+                        />
+                      ) : (
+                        <Text className="text-base font-bold text-black">
+                          {userData?.displayName}
+                        </Text>
+                      )}
+                    </View>
+                  </View>
+
+                  {/* Telefone */}
+                  <View className="flex-row items-center gap-2">
+                    <FontAwesome name="phone-square" size={22} color={colors.black} />
+                    <View className="flex-1">
+                      <Text className="text-sm font-regular text-black">Telefone</Text>
+                      {isEditingUserInfo ? (
+                        <TextInput
+                          value={editedPhone}
+                          onChangeText={validatePhone}
+                          className={`text-base font-bold text-black p-0 m-0 ${!isPhoneValid ? 'text-red' : ''}`}
+                          style={{
+                            lineHeight: 21,
+                            includeFontPadding: false,
+                          }}
+                          keyboardType="phone-pad"
+                        />
+                      ) : (
+                        <Text className="text-base font-bold text-black">
+                          {applyMaskTelephone(userData?.phone || '')}
+                        </Text>
+                      )}
+                    </View>
+                  </View>
+                </View>
+
+                {/* Dados para pagamento */}
+                <View className="flex-row justify-between items-center mt-4">
+                  <Text className="text-lg font-bold text-black">Dados para pagamento</Text>
+                  <TouchableOpacity
+                    activeOpacity={0.5}
+                    onPress={() =>
+                      isEditingPaymentInfo
+                        ? handleSavePaymentInfo()
+                        : setIsEditingPaymentInfo(true)
+                    }>
+                    <Text className="font-regular text-lg text-black">
+                      {isEditingPaymentInfo ? 'Salvar' : 'Editar'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View className="flex-col mt-1 gap-1">
+                  {/* Chave pix */}
+                  <View className="flex-row items-center gap-2">
+                    <MaterialIcons name="pix" size={24} color={colors.black} />
+                    <View className="flex-1">
+                      <Text className="text-sm font-regular text-black">Chave pix</Text>
+                      {isEditingPaymentInfo ? (
+                        <TextInput
+                          value={editedPixKey}
+                          onChangeText={validatePixkey}
+                          className={`text-base font-bold text-black p-0 m-0 ${!isPixKeyValid ? 'text-red' : ''}`}
+                          style={{
+                            lineHeight: 21,
+                            includeFontPadding: false,
+                          }}
+                        />
+                      ) : (
+                        <Text className="text-base font-bold text-black">
+                          {userData?.pixKey || 'Não cadastrado'}
+                        </Text>
+                      )}
+                    </View>
+                  </View>
+                </View>
+              </View>
+            </View>
+            
+            <View className="w-full flex-col gap-3 mt-6 px-8">
+              <Button
+                text="CONFIGURAÇÕES"
+                backgroundColor="orange"
+                onPress={() => navigation.navigate('Settings')}
+                textColor="white"
+                fontSize={25}
+                fontWeight="bold"
+              />
+              <Button
+                text="VENDEDORES"
+                backgroundColor="blue"
+                onPress={() => navigation.navigate('RegisterSellers')}
+                textColor="tertiary_purple"
+                fontSize={25}
+                fontWeight="bold"
+                disabled={
+                  userData?.rule !== 'parceiro_indicador' &&
+                  userData?.rule !== 'admin_franqueadora' &&
+                  userData?.rule !== 'admin_unidade'
+                }
+              />
+            </View>
+
+            <CustomModal
+              visible={isModalVisible}
+              onClose={() => setIsModalVisible(false)}
+              title={modalMessage.title}
+              description={modalMessage.description}
+              buttonText="FECHAR"
             />
-            <View className="absolute -right-1 bg-white w-9 h-9 rounded-lg items-center justify-center">
-              <MaterialIcons name="edit" size={25} color={colors.black} />
-            </View>
           </View>
-        </TouchableOpacity>
-      </View>
-
-      <View className="items-center h-3/5 flex-col px-8">
-        <View className="bg-white h-[55%] w-full rounded-3xl px-8 py-6 mt-8">
-          <View className="flex-row justify-between items-center">
-            <Text className="text-lg text-black font-bold">Informações do usuário</Text>
-            <TouchableOpacity
-              activeOpacity={0.5}
-              onPress={() =>
-                isEditingUserInfo
-                  ? handleSaveUserInfo()
-                  : setIsEditingUserInfo(true)
-              }>
-              <Text className="font-regular text-lg text-black">
-                {isEditingUserInfo ? 'Salvar' : 'Editar'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <View className="flex-col mt-1 gap-1">
-            {/* Nome */}
-            <View className="flex-row items-center gap-2">
-              <FontAwesome name="user" size={25} color={colors.black} />
-              <View className="flex-1">
-                <Text className="text-sm font-regular text-black">Nome</Text>
-                {isEditingUserInfo ? (
-                  <TextInput
-                    value={editedName}
-                    onChangeText={validateName}
-                    className={`text-base font-bold p-0 m-0 text-black ${!isNameValid ? 'text-red' : ''}`}
-                    style={{
-                      lineHeight: 21,
-                      includeFontPadding: false,
-                    }}
-                  />
-                ) : (
-                  <Text className="text-base font-bold text-black">
-                    {userData?.displayName}
-                  </Text>
-                )}
-              </View>
-            </View>
-
-            {/* Telefone */}
-            <View className="flex-row items-center gap-2">
-              <FontAwesome name="phone-square" size={22} color={colors.black} />
-              <View className="flex-1">
-                <Text className="text-sm font-regular text-black">Telefone</Text>
-                {isEditingUserInfo ? (
-                  <TextInput
-                    value={editedPhone}
-                    onChangeText={validatePhone}
-                    className={`text-base font-bold text-black p-0 m-0 ${!isPhoneValid ? 'text-red' : ''}`}
-                    style={{
-                      lineHeight: 21,
-                      includeFontPadding: false,
-                    }}
-                    keyboardType="phone-pad"
-                  />
-                ) : (
-                  <Text className="text-base font-bold text-black">
-                    {applyMaskTelephone(userData?.phone || '')}
-                  </Text>
-                )}
-              </View>
-            </View>
-          </View>
-
-          {/* Dados para pagamento */}
-          <View className="flex-row justify-between items-center mt-4">
-            <Text className="text-lg font-bold text-black">Dados para pagamento</Text>
-            <TouchableOpacity
-              activeOpacity={0.5}
-              onPress={() =>
-                isEditingPaymentInfo
-                  ? handleSavePaymentInfo()
-                  : setIsEditingPaymentInfo(true)
-              }>
-              <Text className="font-regular text-lg text-black">
-                {isEditingPaymentInfo ? 'Salvar' : 'Editar'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <View className="flex-col mt-1 gap-1">
-            {/* Chave pix */}
-            <View className="flex-row items-center gap-2">
-              <MaterialIcons name="pix" size={24} color={colors.black} />
-              <View className="flex-1">
-                <Text className="text-sm font-regular text-black">Chave pix</Text>
-                {isEditingPaymentInfo ? (
-                  <TextInput
-                    value={editedPixKey}
-                    onChangeText={validatePixkey}
-                    className={`text-base font-bold text-black p-0 m-0 ${!isPixKeyValid ? 'text-red' : ''}`}
-                    style={{
-                      lineHeight: 21,
-                      includeFontPadding: false,
-                    }}
-                  />
-                ) : (
-                  <Text className="text-base font-bold text-black">
-                    {userData?.pixKey || 'Não cadastrado'}
-                  </Text>
-                )}
-              </View>
-            </View>
-          </View>
-        </View>
-        <View className="w-full flex-col gap-3 mt-6">
-          <Button
-            text="CONFIGURAÇÕES"
-            backgroundColor="orange"
-            onPress={() => navigation.navigate('Settings')}
-            textColor="white"
-            fontSize={25}
-            fontWeight="bold"
-          />
-          <Button
-            text="VENDEDORES"
-            backgroundColor="blue"
-            onPress={() => navigation.navigate('RegisterSellers')}
-            textColor="tertiary_purple"
-            fontSize={25}
-            fontWeight="bold"
-            disabled={
-              userData?.rule !== 'parceiro_indicador' &&
-              userData?.rule !== 'admin_franqueadora' &&
-              userData?.rule !== 'admin_unidade'
-            }
-          />
-        </View>
-      </View>
-
-      <CustomModal
-        visible={isModalVisible}
-        onClose={() => setIsModalVisible(false)}
-        title={modalMessage.title}
-        description={modalMessage.description}
-        buttonText="FECHAR"
-      />
-    </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
