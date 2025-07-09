@@ -191,7 +191,7 @@ export const indicatedInBulk = functions.firestore.onDocumentCreated(
     const unitName = unitData?.name;
 
     const payload = {
-      indicator_name: newPackagedIndication.indicatorName,
+      indicator_name: newPackagedIndication.indicator_name,
       quantity_of_indications: newPackagedIndication.indications.length,
       unit_name: unitName,
       unit_phone: unitPhone,

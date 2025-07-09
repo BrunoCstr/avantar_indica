@@ -10,5 +10,7 @@ export {createUserAsAdmin} from './auth/createUserAsAdmin';
 export {updateUserPassword} from './auth/updateUserPassword';
 export {indicatedInBulk} from './notifications/indicateInBulk';
 export {withdrawRequest} from './notifications/withdrawRequest';
+export {closedProposal} from './notifications/closedProposal';
+export {withdrawalStatus} from './notifications/withdrawalStatus';
 export * from './auth/updateUserEmail';
 export * from './auth/toggleUserActive';

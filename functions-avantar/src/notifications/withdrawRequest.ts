@@ -9,6 +9,14 @@ const WEBHOOK_BOTCONVERSA = defineSecret(
   'WEBHOOK_BOTCONVERSA_SOLICITACAO_SAQUE',
 );
 
+// Função para formatar valores monetários
+const formatCurrency = (value: number): string => {
+  return value.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
+
 export const withdrawRequest = functions.firestore.onDocumentCreated(
   {
     document: 'withdrawals/{withdrawId}',
@@ -169,7 +177,7 @@ export const withdrawRequest = functions.firestore.onDocumentCreated(
             <p>Segue os dados:</p>
             <div class='indication'>
               <span>Usuário: ${newWithdrawal.fullName}</span>
-              <span>Valor: R$ ${newWithdrawal.amount}</span>
+              <span>Valor: R$ ${formatCurrency(newWithdrawal.amount)}</span>
             </div>
             <p></p>
             <a class='anchorLink' href="indica.avantar.com.br">👉 Acesse agora o painel para conferir os detalhes...</a>
