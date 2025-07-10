@@ -16,12 +16,11 @@ import {FilterDropdown} from '../components/FilterDropdown';
 import {StatusScreenSkeleton} from '../components/skeletons/StatusScreenSkeleton';
 import {useAuth} from '../contexts/Auth';
 import {
-  getOpportunitiesByUserId,
-  filterOpportunities,
+  getAllStatusItemsByUserId,
+  filterStatusItems,
   getStatusStats,
-  Opportunity,
+  StatusItem,
 } from '../services/status/status';
-import {formatTimeAgo} from '../utils/formatTimeToDistance';
 import {useBottomNavigationPadding} from '../hooks/useBottomNavigationPadding';
 
 export function StatusScreen() {
@@ -31,11 +30,15 @@ export function StatusScreen() {
   const [showFilter, setShowFilter] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
-
-
+  const [statusItems, setStatusItems] = useState<StatusItem[]>([]);
 
   const filterOptions = [
+    // Filtros por tipo
+    'APENAS OPORTUNIDADES',
+    'APENAS INDICAÇÕES',
+    // Separador visual (não será usado como filtro real)
+    '---',
+    // Filtros por status
     'FECHADO',
     'NÃO FECHADO',
     'AGUARDANDO CLIENTE',
@@ -47,30 +50,30 @@ export function StatusScreen() {
     'SEGURO RECUSADO',
   ];
 
-  // Carregar oportunidades do usuário
+  // Carregar oportunidades e indicações do usuário
   useEffect(() => {
-    const loadOpportunities = async () => {
+    const loadStatusItems = async () => {
       if (!userData?.uid) return;
       
       try {
         setIsLoading(true);
-        const userOpportunities = await getOpportunitiesByUserId(userData.uid);
-        setOpportunities(userOpportunities);
+        const allStatusItems = await getAllStatusItemsByUserId(userData.uid);
+        setStatusItems(allStatusItems);
       } catch (error) {
-        console.error('Erro ao carregar oportunidades:', error);
+        console.error('Erro ao carregar dados de status:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadOpportunities();
+    loadStatusItems();
   }, [userData?.uid]);
 
   // Filtrar dados baseado na busca e filtros selecionados
-  const filteredData = filterOpportunities(opportunities, search, selectedFilters);
+  const filteredData = filterStatusItems(statusItems, search, selectedFilters);
 
   // Calcular estatísticas
-  const stats = getStatusStats(opportunities);
+  const stats = getStatusStats(statusItems);
 
   const handleSelectFilter = (option: string) => {
     if (selectedFilters.includes(option)) {
@@ -85,6 +88,12 @@ export function StatusScreen() {
     const names = name.split(' ');
     const initials = names.map(n => n[0]).join('');
     return initials.substring(0, 2).toUpperCase();
+  };
+
+  // Função para limitar texto com "..."
+  const limitText = (text: string, maxLength: number = 25) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
   };
 
   // Função para obter a cor do status
@@ -197,6 +206,7 @@ export function StatusScreen() {
               options={filterOptions}
               selectedOptions={selectedFilters}
               onSelectOption={handleSelectFilter}
+              position={{ top: 180, right: 20 }}
             />
           </View>
 
@@ -253,12 +263,12 @@ export function StatusScreen() {
                   style={{marginBottom: 16, opacity: 0.7}}
                 />
                 <Text className="text-lg font-bold text-tertiary_purple mb-2 text-center">
-                  Nenhuma oportunidade encontrada
+                  Nenhum resultado encontrado
                 </Text>
                 <Text className="text-sm text-black text-center">
                   {search || selectedFilters.length > 0 
-                    ? 'Nenhuma oportunidade corresponde aos filtros aplicados. Tente ajustar sua busca.'
-                    : 'Você ainda não possui oportunidades registradas. Quando você indicar alguém, elas aparecerão aqui!'
+                    ? 'Nenhum item corresponde aos filtros aplicados. Tente ajustar sua busca.'
+                    : 'Você ainda não possui oportunidades ou indicações registradas. Quando você indicar alguém, elas aparecerão aqui!'
                   }
                 </Text>
               </View>
@@ -293,7 +303,7 @@ export function StatusScreen() {
                       <View className="flex-1">
                         <View className="flex-row items-center justify-between mb-1">
                           <Text className="text-black font-bold text-base flex-1">
-                            {item.name}
+                            {limitText(item.name)}
                           </Text>
                           <Text className="text-xs text-black ml-2">
                             {item.updatedAt}
@@ -302,16 +312,32 @@ export function StatusScreen() {
                         <Text className="text-black text-sm mb-2">
                           {item.product}
                         </Text>
-                        <View
-                          className="self-start px-3 py-1 w-auto rounded-full"
-                          style={{
-                            backgroundColor: getStatusBgColor(item.status),
-                          }}>
-                          <Text
-                            className="text-xs font-semibold"
-                            style={{color: getStatusColor(item.status)}}>
-                            {item.status}
-                          </Text>
+                        <View className="flex-row items-center justify-between">
+                          <View
+                            className="self-start px-3 py-1 w-auto rounded-full"
+                            style={{
+                              backgroundColor: getStatusBgColor(item.status),
+                            }}>
+                            <Text
+                              className="text-xs font-semibold"
+                              style={{color: getStatusColor(item.status)}}>
+                              {item.status}
+                            </Text>
+                          </View>
+                          {/* Badge para identificar o tipo */}
+                          <View
+                            className="px-2 py-1 rounded-md"
+                            style={{
+                              backgroundColor: item.type === 'opportunity' ? '#dcfce7' : '#dbeafe',
+                            }}>
+                            <Text
+                              className="text-xs font-medium"
+                              style={{
+                                color: item.type === 'opportunity' ? '#16a34a' : '#2563eb',
+                              }}>
+                              {item.type === 'opportunity' ? 'Oportunidade' : 'Indicação'}
+                            </Text>
+                          </View>
                         </View>
                       </View>
                     </View>

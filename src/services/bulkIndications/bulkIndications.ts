@@ -30,6 +30,7 @@ export async function sendBulkIndications(
     await docRef.set({
       indications,
       createdAt: firestore.FieldValue.serverTimestamp(),
+      updatedAt: firestore.FieldValue.serverTimestamp(),
       indicator_name,
       indicator_id,
       unitId,

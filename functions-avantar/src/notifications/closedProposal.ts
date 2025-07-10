@@ -55,6 +55,14 @@ export const closedProposal = functions.firestore.onDocumentUpdated(
       const userData = userDoc.data();
       const userId = userDoc.id;
 
+      // Verificar se o usuário tem preferências de notificação habilitadas para status
+      const statusNotificationEnabled = userData?.notificationPreferences?.status !== false;
+      
+      if (!statusNotificationEnabled) {
+        console.log('Usuário tem notificações de status desabilitadas, pulando envio');
+        return;
+      }
+
       // Criando notificação na subcoleção notifications
       try {
         const notificationRef = admin

@@ -35,7 +35,7 @@ export function HomeSkeleton() {
         {/* Botão de Regras */}
         <Rect x="0" y="200" rx="10" ry="10" width={containerWidth} height={80} />
 
-        {/* Card de Indicações */}
+        {/* Card de Indicações e Oportunidades */}
         <Rect x="0" y="300" rx="20" ry="20" width={containerWidth} height={250} />
 
         {/* Botão de Status */}

@@ -21,6 +21,7 @@ import {FormInput} from '../components/FormInput';
 import {BackButton} from '../components/BackButton';
 import {CustomModal} from '../components/CustomModal';
 import {useAuth} from '../contexts/Auth';
+import firestore from '@react-native-firebase/firestore';
 
 const db = getFirestore();
 
@@ -46,7 +47,11 @@ export function IndicateModal({visible, onClose}: ModalProps) {
         const productsSnapshot = await getDocs(productsCollection);
         const productsList = productsSnapshot.docs.map(doc => doc.data());
 
-        setProducts(productsList.map(product => product.name));
+        const sortedProducts = productsList
+          .map(product => product.name)
+          .sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+        setProducts(sortedProducts);
       } catch (error) {
         console.error('Erro ao buscar os produtos:', error);
       }
@@ -90,6 +95,7 @@ export function IndicateModal({visible, onClose}: ModalProps) {
         createdAt: serverTimestamp(),
         status: 'PENDENTE CONTATO',
         sgcorId: null,
+        updatedAt: firestore.FieldValue.serverTimestamp(),
       });
 
       reset();
@@ -246,6 +252,7 @@ export function IndicateModal({visible, onClose}: ModalProps) {
                   fontWeight="bold"
                   fontSize={22}
                   width="100%"
+                  isLoading={isLoading}
                 />
               </View>
             </View>
@@ -259,7 +266,6 @@ export function IndicateModal({visible, onClose}: ModalProps) {
         title={modalMessage.title}
         description={modalMessage.description}
         buttonText="FECHAR"
-        isLoading={isLoading}
       />
     </Modal>
   );

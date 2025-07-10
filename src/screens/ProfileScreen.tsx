@@ -32,7 +32,6 @@ type RootStackParamList = {
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
 
-
 import {useAuth} from '../contexts/Auth';
 import images from '../data/images';
 import {colors} from '../styles/colors';
@@ -291,6 +290,34 @@ export function ProfileScreen() {
     }
   };
 
+  const handleSignOut = async () => {
+    const error = await signOut();
+    if (error) {
+      switch (error) {
+        case 'auth/no-current-user':
+          setModalMessage({
+            title: 'Falha ao sair',
+            description: 'Nenhum usuário autenticado no momento.',
+          });
+          setIsModalVisible(true);
+          break;
+        case 'auth/network-request-failed':
+          setModalMessage({
+            title: 'Falha ao sair',
+            description: 'Falha de conexão com a rede.',
+          });
+          setIsModalVisible(true);
+          break;
+        default:
+          setModalMessage({
+            title: 'Erro desconhecido ao deslogar',
+            description: 'Entre em contato com o suporte!',
+          });
+          setIsModalVisible(true);
+      }
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       className="flex-1"
@@ -300,7 +327,7 @@ export function ProfileScreen() {
           contentContainerStyle={{flexGrow: 1}}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}>
-          <View 
+          <View
             className="flex-1 bg-fifth_purple justify-center"
             style={{paddingBottom}}>
             <View className="flex-row justify-between mr-7 ml-7">
@@ -309,7 +336,7 @@ export function ProfileScreen() {
               <TouchableOpacity
                 className="items-center justify-center"
                 activeOpacity={0.8}
-                onPress={() => signOut()}>
+                onPress={() => handleSignOut()}>
                 <Ionicons name="exit-outline" size={35} color={colors.red} />
               </TouchableOpacity>
             </View>
@@ -338,7 +365,9 @@ export function ProfileScreen() {
             <View className="items-center flex-col px-8">
               <View className="bg-white w-full rounded-3xl px-8 py-6 mt-8">
                 <View className="flex-row justify-between items-center">
-                  <Text className="text-lg text-black font-bold">Informações do usuário</Text>
+                  <Text className="text-lg text-black font-bold">
+                    Informações do usuário
+                  </Text>
                   <TouchableOpacity
                     activeOpacity={0.5}
                     onPress={() =>
@@ -357,7 +386,9 @@ export function ProfileScreen() {
                   <View className="flex-row items-center gap-2">
                     <FontAwesome name="user" size={25} color={colors.black} />
                     <View className="flex-1">
-                      <Text className="text-sm font-regular text-black">Nome</Text>
+                      <Text className="text-sm font-regular text-black">
+                        Nome
+                      </Text>
                       {isEditingUserInfo ? (
                         <TextInput
                           value={editedName}
@@ -378,9 +409,15 @@ export function ProfileScreen() {
 
                   {/* Telefone */}
                   <View className="flex-row items-center gap-2">
-                    <FontAwesome name="phone-square" size={22} color={colors.black} />
+                    <FontAwesome
+                      name="phone-square"
+                      size={22}
+                      color={colors.black}
+                    />
                     <View className="flex-1">
-                      <Text className="text-sm font-regular text-black">Telefone</Text>
+                      <Text className="text-sm font-regular text-black">
+                        Telefone
+                      </Text>
                       {isEditingUserInfo ? (
                         <TextInput
                           value={editedPhone}
@@ -403,7 +440,9 @@ export function ProfileScreen() {
 
                 {/* Dados para pagamento */}
                 <View className="flex-row justify-between items-center mt-4">
-                  <Text className="text-lg font-bold text-black">Dados para pagamento</Text>
+                  <Text className="text-lg font-bold text-black">
+                    Dados para pagamento
+                  </Text>
                   <TouchableOpacity
                     activeOpacity={0.5}
                     onPress={() =>
@@ -422,7 +461,9 @@ export function ProfileScreen() {
                   <View className="flex-row items-center gap-2">
                     <MaterialIcons name="pix" size={24} color={colors.black} />
                     <View className="flex-1">
-                      <Text className="text-sm font-regular text-black">Chave pix</Text>
+                      <Text className="text-sm font-regular text-black">
+                        Chave pix
+                      </Text>
                       {isEditingPaymentInfo ? (
                         <TextInput
                           value={editedPixKey}
@@ -435,7 +476,7 @@ export function ProfileScreen() {
                         />
                       ) : (
                         <Text className="text-base font-bold text-black">
-                          {userData?.pixKey || 'Não cadastrado'}
+                          {userData?.pixKey == '' || userData?.pixKey == null ? 'Não cadastrada' : userData?.pixKey}
                         </Text>
                       )}
                     </View>
@@ -443,7 +484,7 @@ export function ProfileScreen() {
                 </View>
               </View>
             </View>
-            
+
             <View className="w-full flex-col gap-3 mt-6 px-8">
               <Button
                 text="CONFIGURAÇÕES"

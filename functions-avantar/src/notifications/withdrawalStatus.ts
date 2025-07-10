@@ -56,6 +56,14 @@ export const withdrawalStatus = functions.firestore.onDocumentUpdated(
       const userData = userDoc.data();
       const userId = userDoc.id;
 
+      // Verificar se o usuário tem preferências de notificação habilitadas para saque
+      const withdrawNotificationEnabled = userData?.notificationPreferences?.withdraw !== false;
+      
+      if (!withdrawNotificationEnabled) {
+        console.log('Usuário tem notificações de saque desabilitadas, pulando envio');
+        return;
+      }
+
       // Definir mensagens baseadas no status
       const isPaid = afterData.status === 'PAGO';
       const title = isPaid 
@@ -138,7 +146,7 @@ export const withdrawalStatus = functions.firestore.onDocumentUpdated(
         const emailContent = isPaid 
           ? `
             <h1 style='color:#6600CC; font-size: 24px'>✅ Seu saque foi aprovado!</h1>
-            <p>Olá, ${userData.displayName || userData.name || 'Usuário'}!</p>
+            <p>Olá, ${userData.fullName || 'Usuário'}!</p>
             <p>Temos uma ótima notícia! Seu saque foi aprovado com sucesso.</p>
             <p>Segue os dados do saque:</p>
             <div class='withdrawal-info'>

@@ -27,7 +27,8 @@ export function Rules() {
         return 'Admin Franqueadora';
       case 'admin_unidade':
         return 'Admin Unidade';
-      case 'nao_definida':
+      case 'sub_indicador':
+        return 'Sub Indicador';
       default:
         return 'Não Definida';
     }
@@ -80,10 +81,10 @@ export function Rules() {
 • Não é possível sacar dinheiro, apenas trocar por benefícios.,
 • Cadastro simples, com vinculação a uma unidade.`}
            
-           titleDescription2='Parceiro Indicador'
+           titleDescription2='Parceiro Indicador & Sub Indicador'
            description2={`• Indicadores profissionais autorizados por uma unidade franqueada.
 • Pode indicar normalmente e resgatar valores em dinheiro, com valor mínimo de saque equivalente a meio salário mínimo.
-• Pode cadastrar sub-indicadores (ex: equipe de vendas).`}
+• Somente Parceiro Indicador pode cadastrar sub-indicadores (ex: equipe de vendas).`}
             titleDescription3="Sua permissão atual:"
             description3={userRule}
 

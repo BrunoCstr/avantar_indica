@@ -25,8 +25,15 @@ import {useFocusEffect} from '@react-navigation/native';
 import {Button} from '../components/Button';
 import Feather from 'react-native-vector-icons/Feather';
 import {useAuth} from '../contexts/Auth';
-import {updateNotificationPreferences, validatePassword, changeUserPassword, deactivateAccount} from '../services/settings/settings';
+import {
+  updateNotificationPreferences,
+  validatePassword,
+  changeUserPassword,
+  deactivateAccount,
+  getNotificationPreferences,
+} from '../services/settings/settings';
 import {CustomModal} from '../components/CustomModal';
+import {Spinner} from '../components/Spinner';
 
 const CONTACTS_PERMISSION = Platform.select({
   ios: PERMISSIONS.IOS.CONTACTS,
@@ -36,9 +43,9 @@ const CONTACTS_PERMISSION = Platform.select({
 export function Settings() {
   const [contactsStatus, setContactsStatus] = useState('loading');
   const [contactsEnabled, setContactsEnabled] = useState(false);
-  const [campaignsNotification, setCampaignsNotification] = useState(true);
-  const [statusNotification, setStatusNotification] = useState(true);
-  const [withdrawNotification, setWithdrawNotification] = useState(true);
+  const [campaignsNotification, setCampaignsNotification] = useState(false);
+  const [statusNotification, setStatusNotification] = useState(false);
+  const [withdrawNotification, setWithdrawNotification] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -54,6 +61,13 @@ export function Settings() {
   const [modalCancelButtonText, setModalCancelButtonText] = useState('');
   const [showDeactivateModal, setShowDeactivateModal] = useState(false);
   const {userData} = useAuth();
+  const [
+    isLoadingNotificationPreferences,
+    setIsLoadingNotificationPreferences,
+  ] = useState(false);
+  const [isLoadingPasswordChange, setIsLoadingPasswordChange] = useState(false);
+  const [isLoadingDeactivateAccount, setIsLoadingDeactivateAccount] =
+    useState(false);
 
   const fetchPermissions = async () => {
     if (CONTACTS_PERMISSION) {
@@ -66,6 +80,24 @@ export function Settings() {
   useEffect(() => {
     fetchPermissions();
   }, []);
+
+  // Carregar preferências de notificação do usuário
+  useEffect(() => {
+    const loadNotificationPreferences = async () => {
+      if (!userData?.uid) return;
+
+      try {
+        const preferences = await getNotificationPreferences(userData.uid);
+        setCampaignsNotification(preferences.campaigns);
+        setStatusNotification(preferences.status);
+        setWithdrawNotification(preferences.withdraw);
+      } catch (error) {
+        console.error('Erro ao carregar preferências de notificação:', error);
+      }
+    };
+
+    loadNotificationPreferences();
+  }, [userData?.uid]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -102,6 +134,7 @@ export function Settings() {
   ) => {
     if (!userData?.uid) return;
     try {
+      setIsLoadingNotificationPreferences(true);
       await updateNotificationPreferences(userData.uid, {
         campaigns: newPrefs?.campaigns ?? campaignsNotification,
         status: newPrefs?.status ?? statusNotification,
@@ -122,6 +155,8 @@ export function Settings() {
       setModalButtonText2('');
       setModalCancelButtonText('');
       setIsModalVisible(true);
+    } finally {
+      setIsLoadingNotificationPreferences(false);
     }
   };
 
@@ -163,13 +198,14 @@ export function Settings() {
     }
 
     try {
+      setIsLoadingPasswordChange(true);
       await changeUserPassword(currentPassword, newPassword);
-      
+
       // Limpar campos após sucesso
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-      
+
       setModalMessage({
         title: 'Sucesso',
         description: 'Senha alterada com sucesso!',
@@ -185,24 +221,27 @@ export function Settings() {
       setModalButtonText2('');
       setModalCancelButtonText('');
       setIsModalVisible(true);
+    } finally {
+      setIsLoadingPasswordChange(false);
     }
   };
 
   // Função para desativar conta
   const handleDeactivateAccount = async () => {
     if (!userData?.uid) return;
-    
+
     try {
       await deactivateAccount(userData.uid);
-      
+
       setModalMessage({
         title: 'Conta desativada',
-        description: 'Sua conta foi desativada com sucesso. Você será redirecionado para a tela de login.',
+        description:
+          'Sua conta foi desativada com sucesso. Você será redirecionado para a tela de login.',
       });
       setModalButtonText2('');
       setModalCancelButtonText('');
       setIsModalVisible(true);
-      
+
       // O usuário será automaticamente redirecionado para login após o signOut
     } catch (error: any) {
       setModalMessage({
@@ -450,6 +489,7 @@ export function Settings() {
                 textColor="white"
                 fontWeight="bold"
                 fontSize={16}
+                isLoading={isLoadingNotificationPreferences}
               />
             </View>
           </View>
@@ -569,6 +609,7 @@ export function Settings() {
                   textColor="white"
                   fontWeight="bold"
                   fontSize={16}
+                  isLoading={isLoadingPasswordChange}
                 />
               </View>
             </View>
@@ -588,7 +629,11 @@ export function Settings() {
               activeOpacity={0.8}
               onPress={showDeactivateConfirmation}>
               <Text style={{color: '#fff', fontWeight: 'bold', fontSize: 16}}>
-                DESATIVAR CONTA
+                {isLoadingDeactivateAccount ? (
+                  <Spinner size={32} variant="blue" />
+                ) : (
+                  'DESATIVAR CONTA'
+                )}
               </Text>
             </TouchableOpacity>
           </View>
@@ -603,7 +648,7 @@ export function Settings() {
         }}
         title={modalMessage.title}
         description={modalMessage.description}
-        buttonText={modalButtonText2 ? "CANCELAR" : "FECHAR"}
+        buttonText={modalButtonText2 ? 'CANCELAR' : 'FECHAR'}
         buttonText2={modalButtonText2}
         onPress={modalButtonText2 ? () => openSettings() : undefined}
       />

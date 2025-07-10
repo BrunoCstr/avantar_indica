@@ -3,6 +3,63 @@ import {formatTimeAgo} from '../../utils/formatTimeToDistance';
 
 const db = getFirestore();
 
+// Nova função para formatar o tempo com texto apropriado
+const formatStatusTime = (updatedAt: any, createdAt: any) => {
+  try {
+    console.log('formatStatusTime - updatedAt:', updatedAt);
+    console.log('formatStatusTime - createdAt:', createdAt);
+    
+    // Se não há updatedAt, usar createdAt
+    if (!updatedAt) {
+      const time = formatTimeAgo(createdAt);
+      console.log('formatStatusTime - Sem updatedAt, usando createdAt:', time);
+      return `Enviado ${time}`;
+    }
+
+    // Converter timestamps para números
+    let updatedTime: number;
+    let createdTime: number;
+    
+    if (updatedAt.toDate) {
+      updatedTime = updatedAt.toDate().getTime();
+    } else if (updatedAt.seconds) {
+      updatedTime = updatedAt.seconds * 1000;
+    } else if (updatedAt._seconds) {
+      updatedTime = updatedAt._seconds * 1000;
+    } else {
+      updatedTime = new Date(updatedAt).getTime();
+    }
+    
+    if (createdAt.toDate) {
+      createdTime = createdAt.toDate().getTime();
+    } else if (createdAt.seconds) {
+      createdTime = createdAt.seconds * 1000;
+    } else if (createdAt._seconds) {
+      createdTime = createdAt._seconds * 1000;
+    } else {
+      createdTime = new Date(createdAt).getTime();
+    }
+    
+    console.log('formatStatusTime - updatedTime:', updatedTime);
+    console.log('formatStatusTime - createdTime:', createdTime);
+    console.log('formatStatusTime - updatedTime > createdTime:', updatedTime > createdTime);
+    
+    // Se updatedAt é mais recente que createdAt, mostrar "Atualizado"
+    if (updatedTime > createdTime) {
+      const time = formatTimeAgo(updatedAt);
+      console.log('formatStatusTime - Atualizado:', time);
+      return `Atualizado ${time}`;
+    } else {
+      const time = formatTimeAgo(createdAt);
+      console.log('formatStatusTime - Enviado:', time);
+      return `Enviado ${time}`;
+    }
+  } catch (error) {
+    console.error('Erro ao formatar tempo do status:', error);
+    return 'Data não disponível';
+  }
+};
+
 export interface Opportunity {
   id: string;
   name: string;
@@ -11,6 +68,31 @@ export interface Opportunity {
   updatedAt: string;
   indicator_id: string;
   createdAt: any;
+  updatedAtOriginal?: any; // Timestamp original para ordenação
+}
+
+export interface Indication {
+  id: string;
+  name: string;
+  status: string;
+  product: string;
+  updatedAt: string;
+  indicator_id: string;
+  createdAt: any;
+  updatedAtOriginal?: any; // Timestamp original para ordenação
+}
+
+// Interface unificada para exibir tanto oportunidades quanto indicações
+export interface StatusItem {
+  id: string;
+  name: string;
+  status: string;
+  product: string;
+  updatedAt: string;
+  indicator_id: string;
+  createdAt: any;
+  type: 'opportunity' | 'indication'; // Campo para identificar o tipo
+  updatedAtOriginal?: any; // Timestamp original para ordenação
 }
 
 export interface StatusStats {
@@ -20,39 +102,101 @@ export interface StatusStats {
 export const getOpportunitiesByUserId = async (userId: string): Promise<Opportunity[]> => {
   try {
     const opportunitiesRef = collection(db, 'opportunities');
-    const q = query(
+    
+    // Buscar por indicator_id OU userId
+    const q1 = query(
       opportunitiesRef,
-      where('indicator_id', '==', userId),
-      orderBy('updatedAt', 'desc')
+      where('indicator_id', '==', userId)
+    );
+    
+    const q2 = query(
+      opportunitiesRef,
+      where('userId', '==', userId)
     );
 
-    const querySnapshot = await getDocs(q);
+    const [querySnapshot1, querySnapshot2] = await Promise.all([
+      getDocs(q1),
+      getDocs(q2)
+    ]);
+    
     const opportunities: Opportunity[] = [];
+    const processedIds = new Set<string>();
 
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      try {
-        opportunities.push({
-          id: doc.id,
-          name: data.name || '',
-          status: data.status || '',
-          product: data.product || '',
-          updatedAt: formatTimeAgo(data.updatedAt),
-          indicator_id: data.indicator_id || '',
-          createdAt: data.createdAt,
+    // Processar resultados da primeira query (indicator_id)
+    querySnapshot1.forEach((doc) => {
+      if (!processedIds.has(doc.id)) {
+        processedIds.add(doc.id);
+        const data = doc.data();
+        console.log('getOpportunitiesByUserId - Dados completos do documento:', doc.id, data);
+        console.log('getOpportunitiesByUserId - Campos de tempo:', {
+          updatedAt: data.updatedAt,
+          updateAt: data.updateAt,
+          createdAt: data.createdAt
         });
-      } catch (error) {
-        console.error('Erro ao processar documento:', doc.id, error);
-        // Adiciona o documento mesmo com erro, mas com valores padrão
-        opportunities.push({
-          id: doc.id,
-          name: data.name || 'Nome não disponível',
-          status: data.status || 'Status não disponível',
-          product: data.product || 'Produto não disponível',
-          updatedAt: 'Data não disponível',
-          indicator_id: data.indicator_id || '',
-          createdAt: data.createdAt,
+        try {
+          opportunities.push({
+            id: doc.id,
+            name: data.name || '',
+            status: data.status || '',
+            product: data.product || '',
+            updatedAt: formatStatusTime(data.updatedAt || data.updateAt, data.createdAt),
+            indicator_id: data.indicator_id || '',
+            createdAt: data.createdAt,
+            updatedAtOriginal: data.updatedAt || data.updateAt, // Armazenar timestamp original
+          });
+        } catch (error) {
+          console.error('Erro ao processar documento:', doc.id, error);
+          // Adiciona o documento mesmo com erro, mas com valores padrão
+          opportunities.push({
+            id: doc.id,
+            name: data.name || 'Nome não disponível',
+            status: data.status || 'Status não disponível',
+            product: data.product || 'Produto não disponível',
+            updatedAt: 'Data não disponível',
+            indicator_id: data.indicator_id || '',
+            createdAt: data.createdAt,
+            updatedAtOriginal: data.updatedAt || data.updateAt, // Armazenar timestamp original
+          });
+        }
+      }
+    });
+
+    // Processar resultados da segunda query (userId)
+    querySnapshot2.forEach((doc) => {
+      if (!processedIds.has(doc.id)) {
+        processedIds.add(doc.id);
+        const data = doc.data();
+        console.log('getOpportunitiesByUserId - Dados completos do documento (userId):', doc.id, data);
+        console.log('getOpportunitiesByUserId - Campos de tempo (userId):', {
+          updatedAt: data.updatedAt,
+          updateAt: data.updateAt,
+          createdAt: data.createdAt
         });
+        try {
+          opportunities.push({
+            id: doc.id,
+            name: data.name || '',
+            status: data.status || '',
+            product: data.product || '',
+            updatedAt: formatStatusTime(data.updatedAt || data.updateAt, data.createdAt),
+            indicator_id: data.indicator_id || '',
+            createdAt: data.createdAt,
+            updatedAtOriginal: data.updatedAt || data.updateAt, // Armazenar timestamp original
+          });
+        } catch (error) {
+          console.error('Erro ao processar documento:', doc.id, error);
+          // Adiciona o documento mesmo com erro, mas com valores padrão
+          opportunities.push({
+            id: doc.id,
+            name: data.name || 'Nome não disponível',
+            status: data.status || 'Status não disponível',
+            product: data.product || 'Produto não disponível',
+            updatedAt: 'Data não disponível',
+            indicator_id: data.indicator_id || '',
+            createdAt: data.createdAt,
+            updatedAtOriginal: data.updatedAt || data.updateAt, // Armazenar timestamp original
+          });
+        }
       }
     });
 
@@ -63,20 +207,157 @@ export const getOpportunitiesByUserId = async (userId: string): Promise<Opportun
   }
 };
 
-export const getStatusStats = (opportunities: Opportunity[]): StatusStats => {
+export const getIndicationsByUserId = async (userId: string): Promise<Indication[]> => {
+  try {
+    const indicationsRef = collection(db, 'indications');
+    
+    // Buscar por indicator_id OU userId
+    const q1 = query(
+      indicationsRef,
+      where('indicator_id', '==', userId)
+    );
+    
+    const q2 = query(
+      indicationsRef,
+      where('userId', '==', userId)
+    );
+
+    const [querySnapshot1, querySnapshot2] = await Promise.all([
+      getDocs(q1),
+      getDocs(q2)
+    ]);
+    
+    const indications: Indication[] = [];
+    const processedIds = new Set<string>();
+
+    // Processar resultados da primeira query (indicator_id)
+    querySnapshot1.forEach((doc) => {
+      if (!processedIds.has(doc.id)) {
+        processedIds.add(doc.id);
+        const data = doc.data();
+        try {
+          // Usar createdAt se updatedAt não existir
+          const updateTime = data.updatedAt || data.createdAt;
+          indications.push({
+            id: doc.id,
+            name: data.name || '',
+            status: data.status || '',
+            product: data.product || '',
+            updatedAt: formatStatusTime(data.updatedAt, data.createdAt),
+            indicator_id: data.indicator_id || '',
+            createdAt: data.createdAt,
+            updatedAtOriginal: data.updatedAt, // Armazenar timestamp original
+          });
+        } catch (error) {
+          console.error('Erro ao processar documento:', doc.id, error);
+          // Adiciona o documento mesmo com erro, mas com valores padrão
+          indications.push({
+            id: doc.id,
+            name: data.name || 'Nome não disponível',
+            status: data.status || 'Status não disponível',
+            product: data.product || 'Produto não disponível',
+            updatedAt: 'Data não disponível',
+            indicator_id: data.indicator_id || '',
+            createdAt: data.createdAt,
+            updatedAtOriginal: data.updatedAt, // Armazenar timestamp original
+          });
+        }
+      }
+    });
+
+    // Processar resultados da segunda query (userId)
+    querySnapshot2.forEach((doc) => {
+      if (!processedIds.has(doc.id)) {
+        processedIds.add(doc.id);
+        const data = doc.data();
+        try {
+          // Usar createdAt se updatedAt não existir
+          const updateTime = data.updatedAt || data.createdAt;
+          indications.push({
+            id: doc.id,
+            name: data.name || '',
+            status: data.status || '',
+            product: data.product || '',
+            updatedAt: formatStatusTime(data.updatedAt, data.createdAt),
+            indicator_id: data.indicator_id || '',
+            createdAt: data.createdAt,
+            updatedAtOriginal: data.updatedAt, // Armazenar timestamp original
+          });
+        } catch (error) {
+          console.error('Erro ao processar documento:', doc.id, error);
+          // Adiciona o documento mesmo com erro, mas com valores padrão
+          indications.push({
+            id: doc.id,
+            name: data.name || 'Nome não disponível',
+            status: data.status || 'Status não disponível',
+            product: data.product || 'Produto não disponível',
+            updatedAt: 'Data não disponível',
+            indicator_id: data.indicator_id || '',
+            createdAt: data.createdAt,
+            updatedAtOriginal: data.updatedAt, // Armazenar timestamp original
+          });
+        }
+      }
+    });
+
+    return indications;
+  } catch (error) {
+    console.error('Erro ao buscar indicações:', error);
+    throw error;
+  }
+};
+
+// Função principal que combina oportunidades e indicações
+export const getAllStatusItemsByUserId = async (userId: string): Promise<StatusItem[]> => {
+  try {
+    const [opportunities, indications] = await Promise.all([
+      getOpportunitiesByUserId(userId),
+      getIndicationsByUserId(userId)
+    ]);
+
+    // Converter oportunidades para StatusItem
+    const opportunityItems: StatusItem[] = opportunities.map(opportunity => ({
+      ...opportunity,
+      type: 'opportunity' as const
+    }));
+
+    // Converter indicações para StatusItem
+    const indicationItems: StatusItem[] = indications.map(indication => ({
+      ...indication,
+      type: 'indication' as const
+    }));
+
+    // Combinar e ordenar por data de atualização (mais recente primeiro)
+    const allItems = [...opportunityItems, ...indicationItems];
+    
+    // Ordenar por timestamp do updatedAt (mais recente primeiro)
+    allItems.sort((a, b) => {
+      const aTime = a.updatedAtOriginal?.seconds || a.updatedAtOriginal?.toDate?.() || a.createdAt?.seconds || a.createdAt?.toDate?.() || 0;
+      const bTime = b.updatedAtOriginal?.seconds || b.updatedAtOriginal?.toDate?.() || b.createdAt?.seconds || b.createdAt?.toDate?.() || 0;
+      return bTime - aTime;
+    });
+
+    return allItems;
+  } catch (error) {
+    console.error('Erro ao buscar dados de status:', error);
+    throw error;
+  }
+};
+
+export const getStatusStats = (items: StatusItem[]): StatusStats => {
   const stats: StatusStats = {};
-  opportunities.forEach(item => {
+  items.forEach(item => {
     stats[item.status] = (stats[item.status] || 0) + 1;
   });
   return stats;
 };
 
-export const filterOpportunities = (
-  opportunities: Opportunity[],
+export const filterStatusItems = (
+  items: StatusItem[],
   search: string,
   selectedFilters: string[]
-): Opportunity[] => {
-  let filtered = opportunities;
+): StatusItem[] => {
+  let filtered = items;
 
   // Filtro por texto de busca
   if (search.trim()) {
@@ -87,12 +368,36 @@ export const filterOpportunities = (
     );
   }
 
+  // Filtro por tipo
+  const typeFilters = selectedFilters.filter(filter => 
+    filter === 'APENAS OPORTUNIDADES' || filter === 'APENAS INDICAÇÕES'
+  );
+  
+  if (typeFilters.length > 0) {
+    filtered = filtered.filter(item => {
+      if (typeFilters.includes('APENAS OPORTUNIDADES') && item.type === 'opportunity') {
+        return true;
+      }
+      if (typeFilters.includes('APENAS INDICAÇÕES') && item.type === 'indication') {
+        return true;
+      }
+      return false;
+    });
+  }
+
   // Filtro por status
-  if (selectedFilters.length > 0) {
+  const statusFilters = selectedFilters.filter(filter => 
+    filter !== 'APENAS OPORTUNIDADES' && filter !== 'APENAS INDICAÇÕES' && filter !== '---'
+  );
+  
+  if (statusFilters.length > 0) {
     filtered = filtered.filter(item =>
-      selectedFilters.includes(item.status)
+      statusFilters.includes(item.status)
     );
   }
 
   return filtered;
 };
+
+// Manter funções antigas para compatibilidade
+export const filterOpportunities = filterStatusItems;

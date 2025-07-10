@@ -8,6 +8,41 @@ export interface NotificationPreferences {
 }
 
 /**
+ * Busca as preferências de notificação do usuário no Firestore.
+ * @param userId ID do usuário
+ * @returns Promise<NotificationPreferences> Preferências de notificação
+ */
+export async function getNotificationPreferences(
+  userId: string
+): Promise<NotificationPreferences> {
+  try {
+    const userDoc = await firestore()
+      .collection('users')
+      .doc(userId)
+      .get();
+    
+    const userData = userDoc.data();
+    
+    // Valores padrão caso não existam no banco
+    const defaultPreferences: NotificationPreferences = {
+      campaigns: true,
+      status: true,
+      withdraw: true,
+    };
+    
+    return userData?.notificationPreferences || defaultPreferences;
+  } catch (error) {
+    console.error('Erro ao buscar preferências de notificação:', error);
+    // Retorna valores padrão em caso de erro
+    return {
+      campaigns: true,
+      status: true,
+      withdraw: true,
+    };
+  }
+}
+
+/**
  * Valida se a senha é forte o suficiente
  * @param password Senha a ser validada
  * @returns Objeto com isValid (boolean) e message (string)

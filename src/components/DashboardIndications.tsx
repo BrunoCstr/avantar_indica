@@ -7,7 +7,7 @@ type indicationsData = {
   product: string;
   count: number;
   percentage: number;
-  totalIndications: number;
+  totalIndications: number; // Agora representa o total de indicações + oportunidades
 };
 
 export type indicationsDataArray = indicationsData[];
@@ -93,12 +93,17 @@ const DashboardIndicacoes = ({data}: {data: indicationsDataArray}) => {
     <View>
       {indications.length === 0 ? (
         <View className="items-center justify-center py-12 px-4">
-          <IndicationsEmpty width={48} height={48} style={{ marginBottom: 12, opacity: 0.7 }} />
+          <IndicationsEmpty
+            width={48}
+            height={48}
+            style={{marginBottom: 12, opacity: 0.7}}
+          />
           <Text className="text-lg font-bold text-fifth_purple mb-1 text-center">
-            Nenhuma indicação encontrada
+            Nenhuma indicação ou oportunidade encontrada
           </Text>
           <Text className="text-sm text-black text-center">
-            Você ainda não possui indicações registradas. Quando você indicar alguém, elas aparecerão aqui!
+            Você ainda não possui indicações registradas. Quando você indicar
+            alguém, elas aparecerão aqui!
           </Text>
         </View>
       ) : (

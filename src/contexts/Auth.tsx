@@ -2,12 +2,8 @@ import React, {createContext, useContext, useEffect, useState} from 'react';
 import {Alert} from 'react-native';
 import auth from '@react-native-firebase/auth';
 import firestore, {
-  collection,
   doc,
   setDoc,
-  query,
-  where,
-  getDocs,
   updateDoc,
   onSnapshot,
   serverTimestamp,
@@ -42,7 +38,7 @@ interface AuthContextData {
     unitName: string,
   ) => Promise<string | null>;
   signIn: (email: string, password: string) => Promise<string | null>;
-  signOut: () => Promise<void>;
+  signOut: () => Promise<string | null>;
   registrationStatus: boolean;
   forgotPassword: (email: string) => Promise<string | null>;
   isLoading: boolean;
@@ -240,7 +236,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       try {
         await messaging().requestPermission();
         fcmToken = await messaging().getToken();
-        console.log('FCM Token obtido durante login:', fcmToken);
       } catch (fcmError) {
         console.warn('Erro ao obter FCM token durante login:', fcmError);
       }
@@ -251,7 +246,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         fcmToken: fcmToken,
       });
       
-      console.log('Login realizado com sucesso e FCM token atualizado para o usuário:', user.uid);
     } catch (err: any) {
       console.error('Erro ao logar o usuário:', err);
 
@@ -279,21 +273,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
       await auth().signOut();
     } catch (err: any) {
-      switch (err.code) {
-        case 'auth/no-current-user':
-          Alert.alert(
-            'Falha ao sair',
-            'Nenhum usuário autenticado no momento.',
-          );
-          break;
-        case 'auth/network-request-failed':
-          Alert.alert('Falha ao sair', 'Falha de conexão com a rede.');
-          break;
-        default:
-          Alert.alert(
-            'Erro desconhecido ao deslogar, entre em contato com o suporte!',
-          );
-      }
+      return err.code;
     }
   }
 

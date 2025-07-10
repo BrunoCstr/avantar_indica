@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   TextInput,
   Modal,
+  Image,
 } from 'react-native';
 import {BackButton} from '../components/BackButton';
 import {Button} from '../components/Button';
@@ -32,7 +33,7 @@ import {useNavigation} from '@react-navigation/native';
 import {applyMaskTelephone} from '../utils/applyMaskTelephone';
 import {getDefaultProfilePicture} from '../utils/getDefaultProfilePicture';
 import {Spinner} from '../components/Spinner';
-import { SellerSkeleton } from '../components/skeletons/SellerSkeleton';
+import {SellerSkeleton} from '../components/skeletons/SellerSkeleton';
 
 const db = getFirestore();
 
@@ -54,10 +55,11 @@ const sellerSignUpSchema = z
     password: z.string().min(1, 'Senha é obrigatória'),
     profilePicture: z.string().optional(),
     confirmPassword: z.string().min(1, 'Confirmação de senha é obrigatória'),
-    commission: z.number()
+    commission: z
+      .number()
       .min(0, 'Comissão deve ser entre 0 e 100')
       .max(100, 'Comissão deve ser entre 0 e 100')
-      .refine((val) => !isNaN(val), 'Comissão deve ser um número válido'),
+      .refine(val => !isNaN(val), 'Comissão deve ser um número válido'),
   })
   .refine(data => data.password === data.confirmPassword, {
     message: 'As senhas devem ser iguais!',
@@ -163,37 +165,103 @@ export function RegisterSellers() {
     }
   }
 
+  // Função para obter as iniciais do nome
+  const getInitials = (name: string) => {
+    const names = name.split(' ');
+    const initials = names.map(n => n[0]).join('');
+    return initials.substring(0, 2).toUpperCase();
+  };
+
   function renderSeller({item}: {item: any}) {
     return (
-      <View className="bg-fifth_purple border-2 border-blue w-full p-3 mt-2 rounded-xl flex-row items-center justify-between">
-        <View>
-          <Text className="text-white font-bold text-base">
-            {item.fullName}
-          </Text>
-          <Text className="text-blue text-xs">{item.email}</Text>
-          {item.commission && (
-            <Text className="text-blue text-xs">Comissão: {item.commission}%</Text>
-          )}
-          <Text
-            className="text-xs mt-1"
-            style={{color: item.disabled ? colors.red : colors.green}}>
-            {item.disabled ? 'Inativo' : 'Ativo'}
-          </Text>
-        </View>
-        <View className="flex-row gap-2">
-          <TouchableOpacity onPress={() => handleEdit(item)} className="mr-2">
-            <Ionicons name="create-outline" size={22} color={colors.blue} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => {
-            setSelectedSeller(item);
-            setConfirmModalVisible(true);
-          }}>
-            <Ionicons
-              name={item.disabled ? 'checkmark-done' : 'close-circle'}
-              size={22}
-              color={item.disabled ? colors.green : colors.red}
-            />
-          </TouchableOpacity>
+      <View
+        className="bg-white rounded-xl mb-2 mx-2"
+        style={{
+          shadowColor: '#000',
+          shadowOffset: {width: 2, height: 2},
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          elevation: 5,
+        }}>
+        <View className="flex-row items-center p-4">
+          {/* Avatar */}
+          <View className="mr-4">
+            {item.profilePicture ? (
+              <Image
+                source={{uri: item.profilePicture}}
+                className="w-12 h-12 rounded-full"
+              />
+            ) : (
+              <View
+                className="w-12 h-12 rounded-full items-center justify-center"
+                style={{backgroundColor: colors.tertiary_purple}}>
+                <Text className="text-white font-bold text-sm">
+                  {getInitials(item.fullName)}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          {/* Informações */}
+          <View className="flex-1">
+            <View className="flex-row items-center justify-between mb-1">
+              <View className="flex-row items-center flex-1">
+                <Text className="text-black font-bold text-base flex-1">
+                  {item.fullName}
+                </Text>
+                {/* Badge de status */}
+                <View
+                  className="px-2 py-1 rounded-md ml-2"
+                  style={{
+                    backgroundColor: item.disabled ? '#fee2e2' : '#dcfce7',
+                  }}>
+                  <Text
+                    className="text-xs font-medium"
+                    style={{
+                      color: item.disabled ? '#dc2626' : '#16a34a',
+                    }}>
+                    {item.disabled ? 'Inativo' : 'Ativo'}
+                  </Text>
+                </View>
+              </View>
+            </View>
+            <Text className="text-black text-sm mb-2">{item.email}</Text>
+            {item.commission && (
+              <View
+                className="self-start px-3 py-1 w-auto rounded-full"
+                style={{
+                  backgroundColor: '#dbeafe',
+                }}>
+                <Text
+                  className="text-xs font-semibold"
+                  style={{color: '#2563eb'}}>
+                  Comissão: {item.commission}%
+                </Text>
+              </View>
+            )}
+          </View>
+
+          {/* Botões de ação */}
+          <View className="flex-row gap-2 ml-2">
+            <TouchableOpacity onPress={() => handleEdit(item)} className="mr-2">
+              <Ionicons
+                name="create-outline"
+                size={22}
+                color={colors.tertiary_purple}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                setSelectedSeller(item);
+                setConfirmModalVisible(true);
+              }}>
+              <Ionicons
+                name={item.disabled ? 'checkmark-done' : 'close-circle'}
+                size={22}
+                color={item.disabled ? colors.green : colors.red}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     );
@@ -216,7 +284,11 @@ export function RegisterSellers() {
     if (!selectedSeller) return;
     setIsLoadingToggle(true);
     try {
-      await toggleSellerActiveService(selectedSeller.id, selectedSeller.disabled, selectedSeller.email);
+      await toggleSellerActiveService(
+        selectedSeller.id,
+        selectedSeller.disabled,
+        selectedSeller.email,
+      );
       fetchSellers();
       setConfirmModalVisible(false);
       setSelectedSeller(null);
@@ -326,8 +398,12 @@ export function RegisterSellers() {
 
       // Remove a máscara do telefone antes de salvar
       const phoneWithoutMask = removePhoneMask(phone);
-      console.log('Valor da comissão na edição:', commission, typeof commission);
-      
+      console.log(
+        'Valor da comissão na edição:',
+        commission,
+        typeof commission,
+      );
+
       await updateSellerService(editingSeller.id, {
         fullName,
         email,
@@ -356,12 +432,20 @@ export function RegisterSellers() {
   }
 
   return (
-    <ImageBackground source={images.bg_dark} className="flex-1">
-      <View className="flex-1 mt-20 px-5">
+    <ImageBackground
+      source={images.bg_dark}
+      className="flex-1"
+      resizeMode="cover">
+      <View className="flex-1 px-5 pt-4" style={{paddingTop: 80}}>
         {/* Cabeçalho */}
         <View className="flex-row items-center justify-between mb-6">
-          <BackButton borderColor={colors.blue} color={colors.blue} />
-          <Text className="text-white text-2xl font-bold">Vendedores</Text>
+          <BackButton
+            borderColor={colors.blue}
+            color={colors.blue}
+          />
+          <Text className="text-white text-2xl font-bold">
+            Vendedores
+          </Text>
           <AddUserButton
             borderColor={colors.blue}
             color={colors.blue}
@@ -369,7 +453,7 @@ export function RegisterSellers() {
           />
         </View>
         {/* Input de pesquisa com design igual ao StatusScreen */}
-        <View className="flex-row items-center mt-6 w-full h-14 bg-tertiary_purple rounded-xl border-b-4 border-l-2 border-blue px-4 mb-2">
+        <View className="flex-row items-center w-full h-16 bg-tertiary_purple rounded-xl border-b-4 border-l-2 border-blue px-4 mt-8">
           <Ionicons
             name="search"
             size={24}
@@ -381,7 +465,7 @@ export function RegisterSellers() {
               flex: 1,
               color: colors.white,
               fontFamily: 'FamiljenGrotesk-regular',
-              fontSize: 13,
+              fontSize: 16,
               paddingLeft: 40,
               paddingRight: 10,
             }}
@@ -407,15 +491,15 @@ export function RegisterSellers() {
               </View>
             ) : filteredSellers.length === 0 ? (
               <View className="items-center justify-center mt-16">
-                <Text className="text-white text-lg font-bold mb-4">
+                <Text className="text-tertiary_purple text-lg font-bold mb-4">
                   Nenhum vendedor cadastrado
                 </Text>
                 <AddUserButton
-                  borderColor={colors.blue}
-                  color={colors.blue}
+                  borderColor={colors.tertiary_purple}
+                  color={colors.tertiary_purple}
                   onPress={() => setShowModal(true)}
                 />
-                <Text className="text-blue font-semibold mt-2">
+                <Text className="text-tertiary_purple font-semibold mt-2">
                   Cadastrar novo vendedor
                 </Text>
               </View>
@@ -435,13 +519,8 @@ export function RegisterSellers() {
         }}
         transparent={true}
         animationType="fade">
-        <BlurView
-          style={{flex: 1, backgroundColor: 'transparent'}}
-          blurType="dark"
-          blurAmount={5}
-          reducedTransparencyFallbackColor="transparent">
-          <View className="flex-1 justify-center items-center">
-            <View className="w-[80%] bg-fifth_purple rounded-2xl border-2 border-blue px-7 py-7">
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)'}}>
+          <View className="w-[90%] max-w-md bg-fifth_purple rounded-2xl border-2 border-blue px-7 py-7 max-h-[90%]">
               <View className="justify-between items-center flex-row">
                 <BackButton
                   onPress={() => {
@@ -562,22 +641,31 @@ export function RegisterSellers() {
                 <Controller
                   control={control}
                   name="commission"
-                  render={({ field: { onChange, value, onBlur } }) => (
+                  render={({field: {onChange, value, onBlur}}) => (
                     <TextInput
                       keyboardType="numeric"
                       placeholder="Comissão (%)"
                       placeholderTextColor={colors.white_opacity}
-                      value={value !== undefined && value !== null ? String(value) : ''}
+                      value={
+                        value !== undefined && value !== null
+                          ? String(value)
+                          : ''
+                      }
                       onChangeText={text => {
                         // Permite apenas números, vírgula e ponto
                         const onlyNumbers = text.replace(/[^0-9.,]/g, '');
                         const normalized = onlyNumbers.replace(',', '.');
                         // Se o texto estiver vazio, define como 0, senão converte para número
-                        const numValue = normalized === '' ? 0 : parseFloat(normalized);
-                        
+                        const numValue =
+                          normalized === '' ? 0 : parseFloat(normalized);
+
                         // Valida se o valor está entre 0 e 100
                         if (numValue >= 0 && numValue <= 100) {
-                          console.log('Valor da comissão sendo definido:', numValue, typeof numValue);
+                          console.log(
+                            'Valor da comissão sendo definido:',
+                            numValue,
+                            typeof numValue,
+                          );
                           onChange(numValue);
                         } else if (normalized !== '') {
                           // Se o valor estiver fora do range, não atualiza o campo
@@ -587,7 +675,9 @@ export function RegisterSellers() {
                       onBlur={onBlur}
                       style={{
                         borderWidth: 1,
-                        borderColor: errors.commission ? colors.red : colors.blue,
+                        borderColor: errors.commission
+                          ? colors.red
+                          : colors.blue,
                         backgroundColor: colors.tertiary_purple_opacity,
                         color: colors.white_opacity,
                         borderRadius: 10,
@@ -721,8 +811,7 @@ export function RegisterSellers() {
               </View>
             </View>
           </View>
-        </BlurView>
-      </Modal>
+        </Modal>
 
       {/* Modal de edição de vendedor */}
       <Modal
@@ -733,13 +822,8 @@ export function RegisterSellers() {
         }}
         transparent={true}
         animationType="fade">
-        <BlurView
-          style={{flex: 1, backgroundColor: 'transparent'}}
-          blurType="dark"
-          blurAmount={5}
-          reducedTransparencyFallbackColor="transparent">
-          <View className="flex-1 justify-center items-center">
-            <View className="w-[80%] bg-fifth_purple rounded-2xl border-2 border-blue px-7 py-7">
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)'}}>
+          <View className="w-[90%] max-w-md bg-fifth_purple rounded-2xl border-2 border-blue px-7 py-7 max-h-[90%]">
               <View className="justify-between items-center flex-row">
                 <BackButton
                   onPress={() => {
@@ -826,21 +910,34 @@ export function RegisterSellers() {
                 <TextInput
                   placeholder="Comissão (%)"
                   placeholderTextColor={colors.white_opacity}
-                  value={watchEdit('commission') !== undefined && watchEdit('commission') !== null ? String(watchEdit('commission')) : ''}
+                  value={
+                    watchEdit('commission') !== undefined &&
+                    watchEdit('commission') !== null
+                      ? String(watchEdit('commission'))
+                      : ''
+                  }
                   onChangeText={text => {
                     // Permite apenas números, vírgula e ponto
                     const onlyNumbers = text.replace(/[^0-9.,]/g, '');
                     const normalized = onlyNumbers.replace(',', '.');
                     // Se o texto estiver vazio, define como 0, senão converte para número
-                    const numValue = normalized === '' ? 0 : parseFloat(normalized);
-                    
+                    const numValue =
+                      normalized === '' ? 0 : parseFloat(normalized);
+
                     // Valida se o valor está entre 0 e 100
                     if (numValue >= 0 && numValue <= 100) {
-                      console.log('Valor da comissão sendo definido (edição):', numValue, typeof numValue);
+                      console.log(
+                        'Valor da comissão sendo definido (edição):',
+                        numValue,
+                        typeof numValue,
+                      );
                       resetEdit({...watchEdit(), commission: numValue});
                     } else if (normalized !== '') {
                       // Se o valor estiver fora do range, não atualiza o campo
-                      console.log('Valor fora do range (0-100) na edição:', numValue);
+                      console.log(
+                        'Valor fora do range (0-100) na edição:',
+                        numValue,
+                      );
                     }
                   }}
                   keyboardType="numeric"
@@ -952,8 +1049,7 @@ export function RegisterSellers() {
               </View>
             </View>
           </View>
-        </BlurView>
-      </Modal>
+        </Modal>
 
       {/* CustomModal global para sucesso/erro */}
       <CustomModal
@@ -971,11 +1067,17 @@ export function RegisterSellers() {
           setConfirmModalVisible(false);
           setSelectedSeller(null);
         }}
-        title={selectedSeller?.disabled ? 'Ativar vendedor' : 'Inativar vendedor'}
-        description={selectedSeller?.disabled
-          ? 'Deseja realmente ativar este vendedor?'
-          : 'Deseja realmente inativar este vendedor?'}
-        buttonText={isLoadingToggle ? <Spinner size={24} variant="blue" /> : 'Confirmar'}
+        title={
+          selectedSeller?.disabled ? 'Ativar vendedor' : 'Inativar vendedor'
+        }
+        description={
+          selectedSeller?.disabled
+            ? 'Deseja realmente ativar este vendedor?'
+            : 'Deseja realmente inativar este vendedor?'
+        }
+        buttonText={
+          isLoadingToggle ? <Spinner size={24} variant="blue" /> : 'Confirmar'
+        }
         onPress={handleToggleActiveConfirmed}
         cancelButtonText="Cancelar"
         onCancelButtonPress={() => {

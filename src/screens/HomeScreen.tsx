@@ -299,6 +299,7 @@ export function HomeScreen() {
               options={availableProducts}
               selectedOptions={selectedFilters}
               onSelectOption={handleSelectFilter}
+              position={{ top: 385, right: 40 }}
             />
           </View>
 
