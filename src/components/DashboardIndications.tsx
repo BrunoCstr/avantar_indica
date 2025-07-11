@@ -2,6 +2,7 @@ import React from 'react';
 import {View, Text} from 'react-native';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import IndicationsEmpty from '../assets/images/indications_empty.svg';
+import {Spinner} from './Spinner';
 
 type indicationsData = {
   product: string;
@@ -12,7 +13,12 @@ type indicationsData = {
 
 export type indicationsDataArray = indicationsData[];
 
-const DashboardIndicacoes = ({data}: {data: indicationsDataArray}) => {
+interface DashboardIndicacoesProps {
+  data: indicationsDataArray;
+  isLoading?: boolean;
+}
+
+const DashboardIndicacoes = ({data, isLoading = false}: DashboardIndicacoesProps) => {
   const indications = data;
 
   const getIconNameByProduct = (product: string) => {
@@ -91,7 +97,14 @@ const DashboardIndicacoes = ({data}: {data: indicationsDataArray}) => {
 
   return (
     <View>
-      {indications.length === 0 ? (
+      {isLoading ? (
+        <View className="items-center justify-center py-12 px-4">
+          <Spinner size={32} variant="purple" />
+          <Text className="text-sm text-black text-center mt-4">
+            Carregando indicações...
+          </Text>
+        </View>
+      ) : indications.length === 0 ? (
         <View className="items-center justify-center py-12 px-4">
           <IndicationsEmpty
             width={48}

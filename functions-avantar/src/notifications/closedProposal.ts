@@ -56,7 +56,7 @@ export const closedProposal = functions.firestore.onDocumentUpdated(
       const userId = userDoc.id;
 
       // Verificar se o usuário tem preferências de notificação habilitadas para status
-      const statusNotificationEnabled = userData?.notificationPreferences?.status !== false;
+      const statusNotificationEnabled = userData?.notificationsPreferences?.status !== false;
       
       if (!statusNotificationEnabled) {
         console.log('Usuário tem notificações de status desabilitadas, pulando envio');
@@ -115,8 +115,11 @@ export const closedProposal = functions.firestore.onDocumentUpdated(
         console.error('Erro ao criar notificação para usuário:', userId, error);
       }
 
-      // Enviando email para o usuário que fez a indicação
-      if (userData?.email) {
+      // Verificar se o usuário tem email habilitado nas preferências
+      const emailEnabled = userData?.notificationsPreferences?.email !== false;
+      
+      // Enviando email para o usuário que fez a indicação (apenas se email estiver habilitado)
+      if (userData?.email && emailEnabled) {
         const transporter = nodemailer.createTransport({
           host: 'smtp.dreamhost.com',
           port: 465,

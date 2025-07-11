@@ -50,6 +50,14 @@ export const indicated = functions.firestore.onDocumentCreated(
         const userData = userDoc.data();
         const userId = userDoc.id;
 
+        // Verificar se o usuário tem preferências de notificação habilitadas para novas indicações
+        const newIndicationsEnabled = userData?.notificationsPreferences?.newIndications !== false;
+        
+        if (!newIndicationsEnabled) {
+          console.log(`Usuário ${userId} tem notificações de novas indicações desabilitadas, pulando notificação`);
+          continue;
+        }
+
         // Criando notificação na subcoleção notifications
         try {
           const notificationRef = admin
@@ -108,111 +116,134 @@ export const indicated = functions.firestore.onDocumentCreated(
       console.error('Erro ao buscar usuários admin_unidade:', error);
     }
 
-    // Mandando o email para a unidade que recebeu a indicação
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.dreamhost.com',
-      port: 465,
-      secure: true,
-      auth: {
-        user: EMAIL_USER.value(),
-        pass: EMAIL_PASS.value(),
-      },
+    // Verificar se pelo menos um admin tem email habilitado antes de enviar
+    const usersQuery = admin
+      .firestore()
+      .collection('users')
+      .where('affiliated_to', '==', newIndication.unitId)
+      .where('rule', 'in', ['admin_unidade', 'admin_franqueadora']);
+
+    const usersSnapshot = await usersQuery.get();
+    const hasEmailEnabled = usersSnapshot.docs.some(userDoc => {
+      const userData = userDoc.data();
+      return userData?.notificationsPreferences?.email !== false;
     });
 
-    const mailOptions = {
-      from: 'noreply@indica.avantar.com.br',
-      to: unitData?.email,
-      subject: '👤 Você recebeu uma nova indicação!',
-      html: `
-      <br>
-         <div style="text-align: center;">
-          <img src="https://dashboard.avantar.com.br/images/1.png" style="width:300px; margin: 0 auto;">
-         </div>
-        <br>
-        <br>
-        <style>
-        .container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        }
-  
-        .div {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        background-color: #F6F3FF;
-        width: 80%;
-        border-radius: 12px;
-        padding-left: 2rem;
-        padding-right: 2rem;
-        padding-bottom: 4rem;
-        padding-top: 2rem;
-        }
+    // Mandando o email para a unidade que recebeu a indicação (apenas se algum admin tem email habilitado)
+    if (hasEmailEnabled) {
+      const transporter = nodemailer.createTransport({
+        host: 'smtp.dreamhost.com',
+        port: 465,
+        secure: true,
+        auth: {
+          user: EMAIL_USER.value(),
+          pass: EMAIL_PASS.value(),
+        },
+      });
 
-        .indication {
+      const mailOptions = {
+        from: 'noreply@indica.avantar.com.br',
+        to: unitData?.email,
+        subject: '👤 Você recebeu uma nova indicação!',
+        html: `
+        <br>
+           <div style="text-align: center;">
+            <img src="https://dashboard.avantar.com.br/images/1.png" style="width:300px; margin: 0 auto;">
+           </div>
+          <br>
+          <br>
+          <style>
+          .container {
           display: flex;
+          justify-content: center;
+          align-items: center;
+          }
+    
+          .div {
+          display: flex;
+          justify-content: center;
+          align-items: center;
           flex-direction: column;
-        }
+          background-color: #F6F3FF;
+          width: 80%;
+          border-radius: 12px;
+          padding-left: 2rem;
+          padding-right: 2rem;
+          padding-bottom: 4rem;
+          padding-top: 2rem;
+          }
 
-        .anchorLink {
-          cursor: pointer;
-        }
-        </style>
-        <div class='container'>
-          <div style="font-family: familjen grotesk;" class="div">
-            <h1 style='color:#6600CC; font-size: 24px'>Você recebeu uma nova indicação!</h1>
-            <p>Olá! Acabamos de receber uma nova indicação atribuída à sua unidade.</p>
-            <p>Segue os dados:</p>
-            <div class='indication'>
-              <span>Indicador: ${newIndication.indicator_name}</span>
-              <span>Nome do Indicado: ${newIndication.name}</span>
-              <span>Telefone do Indicado: ${newIndication.phone}</span>
-              <span>Produto desejado: ${newIndication.product}</span>
-              <span>Observações: ${newIndication.observations}</span>
+          .indication {
+            display: flex;
+            flex-direction: column;
+          }
+
+          .anchorLink {
+            cursor: pointer;
+          }
+          </style>
+          <div class='container'>
+            <div style="font-family: familjen grotesk;" class="div">
+              <h1 style='color:#6600CC; font-size: 24px'>Você recebeu uma nova indicação!</h1>
+              <p>Olá! Acabamos de receber uma nova indicação atribuída à sua unidade.</p>
+              <p>Segue os dados:</p>
+              <div class='indication'>
+                <span>Indicador: ${newIndication.indicator_name}</span>
+                <span>Nome do Indicado: ${newIndication.name}</span>
+                <span>Telefone do Indicado: ${newIndication.phone}</span>
+                <span>Produto desejado: ${newIndication.product}</span>
+                <span>Observações: ${newIndication.observations}</span>
+              </div>
+              <p></p>
+              <a class='anchorLink' href="indica.avantar.com.br">👉 Acesse agora o painel para conferir os detalhes...</a>
+              <br>
+              <span>Boas vendas! 🚀</span>
+              <span style='color:#6600CC'>Equipe de Desenvolvimento Avantar</span>
             </div>
-            <p></p>
-            <a class='anchorLink' href="indica.avantar.com.br">👉 Acesse agora o painel para conferir os detalhes...</a>
-            <br>
-            <span>Boas vendas! 🚀</span>
-            <span style='color:#6600CC'>Equipe de Desenvolvimento Avantar</span>
           </div>
-        </div>
-      `,
-    };
+        `,
+      };
 
-    try {
-      await transporter.sendMail(mailOptions);
-    } catch (error) {
-      console.error('Erro ao enviar email:', error);
+      try {
+        await transporter.sendMail(mailOptions);
+      } catch (error) {
+        console.error('Erro ao enviar email:', error);
+      }
     }
 
-    // Mandando as infos pro webhook do BotConversa
-    const webhookUrl = WEBHOOK_BOTCONVERSA.value();
-    const unitPhone = unitData?.phone;
-    const unitName = unitData?.name;
+    // Verificar se pelo menos um admin tem WhatsApp habilitado antes de enviar
+    const hasWhatsAppEnabled = usersSnapshot.docs.some(userDoc => {
+      const userData = userDoc.data();
+      return userData?.notificationsPreferences?.whatsapp !== false;
+    });
 
-    const payload = {
-      indicator_name: newIndication.indicator_name,
-      indication_phone: newIndication.phone,
-      indication_name: newIndication.name,
-      indication_product: newIndication.product,
-      indication_observations: newIndication.observations,
-      unit_name: unitName,
-      unit_phone: unitPhone,
-    };
+    // Mandando as infos pro webhook do BotConversa (apenas se algum admin tem WhatsApp habilitado)
+    if (hasWhatsAppEnabled) {
+      const webhookUrl = WEBHOOK_BOTCONVERSA.value();
+      const unitPhone = unitData?.phone;
+      const unitName = unitData?.name;
 
-    try {
-      await fetch(webhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-    } catch (error) {
-      console.error('Erro ao enviar Whatsapp:', error);
+      const payload = {
+        indicator_name: newIndication.indicator_name,
+        indication_phone: newIndication.phone,
+        indication_name: newIndication.name,
+        indication_product: newIndication.product,
+        indication_observations: newIndication.observations,
+        unit_name: unitName,
+        unit_phone: unitPhone,
+      };
+
+      try {
+        await fetch(webhookUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+      } catch (error) {
+        console.error('Erro ao enviar Whatsapp:', error);
+      }
     }
   },
 );

@@ -93,6 +93,10 @@ export const createUserAsAdmin = functions.https.onCall(
             campaigns: true,
             withdraw: true,
             status: true,
+            email: true,
+            whatsapp: true,
+            newIndications: true,
+            newWithdraw: true,
           },
           balance: 0,
         });

@@ -290,7 +290,7 @@ export function HomeScreen() {
               className="flex-1 pt-1"
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{paddingBottom: 10}}>
-              <DashboardIndications data={topProducts} />
+              <DashboardIndications data={topProducts} isLoading={isLoading} />
             </ScrollView>
 
             <FilterDropdown

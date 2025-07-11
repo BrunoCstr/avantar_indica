@@ -57,7 +57,7 @@ export const withdrawalStatus = functions.firestore.onDocumentUpdated(
       const userId = userDoc.id;
 
       // Verificar se o usuário tem preferências de notificação habilitadas para saque
-      const withdrawNotificationEnabled = userData?.notificationPreferences?.withdraw !== false;
+      const withdrawNotificationEnabled = userData?.notificationsPreferences?.withdraw !== false;
       
       if (!withdrawNotificationEnabled) {
         console.log('Usuário tem notificações de saque desabilitadas, pulando envio');
@@ -127,8 +127,11 @@ export const withdrawalStatus = functions.firestore.onDocumentUpdated(
         console.error('Erro ao criar notificação para usuário:', userId, error);
       }
 
-      // Enviando email para o usuário
-      if (userData?.email) {
+      // Verificar se o usuário tem email habilitado nas preferências
+      const emailEnabled = userData?.notificationsPreferences?.email !== false;
+      
+      // Enviando email para o usuário (apenas se email estiver habilitado)
+      if (userData?.email && emailEnabled) {
         const transporter = nodemailer.createTransport({
           host: 'smtp.dreamhost.com',
           port: 465,
