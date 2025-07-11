@@ -6,7 +6,6 @@ import {AuthProvider} from './src/contexts/Auth';
 import './global.css';
 import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
 import {globalStyles} from './src/styles/globalStyles';
-import RNBootSplash from 'react-native-bootsplash';
 import messaging from '@react-native-firebase/messaging';
 
 // Ignorar warnings específicos que podem estar causando problemas
@@ -16,17 +15,6 @@ LogBox.ignoreLogs([
   'AsyncStorage has been extracted',
   'Sending `onAnimatedValueUpdate` with no listeners registered',
 ]);
-
-// Configurar fonte padrão para todos os componentes Text e TextInput
-Text.defaultProps = {
-  ...Text.defaultProps,
-  style: [globalStyles.defaultText, Text.defaultProps?.style],
-};
-
-TextInput.defaultProps = {
-  ...TextInput.defaultProps,
-  style: [globalStyles.defaultInput, TextInput.defaultProps?.style],
-};
 
 // Função para configurar FCM
 async function setupFCM() {
@@ -62,9 +50,6 @@ export default function App() {
       try {
         // Configurar FCM
         await setupFCM();
-        
-        // Esconder splash screen
-        await RNBootSplash.hide({ fade: true });
       } catch (error) {
         console.warn('Error during app initialization:', error);
       }

@@ -1,8 +1,7 @@
 declare module '@env' {
-    export const FIREBASE_APIKEY: string;
-    export const FIREBASE_PROJECTID: string;
-    export const FIREBASE_APPID: string;
-    export const FIREBASE_MESSAGINGSENDERID: string;
-    export const FIREBASE_STORAGEBUCKET: string;
-  }
-  
+  export const FIREBASE_APIKEY: string;
+  export const FIREBASE_PROJECTID: string;
+  export const FIREBASE_APPID: string;
+  export const FIREBASE_MESSAGINGSENDERID: string;
+  export const FIREBASE_STORAGEBUCKET: string;
+}
