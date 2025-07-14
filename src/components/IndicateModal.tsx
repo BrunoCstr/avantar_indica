@@ -86,6 +86,7 @@ export function IndicateModal({visible, onClose}: ModalProps) {
         indicator_id: userData?.uid,
         indicator_name: userData?.displayName,
         indicationId: indicationRef.id,
+        profilePicture: userData?.profilePicture,
         unitId: userData?.affiliated_to,
         unitName: userData?.unitName,
         name: data.fullName,

@@ -1,4 +1,5 @@
 import firestore from '@react-native-firebase/firestore';
+import { useAuth } from '../../contexts/Auth';
 
 interface Indication {
   name: string;
@@ -22,6 +23,8 @@ export async function sendBulkIndications(
   unitId: string,
   unitName: string,
 ): Promise<string | null> {
+  const {userData} = useAuth();
+
   try {
     const docRef = firestore().collection('packagedIndications').doc();
 
@@ -33,6 +36,7 @@ export async function sendBulkIndications(
       updatedAt: firestore.FieldValue.serverTimestamp(),
       indicator_name,
       indicator_id,
+      profilePicture: userData?.profilePicture,
       unitId,
       unitName,
       packagedIndicationId: generatedId,
