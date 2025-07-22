@@ -13,6 +13,7 @@ import {
   Platform,
   ScrollView,
   TouchableWithoutFeedback,
+  Modal,
 } from 'react-native';
 import {
   collection,
@@ -42,6 +43,7 @@ export function SignUpScreen() {
     title: '',
     description: '',
   });
+  const [isTermsModalVisible, setIsTermsModalVisible] = useState(false);
 
   const {signUp} = useAuth();
 
@@ -371,13 +373,15 @@ export function SignUpScreen() {
                         size={24}
                         color={errors.acceptTerms ? 'red' : colors.white}
                       />
-                      <Text
-                        className="underline text-center"
-                        style={{
-                          color: errors.acceptTerms ? 'red' : colors.white,
-                        }}>
-                        Aceito termos e condições*
-                      </Text>
+                      <TouchableOpacity onPress={() => setIsTermsModalVisible(true)}>
+                        <Text
+                          className="underline text-center"
+                          style={{
+                            color: errors.acceptTerms ? 'red' : colors.white,
+                          }}>
+                          Aceito termos e condições*
+                        </Text>
+                      </TouchableOpacity>
                     </TouchableOpacity>
                   )}
                   name="acceptTerms"
@@ -390,6 +394,91 @@ export function SignUpScreen() {
                 description={modalMessage.description}
                 buttonText="FECHAR"
               />
+              <Modal
+                visible={isTermsModalVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setIsTermsModalVisible(false)}
+              >
+                <ScrollView
+                  contentContainerStyle={{
+                    flexGrow: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    minHeight: '100%',
+                    paddingHorizontal: 16,
+                  }}
+                  keyboardShouldPersistTaps="handled"
+                >
+                  <View style={{
+                    backgroundColor: '#170138',
+                    borderRadius: 14,
+                    padding: 24,
+                    width: '95%',
+                    maxWidth: 420,
+                    borderWidth: 2,
+                    borderColor: '#29F3DF',
+                  }}>
+                    <Text style={{
+                      fontSize: 20,
+                      fontWeight: 'bold',
+                      color: '#fff',
+                      textAlign: 'center',
+                      marginBottom: 16,
+                    }}>
+                      Termos de Uso do Aplicativo
+                    </Text>
+                    <ScrollView style={{ maxHeight: 400, marginBottom: 20 }} showsVerticalScrollIndicator={true}>
+                      <Text style={{ color: '#fff', fontSize: 15 }}>
+                        <Text style={{ fontWeight: 'bold' }}>Última atualização: 18/07/2025{`\n\n`}</Text>
+                        <Text style={{ fontWeight: 'bold' }}>1. OBJETIVO{`\n`}</Text>
+                        O presente Termo de Uso regula o acesso e a utilização do aplicativo AVANTAR INDICA destinado a:{`\n\n`}
+                        - Facilitar a indicação de potenciais clientes (leads) para unidades franqueadas;{`\n`}
+                        - Permitir o acompanhamento do status dessas indicações;{`\n`}
+                        - Recompensar os usuários com comissões, cashback em apólices ou bonificações, conforme regras específicas da franqueadora.{`\n\n`}
+                        <Text style={{ fontWeight: 'bold' }}>2. DEFINIÇÕES{`\n`}</Text>
+                        - Indicador: Usuário que realiza indicações de leads por meio do aplicativo.{`\n`}
+                        - Franqueado: Unidade autorizada que recebe os leads e realiza o atendimento.{`\n`}
+                        - Administrador: Responsável pela gestão da plataforma e regras operacionais.{`\n`}
+                        - Lead: Potencial cliente indicado.{`\n\n`}
+                        <Text style={{ fontWeight: 'bold' }}>3. CONDIÇÕES DE USO{`\n`}</Text>
+                        - O aplicativo deve ser utilizado apenas por maiores de 18 anos com CPF/CNPJ válido.{`\n`}
+                        - É vedado o uso para fins ilegais, fraudulentos ou que violem normas legais e éticas.{`\n`}
+                        - O uso do aplicativo implica na aceitação integral deste termo e da Política de Privacidade.{`\n\n`}
+                        <Text style={{ fontWeight: 'bold' }}>4. INDICAÇÕES E RECOMPENSAS{`\n`}</Text>
+                        - As indicações devem conter informações verídicas e atualizadas.{`\n`}
+                        - O recebimento de comissões e bonificações está sujeito ao cumprimento das regras definidas pela franqueadora.{`\n`}
+                        - Indicações indevidas, fraudulentas ou duplicadas poderão ser desconsideradas, sem prejuízo de sanções.{`\n`}
+                        - O indicador é o único responsável por obter o consentimento necessário do lead antes de compartilhar seus dados pessoais na plataforma. A franqueadora recebe essas informações de forma passiva e atua apenas como intermediadora no processo.{`\n`}
+                        - A Avantar não se responsabiliza por quaisquer consequências legais ou pessoais decorrentes da indicação feita sem o devido consentimento do lead.{`\n`}
+                        - Após a concretização da proposta, o lead indicado passa a ser considerado cliente da Avantar e será tratado como tal em toda a rede franqueada.{`\n\n`}
+                        <Text style={{ fontWeight: 'bold' }}>5. LIMITAÇÃO DE RESPONSABILIDADE{`\n`}</Text>
+                        - A franqueadora não se responsabiliza por informações fornecidas incorretamente pelos usuários.{`\n`}
+                        - O aplicativo funciona como intermediador das indicações e não garante a concretização de negócios.{`\n\n`}
+                        <Text style={{ fontWeight: 'bold' }}>6. MODIFICAÇÕES E ENCERRAMENTO{`\n`}</Text>
+                        - A franqueadora poderá alterar, suspender ou descontinuar o aplicativo a qualquer momento, mediante aviso prévio.{`\n`}
+                        - O uso contínuo após alterações implica aceitação automática dos novos termos.{`\n\n`}
+                        <Text style={{ fontWeight: 'bold' }}>7. ACEITE{`\n`}</Text>
+                        O aceite é obrigatório no primeiro acesso ao aplicativo e será registrado com data e hora vinculados ao perfil do usuário.{`\n\n`}
+                        <Text style={{ fontWeight: 'bold' }}>8. FORO{`\n`}</Text>
+                        Este Termo é regido pelas leis brasileiras. Fica eleito o foro da comarca de Caratinga/MG da sede da franqueadora, com exclusão de qualquer outro.
+                      </Text>
+                    </ScrollView>
+                    <TouchableOpacity
+                      style={{
+                        backgroundColor: '#29F3DF',
+                        borderRadius: 10,
+                        paddingVertical: 12,
+                        alignItems: 'center',
+                      }}
+                      onPress={() => setIsTermsModalVisible(false)}
+                    >
+                      <Text style={{ color: '#170138', fontWeight: 'bold', fontSize: 16 }}>FECHAR</Text>
+                    </TouchableOpacity>
+                  </View>
+                </ScrollView>
+              </Modal>
             </View>
           </ImageBackground>
         </ScrollView>

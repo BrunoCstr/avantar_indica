@@ -1,5 +1,5 @@
 import React from 'react';
-import {Modal, View, Text, TouchableOpacity, ScrollView, Dimensions, KeyboardAvoidingView, Platform} from 'react-native';
+import {Modal, View, Text, TouchableOpacity, ScrollView, Dimensions, KeyboardAvoidingView, Platform, ViewStyle} from 'react-native';
 import {BlurView} from '@react-native-community/blur';
 
 interface ModalProps {
@@ -12,6 +12,8 @@ interface ModalProps {
   buttonText2?: string;
   cancelButtonText?: string;
   onCancelButtonPress?: () => void;
+  scrollable?: boolean;
+  containerStyle?: ViewStyle;
 }
 
 export function CustomModal({
@@ -24,6 +26,8 @@ export function CustomModal({
   buttonText2,
   cancelButtonText,
   onCancelButtonPress,
+  scrollable = false,
+  containerStyle = {},
 }: ModalProps) {
   const {width: screenWidth} = Dimensions.get('window');
   const maxModalWidth = screenWidth * 0.75; // 75% da largura da tela
@@ -39,10 +43,10 @@ export function CustomModal({
           className="flex-1 justify-center items-center px-4"
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View 
-            style={{
+            style={Object.assign({
               maxWidth: maxModalWidth,
               minWidth: 280,
-            }}
+            }, containerStyle)}
             className="bg-[#FFF] rounded-2xl border-2 border-blue px-5 py-5">
             
             {/* Título */}
@@ -51,9 +55,17 @@ export function CustomModal({
             </Text>
             
             {/* Descrição */}
-            <Text className="text-base font-regular text-black text-center text-gray-500 mb-5">
-              {description}
-            </Text>
+            {scrollable ? (
+              <ScrollView style={{maxHeight: 400, marginBottom: 20}} showsVerticalScrollIndicator={true}>
+                <Text className="text-base font-regular text-black text-center text-gray-500 mb-5">
+                  {description}
+                </Text>
+              </ScrollView>
+            ) : (
+              <Text className="text-base font-regular text-black text-center text-gray-500 mb-5">
+                {description}
+              </Text>
+            )}
             
             {/* Botões */}
             <View className="justify-center items-center w-full flex-row gap-2">

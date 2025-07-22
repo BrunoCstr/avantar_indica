@@ -1,5 +1,5 @@
 import admin from 'firebase-admin';
-import servicesAccountJSON from './../../../avantar-indica-firebase-adminsdk-a0cev-005b2a5df5.json';
+import servicesAccountJSON from './../../../fa-avantar-firebase-adminsdk-fbsvc-e8e7e4c8c9.json';
 
 const serviceAccount = {
   projectId: servicesAccountJSON.project_id,

@@ -62,6 +62,7 @@ export const registrationsApproved = functions.firestore.onDocumentUpdated(
               body: 'A partir de agora, você já pode utilizar nosso aplicativo para realizar suas indicações de forma rápida e prática.',
               read: false,
               createdAt: admin.firestore.FieldValue.serverTimestamp(),
+              type: 'registration_approved',
             });
         } catch (error) {
           console.error('Erro ao gravar a notificação no Firestore:', error);

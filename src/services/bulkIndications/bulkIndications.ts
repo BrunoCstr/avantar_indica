@@ -1,5 +1,5 @@
 import firestore from '@react-native-firebase/firestore';
-import { useAuth } from '../../contexts/Auth';
+import {useAuth} from '../../contexts/Auth';
 
 interface Indication {
   name: string;
@@ -28,7 +28,7 @@ export async function sendBulkIndications(
   try {
     const docRef = firestore().collection('packagedIndications').doc();
 
-    const generatedId = docRef.id;
+    const docId = docRef.id;
 
     await docRef.set({
       indications,
@@ -39,10 +39,14 @@ export async function sendBulkIndications(
       profilePicture: userData?.profilePicture,
       unitId,
       unitName,
-      packagedIndicationId: generatedId,
+      packagedIndicationId: docId,
+      total: indications.length,
+      processed: 0,
+      pending: indications.length,
+      progress: 0,
     });
 
-    return generatedId;
+    return docId;
   } catch (error) {
     console.error('Erro ao enviar indicações em massa:', error);
     return null;
