@@ -1,5 +1,6 @@
 import {getFirestore, collection, query, where, getDocs, orderBy} from '@react-native-firebase/firestore';
 import {formatTimeAgo} from '../../utils/formatTimeToDistance';
+import { getPackagedIndicationsByUserId } from '../bulkIndications/bulkIndications';
 
 const db = getFirestore();
 
@@ -94,6 +95,26 @@ export interface StatusItem {
   type: 'opportunity' | 'indication'; // Campo para identificar o tipo
   updatedAtOriginal?: any; // Timestamp original para ordenação
 }
+
+export interface BulkStatusItem {
+  id: string;
+  name: string; // 'Lote em massa'
+  status: string; // 'Em Andamento' ou 'Concluído'
+  product: string; // Ex: '10 indicações'
+  updatedAt: any;
+  indicator_id: string;
+  createdAt: any;
+  updatedAtOriginal?: any;
+  type: 'bulk';
+  indications: any[];
+  progress: number;
+  total: number;
+  processed: number;
+  packagedIndicationId: string;
+  unitName?: string;
+}
+
+export type UnifiedStatusItem = StatusItem | BulkStatusItem;
 
 export interface StatusStats {
   [key: string]: number;
@@ -308,11 +329,12 @@ export const getIndicationsByUserId = async (userId: string): Promise<Indication
 };
 
 // Função principal que combina oportunidades e indicações
-export const getAllStatusItemsByUserId = async (userId: string): Promise<StatusItem[]> => {
+export const getAllStatusItemsByUserId = async (userId: string): Promise<UnifiedStatusItem[]> => {
   try {
-    const [opportunities, indications] = await Promise.all([
+    const [opportunities, indications, bulkIndications] = await Promise.all([
       getOpportunitiesByUserId(userId),
-      getIndicationsByUserId(userId)
+      getIndicationsByUserId(userId),
+      getPackagedIndicationsByUserId(userId),
     ]);
 
     // Converter oportunidades para StatusItem
@@ -327,8 +349,14 @@ export const getAllStatusItemsByUserId = async (userId: string): Promise<StatusI
       type: 'indication' as const
     }));
 
+    // bulkIndications já está no formato BulkStatusItem
+
     // Combinar e ordenar por data de atualização (mais recente primeiro)
-    const allItems = [...opportunityItems, ...indicationItems];
+    const allItems: UnifiedStatusItem[] = [
+      ...opportunityItems,
+      ...indicationItems,
+      ...bulkIndications,
+    ];
     
     // Ordenar por timestamp do updatedAt (mais recente primeiro)
     allItems.sort((a, b) => {
@@ -344,7 +372,7 @@ export const getAllStatusItemsByUserId = async (userId: string): Promise<StatusI
   }
 };
 
-export const getStatusStats = (items: StatusItem[]): StatusStats => {
+export const getStatusStats = (items: UnifiedStatusItem[]): StatusStats => {
   const stats: StatusStats = {};
   items.forEach(item => {
     stats[item.status] = (stats[item.status] || 0) + 1;
@@ -353,10 +381,10 @@ export const getStatusStats = (items: StatusItem[]): StatusStats => {
 };
 
 export const filterStatusItems = (
-  items: StatusItem[],
+  items: UnifiedStatusItem[],
   search: string,
   selectedFilters: string[]
-): StatusItem[] => {
+): UnifiedStatusItem[] => {
   let filtered = items;
 
   // Filtro por texto de busca
@@ -370,7 +398,7 @@ export const filterStatusItems = (
 
   // Filtro por tipo
   const typeFilters = selectedFilters.filter(filter => 
-    filter === 'APENAS OPORTUNIDADES' || filter === 'APENAS INDICAÇÕES'
+    filter === 'APENAS OPORTUNIDADES' || filter === 'APENAS INDICAÇÕES' || filter === 'APENAS LOTES EM MASSA'
   );
   
   if (typeFilters.length > 0) {
@@ -381,13 +409,16 @@ export const filterStatusItems = (
       if (typeFilters.includes('APENAS INDICAÇÕES') && item.type === 'indication') {
         return true;
       }
+      if (typeFilters.includes('APENAS LOTES EM MASSA') && item.type === 'bulk') {
+        return true;
+      }
       return false;
     });
   }
 
   // Filtro por status
   const statusFilters = selectedFilters.filter(filter => 
-    filter !== 'APENAS OPORTUNIDADES' && filter !== 'APENAS INDICAÇÕES' && filter !== '---'
+    filter !== 'APENAS OPORTUNIDADES' && filter !== 'APENAS INDICAÇÕES' && filter !== 'APENAS LOTES EM MASSA' && filter !== '---'
   );
   
   if (statusFilters.length > 0) {

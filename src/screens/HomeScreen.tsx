@@ -30,6 +30,7 @@ import {
   updateDoc,
   doc,
   onSnapshot,
+  where,
 } from '@react-native-firebase/firestore';
 import {launchImageLibrary} from 'react-native-image-picker';
 import storage from '@react-native-firebase/storage';
@@ -102,21 +103,73 @@ export function HomeScreen() {
     if (!userData?.uid) return;
 
     setIsLoading(true);
-    const fetchTopProducts = async () => {
-      try {
-        const topProducts = await getTop4ProductsByUser(userData.uid);
-        setAllProducts(topProducts);
-        setTopProducts(topProducts);
-        setSelectedFilters(topProducts.map(product => product.product));
-        console.log(topProducts);
-      } catch (error) {
-        console.error('Erro ao buscar top produtos:', error);
-      } finally {
-        setIsLoading(false);
-      }
+
+    // Listeners em tempo real para indicações e oportunidades
+    const indicationsQuery = query(
+      collection(db, 'indications'),
+      where('indicator_id', '==', userData.uid)
+    );
+    const opportunitiesQuery = query(
+      collection(db, 'opportunities'),
+      where('indicator_id', '==', userData.uid)
+    );
+
+    let allIndications: any[] = [];
+    let allOpportunities: any[] = [];
+
+    const updateDashboard = () => {
+      // Junta tudo e filtra trash/archived
+      const all = [
+        ...allIndications.filter(
+          (item) => item.trash !== true && item.archived !== true
+        ),
+        ...allOpportunities.filter(
+          (item) => item.trash !== true && item.archived !== true
+        ),
+      ];
+      // Agrupa por produto
+      const productMap = new Map();
+      all.forEach((item) => {
+        if (!item.product) return;
+        if (!productMap.has(item.product)) {
+          productMap.set(item.product, 0);
+        }
+        productMap.set(item.product, productMap.get(item.product) + 1);
+      });
+      const total = all.length;
+      const result = Array.from(productMap.entries())
+        .map(([product, count]) => ({
+          product,
+          count,
+          percentage: total > 0 ? Math.round((count / total) * 100) : 0,
+          totalIndications: total,
+        }))
+        .sort((a, b) => b.count - a.count);
+      setAllProducts(result);
+      setTopProducts(result);
+      setSelectedFilters(result.map((p) => p.product));
+      setIsLoading(false);
     };
 
-    fetchTopProducts();
+    const unsubIndications = onSnapshot(indicationsQuery, (snapshot) => {
+      allIndications = snapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      updateDashboard();
+    });
+    const unsubOpportunities = onSnapshot(opportunitiesQuery, (snapshot) => {
+      allOpportunities = snapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      updateDashboard();
+    });
+
+    return () => {
+      unsubIndications();
+      unsubOpportunities();
+    };
   }, [userData?.uid]);
 
   const handleSelectFilter = (option: string) => {

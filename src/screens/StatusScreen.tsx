@@ -4,9 +4,15 @@ import {
   Text,
   View,
   TouchableOpacity,
+  Modal,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import {BlurView} from '@react-native-community/blur';
+import firestore, { getFirestore, collection, query, where, orderBy, onSnapshot } from '@react-native-firebase/firestore';
 
 import images from '../data/images';
 import {colors} from '../styles/colors';
@@ -19,9 +25,10 @@ import {
   getAllStatusItemsByUserId,
   filterStatusItems,
   getStatusStats,
-  StatusItem,
+  UnifiedStatusItem,
 } from '../services/status/status';
 import {useBottomNavigationPadding} from '../hooks/useBottomNavigationPadding';
+import { formatTimeAgo } from '../utils/formatTimeToDistance';
 
 export function StatusScreen() {
   const {userData} = useAuth();
@@ -30,12 +37,17 @@ export function StatusScreen() {
   const [showFilter, setShowFilter] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [statusItems, setStatusItems] = useState<StatusItem[]>([]);
+  const [statusItems, setStatusItems] = useState<UnifiedStatusItem[]>([]);
+  const [selectedBulk, setSelectedBulk] = useState<any | null>(null);
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [selectedDetail, setSelectedDetail] = useState<any | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   const filterOptions = [
     // Filtros por tipo
     'APENAS OPORTUNIDADES',
     'APENAS INDICAÇÕES',
+    'APENAS LOTES EM MASSA',
     // Separador visual (não será usado como filtro real)
     '---',
     // Filtros por status
@@ -50,23 +62,117 @@ export function StatusScreen() {
     'SEGURO RECUSADO',
   ];
 
-  // Carregar oportunidades e indicações do usuário
+  // Atualizar os listeners para já formatar o campo updatedAt e ordenar os itens
   useEffect(() => {
-    const loadStatusItems = async () => {
-      if (!userData?.uid) return;
-      
-      try {
-        setIsLoading(true);
-        const allStatusItems = await getAllStatusItemsByUserId(userData.uid);
-        setStatusItems(allStatusItems);
-      } catch (error) {
-        console.error('Erro ao carregar dados de status:', error);
-      } finally {
-        setIsLoading(false);
-      }
+    if (!userData?.uid) return;
+
+    setIsLoading(true);
+
+    const db = getFirestore();
+    const indicationsRef = collection(db, 'indications');
+    const opportunitiesRef = collection(db, 'opportunities');
+    const packagedIndicationsRef = firestore().collection('packagedIndications');
+
+    const indicationsQuery = query(indicationsRef, where('indicator_id', '==', userData.uid));
+    const opportunitiesQuery = query(opportunitiesRef, where('indicator_id', '==', userData.uid));
+    const packagedIndicationsQuery = packagedIndicationsRef.where('indicator_id', '==', userData.uid);
+
+    let allIndications: any[] = [];
+    let allOpportunities: any[] = [];
+    let allBulk: any[] = [];
+
+    const updateAndSort = () => {
+      // Junta tudo e ordena pelo updatedAtOriginal (timestamp)
+      const all = [...allIndications, ...allOpportunities, ...allBulk];
+      all.sort((a, b) => {
+        const aTime = a.updatedAtOriginal?.seconds
+          ? a.updatedAtOriginal.seconds * 1000
+          : a.updatedAtOriginal?.toDate?.()?.getTime?.() || a.createdAt?.seconds * 1000 || a.createdAt?.toDate?.()?.getTime?.() || 0;
+        const bTime = b.updatedAtOriginal?.seconds
+          ? b.updatedAtOriginal.seconds * 1000
+          : b.updatedAtOriginal?.toDate?.()?.getTime?.() || b.createdAt?.seconds * 1000 || b.createdAt?.toDate?.()?.getTime?.() || 0;
+        return bTime - aTime;
+      });
+      setStatusItems(all);
+      setIsLoading(false);
     };
 
-    loadStatusItems();
+    const unsubIndications = onSnapshot(indicationsQuery, (snapshot) => {
+      allIndications = snapshot.docs
+        .map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            name: data.name || '',
+            status: data.status || '',
+            product: data.product || '',
+            updatedAt: formatTimeAgo(data.updatedAt || data.createdAt),
+            indicator_id: data.indicator_id || '',
+            createdAt: data.createdAt,
+            updatedAtOriginal: data.updatedAt || data.createdAt,
+            type: 'indication' as const,
+            trash: data.trash,
+            archived: data.archived,
+          };
+        })
+        .filter(item => item.trash !== true && item.archived !== true);
+      updateAndSort();
+    });
+
+    const unsubOpportunities = onSnapshot(opportunitiesQuery, (snapshot) => {
+      allOpportunities = snapshot.docs
+        .map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            name: data.name || '',
+            status: data.status || '',
+            product: data.product || '',
+            updatedAt: formatTimeAgo(data.updatedAt || data.createdAt),
+            indicator_id: data.indicator_id || '',
+            createdAt: data.createdAt,
+            updatedAtOriginal: data.updatedAt || data.createdAt,
+            type: 'opportunity' as const,
+            trash: data.trash,
+            archived: data.archived,
+          };
+        })
+        .filter(item => item.trash !== true && item.archived !== true);
+      updateAndSort();
+    });
+
+    const unsubPackaged = packagedIndicationsQuery.onSnapshot((snapshot) => {
+      allBulk = snapshot.docs
+        .map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            name: 'Lote em massa',
+            status: data.status || (data.progress === 100 ? 'Concluído' : 'Em Andamento'),
+            product: `${data.total || (data.indications?.length || 0)} indicações`,
+            updatedAt: formatTimeAgo(data.updatedAt || data.createdAt),
+            indicator_id: data.indicator_id,
+            createdAt: data.createdAt,
+            updatedAtOriginal: data.updatedAt || data.createdAt,
+            type: 'bulk' as const,
+            indications: data.indications || [],
+            progress: data.progress || 0,
+            total: data.total || (data.indications?.length || 0),
+            processed: data.processed || 0,
+            packagedIndicationId: data.packagedIndicationId,
+            unitName: data.unitName,
+            archived: data.archived,
+          };
+        })
+        .filter(item => item.archived !== true);
+      updateAndSort();
+    });
+
+    return () => {
+      unsubIndications();
+      unsubOpportunities();
+      unsubPackaged();
+    };
   }, [userData?.uid]);
 
   // Filtrar dados baseado na busca e filtros selecionados
@@ -146,6 +252,117 @@ export function StatusScreen() {
       default:
         return '#f3f4f6';
     }
+  };
+
+  const renderBulkModal = () => {
+    if (!selectedBulk) return null;
+    const sentDate = selectedBulk.createdAt;
+    let relativeDate = '';
+    if (sentDate) {
+      relativeDate = formatTimeAgo(sentDate);
+    }
+    const progress = Math.min(Number(selectedBulk.progress) || 0, 100);
+    return (
+      <Modal visible={showBulkModal} onRequestClose={() => setShowBulkModal(false)} transparent={true}>
+        <BlurView
+          style={{flex: 1, backgroundColor: 'transparent'}}
+          blurType="dark"
+          blurAmount={5}
+          reducedTransparencyFallbackColor="transparent">
+          <KeyboardAvoidingView 
+            className="flex-1 justify-center items-center px-2"
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+            <View className="w-full max-w-sm bg-white rounded-2xl border-2 border-blue px-4 py-6">
+              <View className="justify-between items-center flex-row mb-2">
+                <BackButton onPress={() => setShowBulkModal(false)} color={colors.tertiary_purple} borderColor={colors.tertiary_purple} />
+                <Text className="text-tertiary_purple font-bold text-2xl absolute left-1/2 -translate-x-1/2">
+                  Detalhes do Lote
+                </Text>
+              </View>
+              <ScrollView style={{maxHeight: 400}} contentContainerStyle={{paddingBottom: 12, paddingHorizontal: 2}}>
+                <Text style={{color: colors.black, fontSize: 15, marginBottom: 8, fontWeight: 'bold'}}>
+                  {relativeDate ? `Enviado ${relativeDate}` : ''}
+                </Text>
+                <Text style={{fontWeight: 'bold', color: colors.tertiary_purple, marginBottom: 6}}>
+                  Status: <Text style={{fontWeight: 'normal', color: colors.black}}>{selectedBulk.status}</Text>
+                </Text>
+                {/* Barra de progresso visual */}
+                <View style={{marginBottom: 10}}>
+                  <Text style={{color: colors.tertiary_purple, marginBottom: 2, fontWeight: 'bold'}}>Progresso:</Text>
+                  <View style={{height: 14, backgroundColor: '#E6DBFF', borderRadius: 8, overflow: 'hidden', width: '100%'}}>
+                    <View style={{height: '100%', width: `${progress}%`, backgroundColor: colors.tertiary_purple, borderRadius: 8}} />
+                  </View>
+                  <Text style={{color: colors.black, fontSize: 13, marginTop: 2}}>{progress}%</Text>
+                </View>
+                <Text style={{color: colors.tertiary_purple, fontWeight: 'bold'}}>Total de indicações: <Text style={{fontWeight: 'normal', color: colors.black}}>{selectedBulk.total}</Text></Text>
+                <Text style={{color: colors.tertiary_purple, fontWeight: 'bold'}}>Processadas: <Text style={{fontWeight: 'normal', color: colors.black}}>{selectedBulk.processed}</Text></Text>
+                <Text style={{marginTop: 10, fontWeight: 'bold', color: colors.tertiary_purple}}>Indicações:</Text>
+                {selectedBulk.indications && selectedBulk.indications.length > 0 ? (
+                  <FlatList
+                    data={selectedBulk.indications}
+                    keyExtractor={(_, idx) => idx.toString()}
+                    style={{maxHeight: 120}}
+                    renderItem={({item}) => (
+                      <Text style={{fontSize: 13, color: colors.black}}>
+                        - {item.name} {item.phone ? `(${item.phone})` : ''}
+                      </Text>
+                    )}
+                  />
+                ) : (
+                  <Text style={{color: colors.black}}>Nenhuma indicação encontrada neste lote.</Text>
+                )}
+              </ScrollView>
+            </View>
+          </KeyboardAvoidingView>
+        </BlurView>
+      </Modal>
+    );
+  };
+
+  const renderDetailModal = () => {
+    if (!selectedDetail) return null;
+    const relativeDate = selectedDetail.updatedAt || '';
+    return (
+      <Modal visible={showDetailModal} onRequestClose={() => setShowDetailModal(false)} transparent={true}>
+        <BlurView
+          style={{flex: 1, backgroundColor: 'transparent'}}
+          blurType="dark"
+          blurAmount={5}
+          reducedTransparencyFallbackColor="transparent">
+          <KeyboardAvoidingView 
+            className="flex-1 justify-center items-center px-2"
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+            <View className="w-full max-w-sm bg-white rounded-2xl border-2 border-blue px-4 py-6">
+              <View className="justify-between items-center flex-row mb-2">
+                <BackButton onPress={() => setShowDetailModal(false)} color={colors.tertiary_purple} borderColor={colors.tertiary_purple} />
+                <Text className="text-tertiary_purple font-bold text-2xl absolute left-1/2 -translate-x-1/2">
+                  Detalhes
+                </Text>
+              </View>
+              <ScrollView style={{maxHeight: 400}} contentContainerStyle={{paddingBottom: 12, paddingHorizontal: 2}}>
+                <Text style={{color: colors.black, fontSize: 15, marginBottom: 8, fontWeight: 'bold'}}>
+                  {relativeDate}
+                </Text>
+                <Text style={{fontWeight: 'bold', color: colors.tertiary_purple, marginBottom: 6}}>
+                  Nome: <Text style={{fontWeight: 'normal', color: colors.black}}>{selectedDetail.name}</Text>
+                </Text>
+                <Text style={{fontWeight: 'bold', color: colors.tertiary_purple, marginBottom: 6}}>
+                  Produto: <Text style={{fontWeight: 'normal', color: colors.black}}>{selectedDetail.product}</Text>
+                </Text>
+                <Text style={{fontWeight: 'bold', color: colors.tertiary_purple, marginBottom: 6}}>
+                  Status: <Text style={{fontWeight: 'normal', color: colors.black}}>{selectedDetail.status}</Text>
+                </Text>
+                {selectedDetail.type === 'opportunity' && selectedDetail.indicator_id && (
+                  <Text style={{fontWeight: 'bold', color: colors.tertiary_purple, marginBottom: 6}}>
+                    Indicador: <Text style={{fontWeight: 'normal', color: colors.black}}>{selectedDetail.indicator_name}</Text>
+                  </Text>
+                )}
+              </ScrollView>
+            </View>
+          </KeyboardAvoidingView>
+        </BlurView>
+      </Modal>
+    );
   };
 
   return (
@@ -253,7 +470,7 @@ export function StatusScreen() {
           </View>
 
           {/* Lista de Status */}
-          <View className="rounded-2xl flex-1 overflow-hidden" style={{}}>
+          <View className="rounded-2xl flex-1" style={{}}>
             {filteredData.length === 0 ? (
               <View className="flex-1 justify-center items-center p-10">
                 <FontAwesome6
@@ -278,75 +495,156 @@ export function StatusScreen() {
                 showsVerticalScrollIndicator={false}
                 keyExtractor={item => item.id.toString()}
                 contentContainerStyle={{paddingVertical: 8, paddingBottom: 20}}
-                renderItem={({item}) => (
-                  <TouchableOpacity
-                    className="bg-white rounded-xl mb-2 mx-2"
-                    activeOpacity={0.7}
-                    style={{
-                      shadowColor: '#000',
-                      shadowOffset: {width: 2, height: 2},
-                      shadowOpacity: 0.1,
-                      shadowRadius: 4,
-                      elevation: 5, // necessário para Android
-                    }}>
-                    <View className="flex-row items-center p-4">
-                      {/* Avatar */}
-                      <View
-                        className="w-12 h-12 rounded-full items-center justify-center mr-4"
-                        style={{backgroundColor: colors.tertiary_purple}}>
-                        <Text className="text-white font-bold text-sm">
-                          {getInitials(item.name)}
-                        </Text>
-                      </View>
+                renderItem={({item}) => {
+                  if (item.type === 'bulk') {
+                    // Card especial para indicação em massa
+                    const sentDate = item.createdAt;
+                    let relativeDate = '';
+                    if (sentDate) {
+                      relativeDate = formatTimeAgo(sentDate);
+                    }
+                    return (
+                      <TouchableOpacity
+                        className="bg-white rounded-xl mb-2 mx-2"
+                        activeOpacity={0.7}
+                        style={{
+                          shadowColor: '#000',
+                          shadowOffset: {width: 2, height: 2},
+                          shadowOpacity: 0.1,
+                          shadowRadius: 4,
+                          elevation: 5,
+                        }}
+                        onPress={() => {
+                          setSelectedBulk(item);
+                          setShowBulkModal(true);
+                        }}
+                      >
+                        <View className="flex-row items-center p-4">
+                          {/* Avatar */}
+                          <View
+                            className="w-12 h-12 rounded-full items-center justify-center mr-4"
+                            style={{backgroundColor: colors.primary_purple}}>
+                            <FontAwesome6 name="layer-group" size={22} color={colors.white} />
+                          </View>
+                          {/* Informações */}
+                          <View className="flex-1">
+                            <View className="flex-row items-center justify-between mb-1">
+                              <Text className="text-black font-bold text-base flex-1">
+                                Lote em massa
+                              </Text>
+                              <Text className="text-xs text-black ml-2">
+                                {relativeDate}
+                              </Text>
+                            </View>
+                            <Text className="text-black text-sm mb-2">
+                              {item.product}
+                            </Text>
+                            <View className="flex-row items-center justify-between">
+                              <View
+                                className="self-start px-3 py-1 w-auto rounded-full"
+                                style={{backgroundColor: item.status === 'Concluído' ? '#dcfce7' : '#E6DBFF'}}>
+                                <Text
+                                  className="text-xs font-semibold"
+                                  style={{color: item.status === 'Concluído' ? colors.green : colors.primary_purple}}>
+                                  {item.status}
+                                </Text>
+                              </View>
+                              {/* Badge para identificar o tipo */}
+                              <View
+                                className="px-2 py-1 rounded-md"
+                                style={{backgroundColor: '#f3e8ff'}}>
+                                <Text
+                                  className="text-xs font-medium"
+                                  style={{color: colors.primary_purple}}>
+                                  Indicação em massa
+                                </Text>
+                              </View>
+                            </View>
+                          </View>
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  }
+                  // ... existing code for normal cards ...
+                  return (
+                    <TouchableOpacity
+                      className="bg-white rounded-xl mb-2 mx-2"
+                      activeOpacity={0.7}
+                      style={{
+                        shadowColor: '#000',
+                        shadowOffset: {width: 2, height: 2},
+                        shadowOpacity: 0.1,
+                        shadowRadius: 4,
+                        elevation: 5, // necessário para Android
+                      }}
+                      onPress={() => {
+                        setSelectedDetail(item);
+                        setShowDetailModal(true);
+                      }}
+                    >
+                      <View className="flex-row items-center p-4">
+                        {/* Avatar */}
+                        <View
+                          className="w-12 h-12 rounded-full items-center justify-center mr-4"
+                          style={{backgroundColor: colors.tertiary_purple}}>
+                          <Text className="text-white font-bold text-sm">
+                            {getInitials(item.name)}
+                          </Text>
+                        </View>
 
-                      {/* Informações */}
-                      <View className="flex-1">
-                        <View className="flex-row items-center justify-between mb-1">
-                          <Text className="text-black font-bold text-base flex-1">
-                            {limitText(item.name)}
-                          </Text>
-                          <Text className="text-xs text-black ml-2">
-                            {item.updatedAt}
-                          </Text>
-                        </View>
-                        <Text className="text-black text-sm mb-2">
-                          {item.product}
-                        </Text>
-                        <View className="flex-row items-center justify-between">
-                          <View
-                            className="self-start px-3 py-1 w-auto rounded-full"
-                            style={{
-                              backgroundColor: getStatusBgColor(item.status),
-                            }}>
-                            <Text
-                              className="text-xs font-semibold"
-                              style={{color: getStatusColor(item.status)}}>
-                              {item.status}
+                        {/* Informações */}
+                        <View className="flex-1">
+                          <View className="flex-row items-center justify-between mb-1">
+                            <Text className="text-black font-bold text-base flex-1">
+                              {limitText(item.name)}
+                            </Text>
+                            <Text className="text-xs text-black ml-2">
+                              {item.updatedAt}
                             </Text>
                           </View>
-                          {/* Badge para identificar o tipo */}
-                          <View
-                            className="px-2 py-1 rounded-md"
-                            style={{
-                              backgroundColor: item.type === 'opportunity' ? '#dcfce7' : '#dbeafe',
-                            }}>
-                            <Text
-                              className="text-xs font-medium"
+                          <Text className="text-black text-sm mb-2">
+                            {item.product}
+                          </Text>
+                          <View className="flex-row items-center justify-between">
+                            <View
+                              className="self-start px-3 py-1 w-auto rounded-full"
                               style={{
-                                color: item.type === 'opportunity' ? '#16a34a' : '#2563eb',
+                                backgroundColor: getStatusBgColor(item.status),
                               }}>
-                              {item.type === 'opportunity' ? 'Oportunidade' : 'Indicação'}
-                            </Text>
+                              <Text
+                                className="text-xs font-semibold"
+                                style={{color: getStatusColor(item.status)}}>
+                                {item.status}
+                              </Text>
+                            </View>
+                            {/* Badge para identificar o tipo */}
+                            <View
+                              className="px-2 py-1 rounded-md"
+                              style={{
+                                backgroundColor: item.type === 'opportunity' ? '#dcfce7' : '#dbeafe',
+                              }}>
+                              <Text
+                                className="text-xs font-medium"
+                                style={{
+                                  color: item.type === 'opportunity' ? '#16a34a' : '#2563eb',
+                                }}>
+                                {item.type === 'opportunity' ? 'Oportunidade' : 'Indicação'}
+                              </Text>
+                            </View>
                           </View>
                         </View>
                       </View>
-                    </View>
-                  </TouchableOpacity>
-                )}
+                    </TouchableOpacity>
+                  );
+                }}
                 ItemSeparatorComponent={() => <View className="h-1" />}
               />
             )}
           </View>
+          {/* Modal de detalhes do lote em massa */}
+          {renderBulkModal()}
+          {/* Modal de detalhes de indicação/oportunidade */}
+          {renderDetailModal()}
         </View>
       )}
     </ImageBackground>

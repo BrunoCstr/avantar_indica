@@ -22,9 +22,8 @@ export async function sendBulkIndications(
   indicator_id: string,
   unitId: string,
   unitName: string,
+  profilePicture: string,
 ): Promise<string | null> {
-  const {userData} = useAuth();
-
   try {
     const docRef = firestore().collection('packagedIndications').doc();
 
@@ -36,7 +35,7 @@ export async function sendBulkIndications(
       updatedAt: firestore.FieldValue.serverTimestamp(),
       indicator_name,
       indicator_id,
-      profilePicture: userData?.profilePicture,
+      profilePicture,
       unitId,
       unitName,
       packagedIndicationId: docId,
@@ -50,5 +49,42 @@ export async function sendBulkIndications(
   } catch (error) {
     console.error('Erro ao enviar indicações em massa:', error);
     return null;
+  }
+}
+
+export async function getPackagedIndicationsByUserId(userId: string) {
+  try {
+    const packagedIndicationsRef = firestore().collection(
+      'packagedIndications',
+    );
+    const q = packagedIndicationsRef.where('indicator_id', '==', userId);
+    const querySnapshot = await q.get();
+    const results = querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        name: 'Lote em massa',
+        status:
+          data.status || (data.progress === 100 ? 'Concluído' : 'Em Andamento'),
+        product: `${data.total || data.indications?.length || 0} indicações`,
+        updatedAt: data.updatedAt,
+        indicator_id: data.indicator_id,
+        createdAt: data.createdAt,
+        updatedAtOriginal: data.updatedAt,
+        type: 'bulk' as const,
+        indications: data.indications || [],
+        progress: data.progress || 0,
+        total: data.total || data.indications?.length || 0,
+        processed: data.processed || 0,
+        packagedIndicationId: data.packagedIndicationId,
+        unitName: data.unitName,
+        indicator_name: data.indicator_name,
+        unitId: data.unitId,
+      };
+    });
+    return results;
+  } catch (error) {
+    console.error('Erro ao buscar indicações em massa:', error);
+    return [];
   }
 }

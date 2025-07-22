@@ -157,6 +157,7 @@ export function IndicateInBulkScreen() {
         userData?.uid || '',
         unitId,
         userData?.unitName || '',
+        userData?.profilePicture || '',
       );
 
       if (packagedIndicationId) {
