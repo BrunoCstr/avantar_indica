@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {View, Text, TouchableOpacity, Pressable, ScrollView} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import { useResponsive } from '../hooks/useResponsive';
 
 const ExpandableSection = ({
   title,
@@ -10,13 +11,14 @@ const ExpandableSection = ({
   children: React.ReactNode;
 }) => {
   const [expanded, setExpanded] = useState(false);
+  const {isSmallScreen} = useResponsive();
 
   return (
     <View className="rounded-lg mb-4 overflow-hidden">
       <Pressable
         onPress={() => setExpanded(!expanded)}
         className="flex-row justify-between items-center px-4 py-3 bg-white">
-        <Text className="text-black font-bold text-2xl">{title}</Text>
+        <Text className={`text-black font-bold ${isSmallScreen ? 'text-md' : 'text-2xl'}`}>{title}</Text>
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => setExpanded(!expanded)}>

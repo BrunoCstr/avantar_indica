@@ -34,7 +34,7 @@ import { formatTimeAgo } from '../utils/formatTimeToDistance';
 export function StatusScreen() {
   const {userData} = useAuth();
   const {paddingBottom} = useBottomNavigationPadding();
-  const {isSmallScreen, isMediumScreen, fontSize, horizontalPadding, spacing} = useResponsive();
+  const {isSmallScreen, horizontalPadding, spacing} = useResponsive();
   const [search, setSearch] = useState('');
   const [showFilter, setShowFilter] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
