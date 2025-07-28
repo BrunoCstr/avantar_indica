@@ -55,7 +55,7 @@ export function HomeScreen() {
   const {userData, registrationStatus} = useAuth();
   const navigation = useNavigation<NavigationProp>();
   const {paddingBottom} = useBottomNavigationPadding();
-  const {isSmallScreen, isMediumScreen, fontSize, horizontalPadding} = useResponsive();
+  const {isSmallScreen, fontSize, horizontalPadding} = useResponsive();
 
   const [isLoading, setIsLoading] = useState(true);
   const [topProducts, setTopProducts] = useState<indicationsDataArray>([]);
@@ -244,7 +244,7 @@ export function HomeScreen() {
         <View 
           className="flex-1 justify-center"
           style={{paddingBottom}}>
-          <View className={`flex-row items-center ${isSmallScreen ? 'mt-12' : 'mt-10'}`} style={{marginHorizontal: horizontalPadding}}>
+          <View className={`flex-row items-center ${isSmallScreen ? 'mt-14' : 'mt-10'}`} style={{marginHorizontal: horizontalPadding}}>
             <View>
               <TouchableOpacity
                 onPress={() => selectImage()}
@@ -260,8 +260,8 @@ export function HomeScreen() {
             </View>
             <View>
               <View className="ml-5 flex-row">
-                <Text className={`text-blue ${fontSize.medium} font-medium`}>Olá, </Text>
-                <Text className={`text-white ${fontSize.medium} font-medium`}>
+                <Text className={`text-blue ${isSmallScreen ? 'text-lg' : fontSize.xlarge} font-medium`}>Olá, </Text>
+                <Text className={`text-white ${isSmallScreen ? 'text-lg' : fontSize.xlarge} font-medium`}>
                   {getFirstName(userData?.displayName || '')}
                 </Text>
               </View>
@@ -276,7 +276,7 @@ export function HomeScreen() {
             </View>
           </View>
 
-          <View className={`${isSmallScreen ? 'h-20' : 'h-24'} items-center justify-center flex-row gap-3 mt-3 mb-3`} style={{marginHorizontal: horizontalPadding}}>
+          <View className={`${isSmallScreen ? 'h-20' : 'h-24'} items-center justify-center flex-row gap-3 mt-5 mb-5`} style={{marginHorizontal: horizontalPadding}}>
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={() => {
@@ -286,7 +286,7 @@ export function HomeScreen() {
               }}>
               <View className={`bg-transparent flex-row border-[1.5px] rounded-lg border-blue justify-center items-center h-full pr-9 pl-9`}>
                 <IndicarIcon />
-                <Text className={`text-white text-bold ${isSmallScreen ? fontSize.medium : fontSize.large} ml-0.5`}>
+                <Text className={`text-white text-bold ${isSmallScreen ? 'text-lg' : fontSize.xlarge} ml-0.5`}>
                   INDICAR
                 </Text>
               </View>
@@ -297,7 +297,7 @@ export function HomeScreen() {
               <View className={`bg-transparent flex-row border-[1.5px] rounded-lg border-blue justify-center items-center h-full pr-9 pl-9`}>
                 <IndicarEmMassaIcon />
                 <View>
-                  <Text className={`text-white text-bold ${isSmallScreen ? fontSize.medium : fontSize.large} ml-0.5`}>
+                  <Text className={`text-white text-bold ${isSmallScreen ? 'text-lg' : fontSize.xlarge} ml-0.5`}>
                     INDICAR
                   </Text>
                   <Text className={`text-white text-bold ${fontSize.small} ml-1`}>
@@ -323,9 +323,9 @@ export function HomeScreen() {
             />
           </View>
 
-          <View className={`mt-3 bg-[#FFF] rounded-2xl ${isSmallScreen ? 'h-64' : 'h-[20rem]'} pt-3`} style={{marginHorizontal: horizontalPadding, paddingHorizontal: horizontalPadding}}>
+          <View className={`mt-5 bg-[#FFF] rounded-2xl ${isSmallScreen ? 'h-64' : 'h-[20rem]'} pt-4`} style={{marginHorizontal: horizontalPadding, paddingHorizontal: horizontalPadding}}>
             <View className="flex-row items-center justify-between">
-              <Text className={`text-primary_purple ${fontSize.medium} font-bold`}>
+              <Text className={`text-primary_purple ${isSmallScreen ? 'text-lg' : fontSize.xlarge} font-bold`}>
                 Indicações
               </Text>
               <TouchableOpacity
@@ -359,7 +359,7 @@ export function HomeScreen() {
             />
           </View>
 
-          <View className="mt-3" style={{marginHorizontal: horizontalPadding}}>
+          <View className="mt-5" style={{marginHorizontal: horizontalPadding}}>
             <Button
               text="STATUS DAS PROPOSTAS"
               backgroundColor="pink"

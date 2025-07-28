@@ -46,10 +46,10 @@ export function useResponsive(): ResponsiveConfig {
 
   // Tamanhos de fonte responsivos
   const fontSize = {
-    small: isSmallScreen ? 'text-xs' : 'text-ss',
-    medium: isSmallScreen ? 'text-s' : 'text-m',
-    large: isSmallScreen ? 'text-xl' : 'text-2xl',
-    xlarge: isSmallScreen ? 'text-l' : 'text-xl',
+    small: isSmallScreen ? 'text-xs' : 'text-sm',
+    medium: isSmallScreen ? 'text-sm' : 'text-base',
+    large: isSmallScreen ? 'text-base' : 'text-lg',
+    xlarge: isSmallScreen ? 'text-lg' : 'text-2xl',
   };
 
   // Espaçamentos responsivos

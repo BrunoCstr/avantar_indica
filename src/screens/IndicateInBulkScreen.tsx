@@ -26,6 +26,7 @@ import {IndicateInBulkSkeleton} from '../components/skeletons/IndicateInBulkSkel
 import {CustomModal} from '../components/CustomModal';
 import {sendBulkIndications} from '../services/bulkIndications/bulkIndications';
 import {Spinner} from '../components/Spinner';
+import {useResponsive} from '../hooks/useResponsive';
 
 type Lead = {
   recordID: string;
@@ -35,6 +36,7 @@ type Lead = {
 
 export function IndicateInBulkScreen() {
   const {userData} = useAuth();
+  const {fontSize, spacing, isSmallScreen} = useResponsive();
   const [isLoading, setIsLoading] = useState(true);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [selecteds, setSelecteds] = useState<{[key: string]: boolean}>({});
@@ -224,26 +226,26 @@ export function IndicateInBulkScreen() {
               color={colors.primary_purple}
               borderColor={colors.primary_purple}
             />
-            <Text className="text-primary_purple font-bold text-3xl absolute left-1/2 -translate-x-1/2">
+            <Text className={`text-primary_purple font-bold ${isSmallScreen ? 'text-2xl' : 'text-3xl'} absolute left-1/2 -translate-x-1/2`}>
               Indicar em Massa
             </Text>
           </View>
 
           <View className="flex-1 mt-3">
-            <Text className="text-lg font-bold text-center text-primary_purple">
+            <Text className={`${isSmallScreen ? 'text-sm' : fontSize.large} font-bold text-center text-primary_purple`}>
               Selecione os contatos:
             </Text>
 
-            <View className="flex-row items-center mt-5 w-full h-16 bg-tertiary_purple rounded-xl border-b-4 border-l-2 border-pink px-4">
+            <View className={`flex-row items-center mt-5 w-full ${isSmallScreen ? 'h-14' : 'h-16'} bg-tertiary_purple rounded-xl border-b-4 border-l-2 border-pink px-4`}>
               <Ionicons
                 name="search"
-                size={24}
+                size={isSmallScreen ? 20 : 24}
                 color={colors.white}
                 className="absolute left-5"
               />
 
               <TextInput
-                className="pl-16 pr-5 flex-1 text-white font-regular text-lg"
+                className={`pl-16 pr-5 flex-1 text-white font-regular ${isSmallScreen ? 'text-base' : 'text-lg'}`}
                 placeholderTextColor={colors.white}
                 onChangeText={setSearch}
                 value={search}
@@ -253,7 +255,7 @@ export function IndicateInBulkScreen() {
 
             {filteredData.length > 0 && (
               <View className="flex-row justify-between items-center mt-3 mb-2">
-                <Text className="text-sm text-primary_purple font-medium">
+                <Text className={`${isSmallScreen ? 'text-xs' : fontSize.small} text-primary_purple font-medium`}>
                   {selectedCount} de {Math.min(filteredData.length, 1000)}{' '}
                   selecionados
                 </Text>
@@ -267,10 +269,10 @@ export function IndicateInBulkScreen() {
                     }
                     textColor="white"
                     fontWeight="bold"
-                    fontSize={12}
+                    fontSize={isSmallScreen ? 12 : 16}
                     onPress={selectAllContacts}
-                    width={120}
-                    height={35}
+                    width={isSmallScreen ? 120 : 130}
+                    height={isSmallScreen ? 20 : 30}
                     disabled={
                       selectedCount === Math.min(filteredData.length, 1000)
                     }
@@ -280,10 +282,10 @@ export function IndicateInBulkScreen() {
                     backgroundColor="primary_purple"
                     textColor="white"
                     fontWeight="bold"
-                    fontSize={14}
+                    fontSize={isSmallScreen ? 10 : 14}
                     onPress={clearAllSelections}
-                    width={80}
-                    height={35}
+                    width={isSmallScreen ? 75 : 85}
+                    height={isSmallScreen ? 20 : 30}
                     disabled={selectedCount === 0}
                   />
                 </View>
@@ -294,7 +296,7 @@ export function IndicateInBulkScreen() {
               <View className="flex-1 justify-center items-center p-10">
                 <Text
                   style={{
-                    fontSize: 30,
+                    fontSize: isSmallScreen ? 20 : 30,
                     color: colors.secondary_purple,
                     fontWeight: 'bold',
                     textAlign: 'center',
@@ -304,7 +306,7 @@ export function IndicateInBulkScreen() {
                 </Text>
                 <Text
                   style={{
-                    fontSize: 16,
+                    fontSize: isSmallScreen ? 12 : 16,
                     color: colors.black,
                     textAlign: 'center',
                     marginBottom: 24,
@@ -317,16 +319,16 @@ export function IndicateInBulkScreen() {
                   backgroundColor="primary_purple"
                   textColor="white"
                   fontWeight="bold"
-                  fontSize={18}
+                  fontSize={isSmallScreen ? 14 : 18}
                   onPress={handlePermissionButton}
-                  width={300}
+                  width={isSmallScreen ? 280 : 300}
                 />
               </View>
             ) : leads.length === 0 ? (
               <View className="flex-1 justify-center items-center p-10">
                 <Text
                   style={{
-                    fontSize: 30,
+                    fontSize: isSmallScreen ? 20 : 30,
                     color: colors.secondary_purple,
                     fontWeight: 'bold',
                     textAlign: 'center',
@@ -336,7 +338,7 @@ export function IndicateInBulkScreen() {
                 </Text>
                 <Text
                   style={{
-                    fontSize: 16,
+                    fontSize: isSmallScreen ? 12 : 16,
                     color: colors.black,
                     textAlign: 'center',
                     marginBottom: 24,
@@ -370,7 +372,7 @@ export function IndicateInBulkScreen() {
               backgroundColor="blue"
               onPress={submitSelecteds}
               textColor="tertiary_purple"
-              fontSize={25}
+              fontSize={isSmallScreen ? 20 : 25}
               fontWeight="bold"
               disabled={isSubmitting}
             />
