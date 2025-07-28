@@ -41,6 +41,7 @@ import {Button} from '../components/Button';
 import {useNavigation} from '@react-navigation/native';
 import {applyMaskTelephone} from '../utils/applyMaskTelephone';
 import {useBottomNavigationPadding} from '../hooks/useBottomNavigationPadding';
+import {useResponsive} from '../hooks/useResponsive';
 
 const db = getFirestore();
 const auth = getAuth();
@@ -48,6 +49,7 @@ const auth = getAuth();
 export function ProfileScreen() {
   const {signOut, userData} = useAuth();
   const {paddingBottom} = useBottomNavigationPadding();
+  const {isSmallScreen, isMediumScreen, fontSize, horizontalPadding, verticalPadding} = useResponsive();
 
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
 
@@ -334,20 +336,22 @@ export function ProfileScreen() {
           <View
             className="flex-1 bg-fifth_purple justify-center"
             style={{paddingBottom}}>
-            <View className="flex-row justify-between mr-7 ml-7">
+            <View 
+              className={`flex-row justify-between ${isSmallScreen ? 'mt-12' : 'mt-10'}`}
+              style={{marginHorizontal: horizontalPadding}}>
               <BackButton />
 
               <TouchableOpacity
                 className="items-center justify-center"
                 activeOpacity={0.8}
                 onPress={() => handleSignOut()}>
-                <Ionicons name="exit-outline" size={35} color={colors.red} />
+                <Ionicons name="exit-outline" size={isSmallScreen ? 30 : 35} color={colors.red} />
               </TouchableOpacity>
             </View>
 
             <View className="items-center">
               <TouchableOpacity activeOpacity={0.9} onPress={selectImage}>
-                <Text className="text-white text-2xl font-bold text-center mb-4">
+                <Text className={`text-white ${isSmallScreen ? 'text-2xl' : 'text-3xl'} font-bold text-center mb-4`}>
                   Perfil
                 </Text>
                 <View className="justify-end">
@@ -357,19 +361,19 @@ export function ProfileScreen() {
                         ? {uri: profilePicture}
                         : images.default_profile_picture
                     }
-                    className="h-32 w-32 rounded-full border-2 border-white"
+                    className={`${isSmallScreen ? 'h-28 w-28' : 'h-32 w-32'} rounded-full border-2 border-white`}
                   />
-                  <View className="absolute -right-1 bg-white w-9 h-9 rounded-lg items-center justify-center">
-                    <MaterialIcons name="edit" size={25} color={colors.black} />
+                  <View className={`absolute -right-1 bg-white ${isSmallScreen ? 'w-8 h-8' : 'w-9 h-9'} rounded-lg items-center justify-center`}>
+                    <MaterialIcons name="edit" size={isSmallScreen ? 22 : 25} color={colors.black} />
                   </View>
                 </View>
               </TouchableOpacity>
             </View>
 
-            <View className="items-center flex-col px-8">
-              <View className="bg-white w-full rounded-3xl px-8 py-6 mt-8">
+            <View className="items-center flex-col" style={{paddingHorizontal: horizontalPadding}}>
+              <View className={`bg-white w-full rounded-3xl ${isSmallScreen ? 'px-6 py-5' : 'px-8 py-6'} mt-8`}>
                 <View className="flex-row justify-between items-center">
-                  <Text className="text-lg text-black font-bold">
+                  <Text className={`text-black font-bold ${fontSize.medium}`}>
                     Informações do usuário
                   </Text>
                   <TouchableOpacity
@@ -379,32 +383,32 @@ export function ProfileScreen() {
                         ? handleSaveUserInfo()
                         : setIsEditingUserInfo(true)
                     }>
-                    <Text className="font-regular text-lg text-black">
+                    <Text className={`font-regular text-black ${fontSize.medium}`}>
                       {isEditingUserInfo ? 'Salvar' : 'Editar'}
                     </Text>
                   </TouchableOpacity>
                 </View>
 
-                <View className="flex-col mt-1 gap-1">
+                <View className={`flex-col mt-1 ${isSmallScreen ? 'gap-1' : 'gap-2'}`}>
                   {/* Nome */}
                   <View className="flex-row items-center gap-2">
-                    <FontAwesome name="user" size={25} color={colors.black} />
+                    <FontAwesome name="user" size={isSmallScreen ? 22 : 25} color={colors.black} />
                     <View className="flex-1">
-                      <Text className="text-sm font-regular text-black">
+                      <Text className={`font-regular text-black ${fontSize.small}`}>
                         Nome
                       </Text>
                       {isEditingUserInfo ? (
                         <TextInput
                           value={editedName}
                           onChangeText={validateName}
-                          className={`text-base font-bold p-0 m-0 text-black ${!isNameValid ? 'text-red' : ''}`}
+                          className={`font-bold p-0 m-0 text-black ${!isNameValid ? 'text-red' : ''} ${fontSize.medium}`}
                           style={{
                             lineHeight: 21,
                             includeFontPadding: false,
                           }}
                         />
                       ) : (
-                        <Text className="text-base font-bold text-black">
+                        <Text className={`font-bold text-black ${fontSize.medium}`}>
                           {userData?.displayName}
                         </Text>
                       )}
@@ -415,18 +419,18 @@ export function ProfileScreen() {
                   <View className="flex-row items-center gap-2">
                     <FontAwesome
                       name="phone-square"
-                      size={22}
+                      size={isSmallScreen ? 20 : 22}
                       color={colors.black}
                     />
                     <View className="flex-1">
-                      <Text className="text-sm font-regular text-black">
+                      <Text className={`font-regular text-black ${fontSize.small}`}>
                         Telefone
                       </Text>
                       {isEditingUserInfo ? (
                         <TextInput
                           value={editedPhone}
                           onChangeText={validatePhone}
-                          className={`text-base font-bold text-black p-0 m-0 ${!isPhoneValid ? 'text-red' : ''}`}
+                          className={`font-bold text-black p-0 m-0 ${!isPhoneValid ? 'text-red' : ''} ${fontSize.medium}`}
                           style={{
                             lineHeight: 21,
                             includeFontPadding: false,
@@ -434,7 +438,7 @@ export function ProfileScreen() {
                           keyboardType="phone-pad"
                         />
                       ) : (
-                        <Text className="text-base font-bold text-black">
+                        <Text className={`font-bold text-black ${fontSize.medium}`}>
                           {applyMaskTelephone(userData?.phone || '')}
                         </Text>
                       )}
@@ -444,7 +448,7 @@ export function ProfileScreen() {
 
                 {/* Dados para pagamento */}
                 <View className="flex-row justify-between items-center mt-4">
-                  <Text className="text-lg font-bold text-black">
+                  <Text className={`font-bold text-black ${fontSize.medium}`}>
                     Dados para pagamento
                   </Text>
                   <TouchableOpacity
@@ -454,18 +458,18 @@ export function ProfileScreen() {
                         ? handleSavePaymentInfo()
                         : setIsEditingPaymentInfo(true)
                     }>
-                    <Text className="font-regular text-lg text-black">
+                    <Text className={`font-regular text-black ${fontSize.medium}`}>
                       {isEditingPaymentInfo ? 'Salvar' : 'Editar'}
                     </Text>
                   </TouchableOpacity>
                 </View>
 
-                <View className="flex-col mt-1 gap-1">
+                <View className={`flex-col mt-1 ${isSmallScreen ? 'gap-1' : 'gap-2'}`}>
                   {/* Chave pix */}
                   <View className="flex-row items-center gap-2">
-                    <MaterialIcons name="pix" size={24} color={colors.black} />
+                    <MaterialIcons name="pix" size={isSmallScreen ? 22 : 24} color={colors.black} />
                     <View className="flex-1">
-                      <Text className="text-sm font-regular text-black">
+                      <Text className={`font-regular text-black ${fontSize.small}`}>
                         Chave pix
                       </Text>
                       {isEditingPaymentInfo ? (
@@ -473,7 +477,7 @@ export function ProfileScreen() {
                           <TextInput
                             value={editedPixKey}
                             onChangeText={validatePixkey}
-                            className={`text-base font-bold text-black p-0 m-0 ${!isPixKeyValid ? 'text-red' : ''}`}
+                            className={`font-bold text-black p-0 m-0 ${!isPixKeyValid ? 'text-red' : ''} ${fontSize.medium}`}
                             style={{
                               lineHeight: 21,
                               includeFontPadding: false,
@@ -483,12 +487,12 @@ export function ProfileScreen() {
                             <TouchableOpacity
                               onPress={() => setEditedPixKey('')}
                               className="pb-4">
-                              <FontAwesome name="trash-o" size={24} color={colors.red} />
+                              <FontAwesome name="trash-o" size={isSmallScreen ? 20 : 24} color={colors.red} />
                             </TouchableOpacity>
                           )}
                         </View>
                       ) : (
-                        <Text className="text-base font-bold text-black">
+                        <Text className={`font-bold text-black ${fontSize.medium}`}>
                           {userData?.pixKey == '' || userData?.pixKey == null
                             ? 'Não cadastrado'
                             : userData?.pixKey}
@@ -500,13 +504,13 @@ export function ProfileScreen() {
               </View>
             </View>
 
-            <View className="w-full flex-col gap-3 mt-6 px-8">
+            <View className="w-full flex-col gap-3 mt-6" style={{paddingHorizontal: horizontalPadding}}>
               <Button
                 text="CONFIGURAÇÕES"
                 backgroundColor="orange"
                 onPress={() => navigation.navigate('Settings')}
                 textColor="white"
-                fontSize={25}
+                fontSize={isSmallScreen ? 22 : 25}
                 fontWeight="bold"
               />
               <Button
@@ -514,7 +518,7 @@ export function ProfileScreen() {
                 backgroundColor="blue"
                 onPress={() => navigation.navigate('RegisterSellers')}
                 textColor="tertiary_purple"
-                fontSize={25}
+                fontSize={isSmallScreen ? 22 : 25}
                 fontWeight="bold"
                 disabled={
                   userData?.rule !== 'parceiro_indicador' &&
