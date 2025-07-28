@@ -431,7 +431,6 @@ export function SignUpScreen() {
                     </Text>
                     <ScrollView style={{ maxHeight: 400, marginBottom: 20 }} showsVerticalScrollIndicator={true}>
                       <Text style={{ color: '#fff', fontSize: 15 }}>
-                        <Text style={{ fontWeight: 'bold' }}>Última atualização: 18/07/2025{`\n\n`}</Text>
                         <Text style={{ fontWeight: 'bold' }}>1. OBJETIVO{`\n`}</Text>
                         O presente Termo de Uso regula o acesso e a utilização do aplicativo AVANTAR INDICA destinado a:{`\n\n`}
                         - Facilitar a indicação de potenciais clientes (leads) para unidades franqueadas;{`\n`}
@@ -464,6 +463,7 @@ export function SignUpScreen() {
                         <Text style={{ fontWeight: 'bold' }}>8. FORO{`\n`}</Text>
                         Este Termo é regido pelas leis brasileiras. Fica eleito o foro da comarca de Caratinga/MG da sede da franqueadora, com exclusão de qualquer outro.
                       </Text>
+                      <Text style={{ fontWeight: 'bold' }} className='text-blue mt-5'>Última atualização: 18/07/2025{`\n\n`}</Text>
                     </ScrollView>
                     <TouchableOpacity
                       style={{

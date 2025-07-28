@@ -124,7 +124,7 @@ export function WalletScreen() {
           currency: 'BRL',
         }).format(
           amount,
-        )} foi solicitado à unidade: ${userData?.unitName}, você pode acompanhar o status em sua carteira!`,
+        )} foi solicitado à unidade: ${userData?.unitName}, o prazo médio de liberação é de 10 dias úteis, você pode acompanhar o status em sua carteira!`,
       });
       setIsModalVisible(true);
 
