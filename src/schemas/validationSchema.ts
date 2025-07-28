@@ -42,7 +42,7 @@ export const indicationSchema = z.object({
   fullName: z.string().min(3, "Nome é obrigatório"),
   phone: z.string().min(14, "Digite um telefone válido!").max(15, "Digite um telefone válido!").regex(/^\(\d{2}\)\s?\d{4,5}-\d{4}$/, "Formato de telefone inválido!"),
   product: z.string().min(3, "Selecione um produto"),
-  observations: z.string().min(1, "Digite uma observação")
+  observations: z.string().optional(),
 })
 
 export type IndicationSchema = z.infer<typeof indicationSchema>;

@@ -55,11 +55,7 @@ const sellerSignUpSchema = z
     password: z.string().min(1, 'Senha é obrigatória'),
     profilePicture: z.string().optional(),
     confirmPassword: z.string().min(1, 'Confirmação de senha é obrigatória'),
-    commission: z
-      .number()
-      .min(0, 'Comissão deve ser entre 0 e 100')
-      .max(100, 'Comissão deve ser entre 0 e 100')
-      .refine(val => !isNaN(val), 'Comissão deve ser um número válido'),
+    commission: z.number().min(0, 'Comissão deve ser entre 0 e 100').max(100, 'Comissão deve ser entre 0 e 100').refine(val => !isNaN(val), 'Comissão deve ser um número válido'),
   })
   .refine(data => data.password === data.confirmPassword, {
     message: 'As senhas devem ser iguais!',
@@ -90,7 +86,7 @@ export function RegisterSellers() {
       phone: '',
       password: '',
       confirmPassword: '',
-      commission: 0,
+      commission: undefined,
     },
   });
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -146,7 +142,7 @@ export function RegisterSellers() {
       phone: '',
       password: '',
       confirmPassword: '',
-      commission: 0,
+      commission: undefined,
     },
   });
 
@@ -275,7 +271,7 @@ export function RegisterSellers() {
       phone: seller.phone ? applyMaskTelephone(seller.phone) : '',
       password: '',
       confirmPassword: '',
-      commission: seller.commission || 0,
+      commission: seller.commission || undefined,
     });
     setEditModalVisible(true);
   }
@@ -351,7 +347,7 @@ export function RegisterSellers() {
         email,
         phone: phoneWithoutMask,
         password,
-        commission,
+        commission: commission || undefined,
         affiliated_to: userData?.affiliated_to,
         unitName: userData?.unitName,
         profilePicture: profilePicture || undefined,
@@ -410,7 +406,7 @@ export function RegisterSellers() {
         phone: phoneWithoutMask,
         password: password !== '' ? password : undefined,
         oldEmail: editingSeller.email,
-        commission,
+        commission: commission || undefined,
       });
       setEditModalVisible(false);
       resetEdit();
@@ -648,15 +644,22 @@ export function RegisterSellers() {
                     placeholder="Comissão (%)"
                     placeholderTextColor={colors.white_opacity}
                     value={
-                      value !== undefined && value !== null ? String(value) : ''
+                      value !== undefined && value !== null ? `${value}%` : ''
                     }
                     onChangeText={text => {
+                      // Remove o símbolo % se presente
+                      const textWithoutPercent = text.replace(/%/g, '');
                       // Permite apenas números, vírgula e ponto
-                      const onlyNumbers = text.replace(/[^0-9.,]/g, '');
+                      const onlyNumbers = textWithoutPercent.replace(/[^0-9.,]/g, '');
                       const normalized = onlyNumbers.replace(',', '.');
-                      // Se o texto estiver vazio, define como 0, senão converte para número
-                      const numValue =
-                        normalized === '' ? 0 : parseFloat(normalized);
+                      
+                      // Se o texto estiver vazio, define como undefined para mostrar placeholder
+                      if (normalized === '') {
+                        onChange(undefined);
+                        return;
+                      }
+                      
+                      const numValue = parseFloat(normalized);
 
                       // Valida se o valor está entre 0 e 100
                       if (numValue >= 0 && numValue <= 100) {
@@ -912,16 +915,23 @@ export function RegisterSellers() {
                 value={
                   watchEdit('commission') !== undefined &&
                   watchEdit('commission') !== null
-                    ? String(watchEdit('commission'))
+                    ? `${watchEdit('commission')}%`
                     : ''
                 }
                 onChangeText={text => {
+                  // Remove o símbolo % se presente
+                  const textWithoutPercent = text.replace(/%/g, '');
                   // Permite apenas números, vírgula e ponto
-                  const onlyNumbers = text.replace(/[^0-9.,]/g, '');
+                  const onlyNumbers = textWithoutPercent.replace(/[^0-9.,]/g, '');
                   const normalized = onlyNumbers.replace(',', '.');
-                  // Se o texto estiver vazio, define como 0, senão converte para número
-                  const numValue =
-                    normalized === '' ? 0 : parseFloat(normalized);
+                  
+                  // Se o texto estiver vazio, define como undefined para mostrar placeholder
+                  if (normalized === '') {
+                    resetEdit({...watchEdit(), commission: undefined});
+                    return;
+                  }
+                  
+                  const numValue = parseFloat(normalized);
 
                   // Valida se o valor está entre 0 e 100
                   if (numValue >= 0 && numValue <= 100) {
