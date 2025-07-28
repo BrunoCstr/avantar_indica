@@ -25,10 +25,12 @@ import {Spinner} from '../components/Spinner';
 import {useBottomNavigationPadding} from '../hooks/useBottomNavigationPadding';
 import {WithdrawalAmountModal} from '../components/WithdrawalAmountModal';
 import {createWithdrawalRequest} from '../services/wallet/Withdrawals';
+import {useResponsive} from '../hooks/useResponsive';
 
 export function WalletScreen() {
   const {userData} = useAuth();
   const {paddingBottom} = useBottomNavigationPadding();
+  const {isSmallScreen, isMediumScreen, horizontalPadding, fontSize, spacing} = useResponsive();
   const [data, setData] = useState<WithdrawalRequest[]>([]);
   const [isLoadingBalance, setIsLoadingBalance] = useState(true);
   const [showBalance, setShowBalance] = useState(true);
@@ -166,13 +168,13 @@ export function WalletScreen() {
     <ImageBackground source={images.bg_white} className="flex-1">
       <View className="flex-1 mt-10" style={{paddingBottom}}>
         <View>
-          <View className="justify-between items-center flex-row ml-5 mr-5">
+          <View style={{marginLeft: horizontalPadding, marginRight: horizontalPadding}} className="justify-between items-center flex-row">
             <BackButton borderColor="#4A04A5" color="#4A04A5" />
           </View>
         </View>
 
         <View>
-          <View className="mr-5 ml-5 bg-fourth_purple rounded-3xl h-30 justify-center items-center mt-10">
+          <View style={{marginLeft: horizontalPadding, marginRight: horizontalPadding, marginTop: spacing.medium}} className="bg-fourth_purple rounded-3xl h-30 justify-center items-center">
             <LinearGradient
               className="w-[100%] flex-1 justify-center items-center rounded-2xl"
               style={{borderRadius: 8}}
@@ -183,17 +185,17 @@ export function WalletScreen() {
                 Saldo Disponível para Saque
               </Text>
               <View className="flex-row items-end justify-center mt-2">
-                <Text className="text-blue text-lg font-bold">R$ </Text>
+                <Text className={`text-blue ${isSmallScreen ? 'text-base' : 'text-lg'} font-bold`}>R$ </Text>
 
                 {showBalance ? (
                   <View className="flex-row items-end">
-                    <Text className="text-blue text-5xl font-bold">
+                    <Text className={`text-blue ${isSmallScreen ? 'text-4xl' : 'text-5xl'} font-bold`}>
                       {new Intl.NumberFormat('pt-BR', {
                         minimumFractionDigits: 0,
                         maximumFractionDigits: 0,
                       }).format(Math.floor(balance))}
                     </Text>
-                    <Text className="text-blue text-lg font-bold">
+                    <Text className={`text-blue ${isSmallScreen ? 'text-base' : 'text-lg'} font-bold`}>
                       ,
                       {new Intl.NumberFormat('pt-BR', {
                         minimumFractionDigits: 2,
@@ -204,7 +206,7 @@ export function WalletScreen() {
                     </Text>
                   </View>
                 ) : (
-                  <Text className="text-blue text-5xl font-bold">******</Text>
+                  <Text className={`text-blue ${isSmallScreen ? 'text-4xl' : 'text-5xl'} font-bold`}>******</Text>
                 )}
 
                 <TouchableOpacity
@@ -223,7 +225,7 @@ export function WalletScreen() {
             </LinearGradient>
           </View>
 
-          <View className="mr-5 ml-5 bg-[#FFF] border-[1px] border-t-0 rounded-br-2xl rounded-bl-2xl border-[#CDCDCD] h-32 pl-4 pr-4 pt-3 pb-3">
+          <View style={{marginLeft: horizontalPadding, marginRight: horizontalPadding}} className="bg-[#FFF] border-[1px] border-t-0 rounded-br-2xl rounded-bl-2xl border-[#CDCDCD] h-32 pl-4 pr-4 pt-3 pb-3">
             {data.length > 0 ? (
               <FlatList
                 data={data}
@@ -281,7 +283,7 @@ export function WalletScreen() {
             )}
           </View>
 
-          <View className="mt-4 ml-5 mr-5">
+          <View style={{marginTop: spacing.small, marginLeft: horizontalPadding, marginRight: horizontalPadding}}>
             <TouchableOpacity
               className="justify-center items-center h-20"
               activeOpacity={0.8}
@@ -292,9 +294,9 @@ export function WalletScreen() {
                 colors={['#9743F8', '#4F00A9']}
                 start={{x: 0, y: 1}}
                 end={{x: 0, y: 0}}>
-                <Text className="text-white font-bold text-4xl">
+                <Text className={`text-white font-bold ${isSmallScreen ? 'text-3xl' : 'text-4xl'}`}>
                   {isLoadingButton ? (
-                    <Spinner size={32} variant="blue" />
+                    <Spinner size={isSmallScreen ? 28 : 32} variant="blue" />
                   ) : (
                     'Sacar'
                   )}
@@ -303,7 +305,7 @@ export function WalletScreen() {
             </TouchableOpacity>
           </View>
 
-          <View className="mt-4 mb-4 ml-5 mr-5">
+          <View style={{marginTop: spacing.small, marginBottom: spacing.small, marginLeft: horizontalPadding, marginRight: horizontalPadding}}>
             <DashboardWallet />
           </View>
         </View>

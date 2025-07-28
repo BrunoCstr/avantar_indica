@@ -4,6 +4,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import {getCommissionsByPeriod} from '../services/wallet/Dashboard';
 import {useAuth} from '../contexts/Auth';
 import {Spinner} from './Spinner';
+import {useResponsive} from '../hooks/useResponsive';
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -12,6 +13,7 @@ const DashboardChart = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('Mês');
   const [isLoading, setIsLoading] = useState(true);
   const {userData} = useAuth();
+  const {isSmallScreen, isMediumScreen, horizontalPadding} = useResponsive();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -96,7 +98,7 @@ const DashboardChart = () => {
       label: item.label,
       value: item.value,
       count: item.count,
-      height: item.value > 0 ? Math.max((item.value / maxValue) * 140, 20) : 20, // Altura mínima de 20
+      height: item.value > 0 ? Math.max((item.value / maxValue) * (isSmallScreen ? 100 : 140), 20) : 20, // Altura mínima de 20
     }));
   };
 
@@ -121,9 +123,9 @@ const DashboardChart = () => {
   };
 
   return (
-    <View className="bg-transparent rounded-lg mx-4 shadow-sm">
+    <View className="bg-transparent rounded-lg shadow-sm">
       {/* Header com seletores de período */}
-      <View className="flex-row justify-center mb-6">
+      <View style={{marginBottom: isSmallScreen ? 16 : 24}} className="flex-row justify-center">
         <View className="flex-row items-center justify-center bg-[#f4f0ff] rounded-lg p-1 w-full">
           {['Semana', 'Mês', 'Ano'].map(period => (
             <TouchableOpacity
@@ -132,13 +134,14 @@ const DashboardChart = () => {
                 selectedPeriod === period ? 'bg-orange' : ''
               }`}
               onPress={() => setSelectedPeriod(period)}>
-              <View className={`w-24 h-6 items-center justify-center`}>
-                <Text
-                  className={`text-sm font-semiBold text-center ${
-                    selectedPeriod === period ? 'text-white' : 'text-black'
-                  }`}>
-                  {period}
-                </Text>
+              <View style={{width: isSmallScreen ? 80 : 96}} className="h-6 items-center justify-center">
+                                  <Text
+                    style={{fontSize: isSmallScreen ? 12 : 14}}
+                    className={`font-semiBold text-center ${
+                      selectedPeriod === period ? 'text-white' : 'text-black'
+                    }`}>
+                    {period}
+                  </Text>
               </View>
             </TouchableOpacity>
           ))}
@@ -149,21 +152,21 @@ const DashboardChart = () => {
       <View className="relative">
         {/* Container das barras */}
         {isLoading ? (
-          <View className="justify-center items-center" style={{height: 200}}>
-            <Spinner size={34} variant="blue" />
+          <View className="justify-center items-center" style={{height: isSmallScreen ? 160 : 200}}>
+            <Spinner size={isSmallScreen ? 28 : 34} variant="blue" />
           </View>
         ) : (
           <>
             <View
-              className="flex-row items-end justify-between px-2"
-              style={{height: 200}}>
+              style={{height: isSmallScreen ? 160 : 200, paddingHorizontal: isSmallScreen ? 4 : 8}}
+              className="flex-row items-end justify-between">
               {chartData.map((item, index) => (
-                <View key={index} className="items-center flex-1 mx-1">
+                <View key={index} style={{marginHorizontal: isSmallScreen ? 2 : 4}} className="items-center flex-1">
                   {/* Valor acima da barra */}
                   <Text
                     className="text-black mb-2 text-center"
                     style={{
-                      fontSize: 10,
+                      fontSize: isSmallScreen ? 8 : 10,
                     }}>
                     {formatCurrency(item.value)}
                   </Text>
@@ -182,7 +185,7 @@ const DashboardChart = () => {
                       className="rounded-xl"
                       style={{
                         height: item.height,
-                        minWidth: 40,
+                        minWidth: isSmallScreen ? 30 : 40,
                       }}
                     />
                   </LinearGradient>
@@ -191,7 +194,7 @@ const DashboardChart = () => {
                   <Text
                     className="font-regular text-black mt-3 text-center"
                     style={{
-                      fontSize: 10,
+                      fontSize: isSmallScreen ? 8 : 10,
                     }}>
                     {formatLabel(item.label)}
                   </Text>
