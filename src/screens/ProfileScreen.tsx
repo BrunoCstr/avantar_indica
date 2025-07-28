@@ -233,7 +233,8 @@ export function ProfileScreen() {
   function validatePixkey(pixKey: string) {
     setEditedPixKey(pixKey);
 
-    const isValid = pixKey.length >= 7;
+    // Permite salvar vazio ou com pelo menos 7 caracteres
+    const isValid = pixKey.length === 0 || pixKey.length >= 7;
     setIsPixKeyValid(isValid);
   }
 

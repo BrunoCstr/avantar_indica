@@ -89,7 +89,7 @@ export const registrationsApproved = functions.firestore.onDocumentUpdated(
         html: `
         <br>
          <div style="text-align: center;">
-          <img src="https://dashboard.avantar.com.br/images/1.png" style="width:300px; margin: 0 auto;">
+          <img src="https://iili.io/FvUnepI.png" style="width:300px; margin: 0 auto;">
          </div>
         <br>
         <br>
