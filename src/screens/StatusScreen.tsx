@@ -28,11 +28,13 @@ import {
   UnifiedStatusItem,
 } from '../services/status/status';
 import {useBottomNavigationPadding} from '../hooks/useBottomNavigationPadding';
+import {useResponsive} from '../hooks/useResponsive';
 import { formatTimeAgo } from '../utils/formatTimeToDistance';
 
 export function StatusScreen() {
   const {userData} = useAuth();
   const {paddingBottom} = useBottomNavigationPadding();
+  const {isSmallScreen, isMediumScreen, fontSize, horizontalPadding, spacing} = useResponsive();
   const [search, setSearch] = useState('');
   const [showFilter, setShowFilter] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
@@ -374,15 +376,19 @@ export function StatusScreen() {
         <StatusScreenSkeleton />
       ) : (
         <View 
-          className="flex-1 px-5 pt-4"
-          style={{paddingBottom}}>
+          className="flex-1"
+          style={{
+            paddingBottom,
+            paddingHorizontal: horizontalPadding,
+            paddingTop: isSmallScreen ? 16 : 20
+          }}>
           {/* Header */}
-          <View className="items-center flex-row justify-between w-full mt-12">
+          <View className={`items-center flex-row justify-between w-full ${isSmallScreen ? 'mt-8' : 'mt-12'}`}>
             <BackButton
               color={colors.tertiary_purple}
               borderColor={colors.tertiary_purple}
             />
-            <Text className="text-tertiary_purple font-bold text-3xl mr-6">
+            <Text className={`text-tertiary_purple font-bold ${isSmallScreen ? 'text-2xl' : 'text-3xl'} mr-6`}>
               Status
             </Text>
             <View>
@@ -391,16 +397,16 @@ export function StatusScreen() {
           </View>
 
           {/* Barra de Pesquisa */}
-          <View className="flex-row items-center w-full h-16 bg-tertiary_purple rounded-xl border-b-4 border-l-2 border-pink px-4 mt-8">
+          <View className={`flex-row items-center w-full bg-tertiary_purple rounded-xl border-b-4 border-l-2 border-pink px-4 ${isSmallScreen ? 'h-14 mt-6' : 'h-16 mt-8'}`}>
             <Ionicons
               name="search"
-              size={24}
+              size={isSmallScreen ? 20 : 24}
               color={colors.white}
               className="absolute left-5"
             />
 
             <TextInput
-              className="pl-16 pr-5 flex-1 text-white font-regular text-lg"
+              className={`pl-16 pr-5 flex-1 text-white font-regular ${isSmallScreen ? 'text-base' : 'text-lg'}`}
               placeholderTextColor={colors.white}
               onChangeText={setSearch}
               value={search}
@@ -412,7 +418,7 @@ export function StatusScreen() {
               className="pr-4">
               <FontAwesome6
                 name={showFilter ? 'xmark' : 'sliders'}
-                size={24}
+                size={isSmallScreen ? 20 : 24}
                 color={colors.white}
               />
             </TouchableOpacity>
@@ -423,12 +429,16 @@ export function StatusScreen() {
               options={filterOptions}
               selectedOptions={selectedFilters}
               onSelectOption={handleSelectFilter}
-              position={{ top: 180, right: 20 }}
+              position={{ 
+                top: isSmallScreen ? 140 : 180, 
+                right: isSmallScreen ? horizontalPadding : 20 
+              }}
             />
           </View>
 
-          <View className="mt-4 mb-1 w-full h-20">
-            <View className="flex-row justify-between gap-3 px-1 w-full space-x-2">
+          {/* Cards de Estatísticas */}
+          <View className={`${isSmallScreen ? 'mt-3 mb-1' : 'mt-4 mb-1'} w-full ${isSmallScreen ? 'h-16' : 'h-20'}`}>
+            <View className="flex-row justify-between gap-2 px-1 w-full">
               {[
                 {label: 'Pendente', value: stats['PENDENTE CONTATO'] || 0},
                 {
@@ -450,7 +460,7 @@ export function StatusScreen() {
               ].map((item, index) => (
                 <View
                   key={index}
-                  className="bg-white rounded-xl p-3 shadow-lg flex-1"
+                  className={`bg-white rounded-xl shadow-lg flex-1 ${isSmallScreen ? 'p-2' : 'p-3'}`}
                   style={{
                     shadowColor: '#000',
                     shadowOffset: {width: 0, height: 2},
@@ -458,10 +468,10 @@ export function StatusScreen() {
                     shadowRadius: 4,
                     elevation: 5,
                   }}>
-                  <Text className="text-2xl font-bold text-tertiary_purple text-center">
+                  <Text className={`${isSmallScreen ? 'text-lg' : 'text-2xl'} font-bold text-tertiary_purple text-center`}>
                     {item.value}
                   </Text>
-                  <Text className="text-xs text-black text-center mt-1">
+                  <Text className={`${isSmallScreen ? 'text-xs' : 'text-xs'} text-black text-center mt-1`}>
                     {item.label}
                   </Text>
                 </View>
@@ -470,19 +480,22 @@ export function StatusScreen() {
           </View>
 
           {/* Lista de Status */}
-          <View className="rounded-2xl flex-1" style={{}}>
+          <View className="rounded-2xl flex-1" style={{
+            marginTop: isSmallScreen ? 4 : 8,
+            minHeight: isSmallScreen ? 400 : 500
+          }}>
             {filteredData.length === 0 ? (
               <View className="flex-1 justify-center items-center p-10">
                 <FontAwesome6
                   name="clipboard-list"
-                  size={60}
+                  size={isSmallScreen ? 50 : 60}
                   color={colors.tertiary_purple}
                   style={{marginBottom: 16, opacity: 0.7}}
                 />
-                <Text className="text-lg font-bold text-tertiary_purple mb-2 text-center">
+                <Text className={`${isSmallScreen ? 'text-base' : 'text-lg'} font-bold text-tertiary_purple mb-2 text-center`}>
                   Nenhum resultado encontrado
                 </Text>
-                <Text className="text-sm text-black text-center">
+                <Text className={`${isSmallScreen ? 'text-xs' : 'text-sm'} text-black text-center`}>
                   {search || selectedFilters.length > 0 
                     ? 'Nenhum item corresponde aos filtros aplicados. Tente ajustar sua busca.'
                     : 'Você ainda não possui oportunidades ou indicações registradas. Quando você indicar alguém, elas aparecerão aqui!'
@@ -494,7 +507,15 @@ export function StatusScreen() {
                 data={filteredData}
                 showsVerticalScrollIndicator={false}
                 keyExtractor={item => item.id.toString()}
-                contentContainerStyle={{paddingVertical: 8, paddingBottom: 20}}
+                                 contentContainerStyle={{
+                   paddingVertical: isSmallScreen ? 8 : 12,
+                   paddingBottom: isSmallScreen ? 60 : 80,
+                   paddingHorizontal: spacing.small
+                 }}
+                 style={{
+                   flex: 1,
+                   minHeight: isSmallScreen ? 380 : 480
+                 }}
                 renderItem={({item}) => {
                   if (item.type === 'bulk') {
                     // Card especial para indicação em massa
@@ -505,7 +526,7 @@ export function StatusScreen() {
                     }
                     return (
                       <TouchableOpacity
-                        className="bg-white rounded-xl mb-2 mx-2"
+                        className="bg-white rounded-xl mb-2"
                         activeOpacity={0.7}
                         style={{
                           shadowColor: '#000',
@@ -519,24 +540,24 @@ export function StatusScreen() {
                           setShowBulkModal(true);
                         }}
                       >
-                        <View className="flex-row items-center p-4">
+                        <View className={`flex-row items-center ${isSmallScreen ? 'p-3' : 'p-4'}`}>
                           {/* Avatar */}
                           <View
-                            className="w-12 h-12 rounded-full items-center justify-center mr-4"
+                            className={`${isSmallScreen ? 'w-10 h-10' : 'w-12 h-12'} rounded-full items-center justify-center mr-4`}
                             style={{backgroundColor: colors.primary_purple}}>
-                            <FontAwesome6 name="layer-group" size={22} color={colors.white} />
+                            <FontAwesome6 name="layer-group" size={isSmallScreen ? 18 : 22} color={colors.white} />
                           </View>
                           {/* Informações */}
                           <View className="flex-1">
                             <View className="flex-row items-center justify-between mb-1">
-                              <Text className="text-black font-bold text-base flex-1">
+                              <Text className={`text-black font-bold ${isSmallScreen ? 'text-sm' : 'text-base'} flex-1`}>
                                 Lote em massa
                               </Text>
-                              <Text className="text-xs text-black ml-2">
+                              <Text className={`${isSmallScreen ? 'text-xs' : 'text-xs'} text-black ml-2`}>
                                 {relativeDate}
                               </Text>
                             </View>
-                            <Text className="text-black text-sm mb-2">
+                            <Text className={`text-black ${isSmallScreen ? 'text-xs' : 'text-sm'} mb-2`}>
                               {item.product}
                             </Text>
                             <View className="flex-row items-center justify-between">
@@ -544,7 +565,7 @@ export function StatusScreen() {
                                 className="self-start px-3 py-1 w-auto rounded-full"
                                 style={{backgroundColor: item.status === 'Concluído' ? '#dcfce7' : '#E6DBFF'}}>
                                 <Text
-                                  className="text-xs font-semibold"
+                                  className={`${isSmallScreen ? 'text-xs' : 'text-xs'} font-semibold`}
                                   style={{color: item.status === 'Concluído' ? colors.green : colors.primary_purple}}>
                                   {item.status}
                                 </Text>
@@ -554,7 +575,7 @@ export function StatusScreen() {
                                 className="px-2 py-1 rounded-md"
                                 style={{backgroundColor: '#f3e8ff'}}>
                                 <Text
-                                  className="text-xs font-medium"
+                                  className={`${isSmallScreen ? 'text-xs' : 'text-xs'} font-medium`}
                                   style={{color: colors.primary_purple}}>
                                   Indicação em massa
                                 </Text>
@@ -568,7 +589,7 @@ export function StatusScreen() {
                   // ... existing code for normal cards ...
                   return (
                     <TouchableOpacity
-                      className="bg-white rounded-xl mb-2 mx-2"
+                      className="bg-white rounded-xl mb-2"
                       activeOpacity={0.7}
                       style={{
                         shadowColor: '#000',
@@ -582,12 +603,12 @@ export function StatusScreen() {
                         setShowDetailModal(true);
                       }}
                     >
-                      <View className="flex-row items-center p-4">
+                      <View className={`flex-row items-center ${isSmallScreen ? 'p-3' : 'p-4'}`}>
                         {/* Avatar */}
                         <View
-                          className="w-12 h-12 rounded-full items-center justify-center mr-4"
+                          className={`${isSmallScreen ? 'w-10 h-10' : 'w-12 h-12'} rounded-full items-center justify-center mr-4`}
                           style={{backgroundColor: colors.tertiary_purple}}>
-                          <Text className="text-white font-bold text-sm">
+                          <Text className={`text-white font-bold ${isSmallScreen ? 'text-xs' : 'text-sm'}`}>
                             {getInitials(item.name)}
                           </Text>
                         </View>
@@ -595,14 +616,14 @@ export function StatusScreen() {
                         {/* Informações */}
                         <View className="flex-1">
                           <View className="flex-row items-center justify-between mb-1">
-                            <Text className="text-black font-bold text-base flex-1">
+                            <Text className={`text-black font-bold ${isSmallScreen ? 'text-sm' : 'text-base'} flex-1`}>
                               {limitText(item.name)}
                             </Text>
-                            <Text className="text-xs text-black ml-2">
+                            <Text className={`${isSmallScreen ? 'text-xs' : 'text-xs'} text-black ml-2`}>
                               {item.updatedAt}
                             </Text>
                           </View>
-                          <Text className="text-black text-sm mb-2">
+                          <Text className={`text-black ${isSmallScreen ? 'text-xs' : 'text-sm'} mb-2`}>
                             {item.product}
                           </Text>
                           <View className="flex-row items-center justify-between">
@@ -612,7 +633,7 @@ export function StatusScreen() {
                                 backgroundColor: getStatusBgColor(item.status),
                               }}>
                               <Text
-                                className="text-xs font-semibold"
+                                className={`${isSmallScreen ? 'text-xs' : 'text-xs'} font-semibold`}
                                 style={{color: getStatusColor(item.status)}}>
                                 {item.status}
                               </Text>
@@ -624,7 +645,7 @@ export function StatusScreen() {
                                 backgroundColor: item.type === 'opportunity' ? '#dcfce7' : '#dbeafe',
                               }}>
                               <Text
-                                className="text-xs font-medium"
+                                className={`${isSmallScreen ? 'text-xs' : 'text-xs'} font-medium`}
                                 style={{
                                   color: item.type === 'opportunity' ? '#16a34a' : '#2563eb',
                                 }}>
