@@ -55,7 +55,7 @@ export const formatCurrency = (value: number): string => {
 export interface CreateWithdrawalRequest {
   amount: number;
   fullName: string;
-  pixKey: string;
+  pixKey: string | null;
   rule: string;
   unitId: string;
   unitName: string;

@@ -22,7 +22,7 @@ interface UserData {
   uid: string;
   profilePicture: string;
   phone: string;
-  pixKey: string;
+  pixKey: string | null;
   unitName: string;
   rule: string;
 }

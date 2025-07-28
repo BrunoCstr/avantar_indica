@@ -98,15 +98,13 @@ export function ProfileScreen() {
   const [isEditingPaymentInfo, setIsEditingPaymentInfo] = useState(false);
 
   const [editedName, setEditedName] = useState(userData?.displayName || '');
-  const [editedPhone, setEditedPhone] = useState(
-    applyMaskTelephone(userData?.phone || ''),
-  );
+  const [editedPhone, setEditedPhone] = useState(userData?.phone || '');
   const [editedPixKey, setEditedPixKey] = useState(userData?.pixKey || '');
 
   useEffect(() => {
     if (isEditingUserInfo && userData) {
       setEditedName(userData.displayName || '');
-      setEditedPhone(applyMaskTelephone(userData.phone || ''));
+      setEditedPhone(userData.phone || '');
     }
   }, [isEditingUserInfo, userData]);
 
@@ -121,11 +119,13 @@ export function ProfileScreen() {
   const [isNameValid, setIsNameValid] = useState(true);
 
   function validatePhone(phone: string) {
-    // Aplica máscara visualmente
-    const masked = applyMaskTelephone(phone);
-    setEditedPhone(masked);
+    // Permite digitação livre - não aplica máscara durante a digitação
+    setEditedPhone(phone);
+
+    // Remove todos os caracteres não numéricos para validação
+    const rawPhone = phone.replace(/\D/g, '');
+
     // Valida o telefone sem máscara
-    const rawPhone = masked.replace(/\D/g, '');
     const isValid = rawPhone.length >= 10 && rawPhone.length <= 11;
     setIsPhoneValid(isValid);
   }
@@ -255,15 +255,18 @@ export function ProfileScreen() {
 
     if (isPixKeyValid) {
       try {
+        // Se o campo estiver vazio, salva como null, senão salva o valor
+        const pixKeyValue = editedPixKey.trim() === '' ? null : editedPixKey;
+
         await updateDoc(doc(db, 'users', userData.uid), {
-          pixKey: editedPixKey,
+          pixKey: pixKeyValue,
         });
 
         setIsEditingPaymentInfo(false);
         Keyboard.dismiss();
 
         // Atualiza o valor local
-        userData.pixKey = editedPixKey;
+        userData.pixKey = pixKeyValue;
 
         setModalMessage({
           title: 'Feito!',
@@ -466,18 +469,29 @@ export function ProfileScreen() {
                         Chave pix
                       </Text>
                       {isEditingPaymentInfo ? (
-                        <TextInput
-                          value={editedPixKey}
-                          onChangeText={validatePixkey}
-                          className={`text-base font-bold text-black p-0 m-0 ${!isPixKeyValid ? 'text-red' : ''}`}
-                          style={{
-                            lineHeight: 21,
-                            includeFontPadding: false,
-                          }}
-                        />
+                        <View className="flex-row items-center justify-between gap-2">
+                          <TextInput
+                            value={editedPixKey}
+                            onChangeText={validatePixkey}
+                            className={`text-base font-bold text-black p-0 m-0 ${!isPixKeyValid ? 'text-red' : ''}`}
+                            style={{
+                              lineHeight: 21,
+                              includeFontPadding: false,
+                            }}
+                          />
+                          {editedPixKey.length > 0 && (
+                            <TouchableOpacity
+                              onPress={() => setEditedPixKey('')}
+                              className="pb-4">
+                              <FontAwesome name="trash-o" size={24} color={colors.red} />
+                            </TouchableOpacity>
+                          )}
+                        </View>
                       ) : (
                         <Text className="text-base font-bold text-black">
-                          {userData?.pixKey == '' || userData?.pixKey == null ? 'Não cadastrada' : userData?.pixKey}
+                          {userData?.pixKey == '' || userData?.pixKey == null
+                            ? 'Não cadastrado'
+                            : userData?.pixKey}
                         </Text>
                       )}
                     </View>

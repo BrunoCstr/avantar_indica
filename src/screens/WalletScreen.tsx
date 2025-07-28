@@ -82,7 +82,7 @@ export function WalletScreen() {
     if (!userData?.pixKey || userData.pixKey.trim() === '') {
       setModalMessage({
         title: 'Chave PIX não cadastrada',
-        description: 'Para realizar um saque, você precisa cadastrar sua chave PIX no perfil. Acesse Configurações > Perfil para atualizar.',
+        description: 'Para realizar um saque, você precisa cadastrar sua chave PIX no perfil. Acesse Perfil > Dados para Pagamento para atualizar.',
       });
       setIsModalVisible(true);
       return;
