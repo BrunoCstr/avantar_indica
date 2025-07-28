@@ -507,15 +507,14 @@ export function StatusScreen() {
                 data={filteredData}
                 showsVerticalScrollIndicator={false}
                 keyExtractor={item => item.id.toString()}
-                                 contentContainerStyle={{
-                   paddingVertical: isSmallScreen ? 8 : 12,
-                   paddingBottom: isSmallScreen ? 60 : 80,
-                   paddingHorizontal: spacing.small
-                 }}
-                 style={{
-                   flex: 1,
-                   minHeight: isSmallScreen ? 380 : 480
-                 }}
+                contentContainerStyle={{
+                  paddingVertical: isSmallScreen ? 8 : 12,
+                  paddingBottom: isSmallScreen ? 60 : 80,
+                }}
+                style={{
+                  flex: 1,
+                  minHeight: isSmallScreen ? 380 : 480
+                }}
                 renderItem={({item}) => {
                   if (item.type === 'bulk') {
                     // Card especial para indicação em massa

@@ -6,6 +6,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
 import type {StackNavigationProp} from '@react-navigation/stack';
+import {useResponsive} from '../hooks/useResponsive';
 
 type RootStackParamList = {
   WaitingConfirmationScreen: undefined;
@@ -34,12 +35,13 @@ const Tab = createBottomTabNavigator();
 
 export function BottomNavigator() {
   const { registrationStatus } = useAuth();
+  const {horizontalPadding} = useResponsive();
   const [showModal, setShowModal] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const navigation = useNavigation<NavigationProp>();
 
   // Margem lateral da bottom navigation
-  const sideMargin = 28;
+  const sideMargin = horizontalPadding;
   const screenWidth = Dimensions.get('window').width;
   const tabBarWidth = screenWidth - (sideMargin * 2);
 
