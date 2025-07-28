@@ -1,17 +1,18 @@
+import React from 'react';
 import {TouchableOpacity, Text} from 'react-native';
 import {colors} from '../styles/colors';
-import { ReactNode } from 'react';
-import { Spinner } from './Spinner';
+import {Spinner} from './Spinner';
+import {useResponsive} from '../hooks/useResponsive';
 
 interface ButtonProps {
-  text: string | ReactNode;
-  backgroundColor: string;
-  textColor?: string;
-  fontWeight?: any;
-  fontSize?: number;
   onPress: () => void;
+  text: string;
+  backgroundColor: string;
+  textColor: string;
+  fontWeight: string;
+  fontSize: number;
+  width?: string | number;
   height?: number;
-  width?: number | string;
   borderBottomWidth?: number;
   borderRightWidth?: number;
   borderColor?: string;
@@ -34,6 +35,12 @@ export function Button({
   disabled = false,
   isLoading = false,
 }: ButtonProps) {
+  const { isSmallScreen } = useResponsive();
+  
+  // Ajustar tamanhos para telas pequenas
+  const adjustedFontSize = isSmallScreen ? Math.max(fontSize - 2, 14) : fontSize;
+  const adjustedHeight = isSmallScreen ? Math.max(height - 10, 50) : height;
+
   return (
     <TouchableOpacity
       disabled={disabled || isLoading}
@@ -45,7 +52,7 @@ export function Button({
           : colors[backgroundColor as keyof typeof colors],
         opacity: disabled || isLoading ? 0.5 : 1,
         borderRadius: 10,
-        height,
+        height: adjustedHeight,
         width: typeof width === 'number' ? width : width === '100%' ? '100%' : undefined,
         borderBottomWidth,
         borderRightWidth,
@@ -61,7 +68,7 @@ export function Button({
             textAlign: 'center',
             fontFamily: 'FamiljenGrotesk-regular',
             fontWeight,
-            fontSize,
+            fontSize: adjustedFontSize,
             color: colors[textColor as keyof typeof colors],
           }}
           className="font-bold">

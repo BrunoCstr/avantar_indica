@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Modal } from 'react-native';
+import { useResponsive } from '../hooks/useResponsive';
 
 interface FilterDropdownProps {
   visible: boolean;
@@ -22,6 +23,7 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
   onSelectOption,
   position = { top: 180, right: 20 },
 }) => {
+  const { isSmallScreen, horizontalPadding } = useResponsive();
   return (
     <Modal
       transparent={true}
@@ -41,19 +43,20 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
             top: position.top,
             right: position.right,
             left: position.left,
-            minWidth: 200,
+            minWidth: isSmallScreen ? 160 : 200,
+            maxWidth: isSmallScreen ? 280 : 320,
             zIndex: 10000
           }}
         >
           <TouchableOpacity activeOpacity={1}>
-            <View className="bg-fifth_purple rounded-xl py-2 px-1 border-2 border-blue shadow-lg">
+            <View className={`bg-fifth_purple rounded-xl py-2 px-1 border-2 border-blue shadow-lg ${isSmallScreen ? 'mx-2' : ''}`}>
               {options.map((option, index) => {
                 // Separador visual - não é clicável
                 if (option === '---') {
                   return (
                     <View
                       key={index}
-                      className="mx-3 my-1"
+                      className={`${isSmallScreen ? 'mx-2' : 'mx-3'} my-1`}
                     >
                       <View className="h-px bg-purple-300 opacity-50" />
                     </View>
@@ -65,14 +68,14 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
                     activeOpacity={0.8}
                     key={index}
                     onPress={() => onSelectOption(option)}
-                    className="flex-row items-center py-2 px-3"
+                    className={`flex-row items-center py-2 ${isSmallScreen ? 'px-2' : 'px-3'}`}
                   >
                     <View className="w-5 h-5 border border-purple-500 rounded mr-2 flex items-center justify-center">
                       {selectedOptions.includes(option) && (
                         <View className="w-3 h-3 bg-purple-500 rounded-sm" />
                       )}
                     </View>
-                    <Text className="text-purple-200 flex-1">{option}</Text>
+                    <Text className={`text-purple-200 flex-1 ${isSmallScreen ? 'text-xs' : 'text-sm'}`}>{option}</Text>
                   </TouchableOpacity>
                 );
               })}

@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import type {StackNavigationProp} from '@react-navigation/stack';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import IndicarIcon from '../assets/images/indicar_icon.svg';
 import IndicarEmMassaIcon from '../assets/images/indicar_em_massa_icon.svg';
 
@@ -45,10 +44,10 @@ import {colors} from '../styles/colors';
 import {HomeSkeleton} from '../components/skeletons/HomeSkeleton';
 import {IndicateModal} from '../components/IndicateModal';
 import DashboardIndications from '../components/DashboardIndications';
-import {getTop4ProductsByUser} from '../services/home/DashboardIndications';
 import {indicationsDataArray} from '../components/DashboardIndications';
 import {FilterDropdown} from '../components/FilterDropdown';
 import {useBottomNavigationPadding} from '../hooks/useBottomNavigationPadding';
+import {useResponsive} from '../hooks/useResponsive';
 
 const db = getFirestore();
 
@@ -56,6 +55,7 @@ export function HomeScreen() {
   const {userData, registrationStatus} = useAuth();
   const navigation = useNavigation<NavigationProp>();
   const {paddingBottom} = useBottomNavigationPadding();
+  const {isSmallScreen, isMediumScreen, fontSize, horizontalPadding} = useResponsive();
 
   const [isLoading, setIsLoading] = useState(true);
   const [topProducts, setTopProducts] = useState<indicationsDataArray>([]);
@@ -244,7 +244,7 @@ export function HomeScreen() {
         <View 
           className="flex-1 justify-center"
           style={{paddingBottom}}>
-          <View className="grid-cols-3 flex-row items-center mt-10 ml-7 mr-7">
+          <View className={`flex-row items-center ${isSmallScreen ? 'mt-12' : 'mt-10'}`} style={{marginHorizontal: horizontalPadding}}>
             <View>
               <TouchableOpacity
                 onPress={() => selectImage()}
@@ -255,18 +255,18 @@ export function HomeScreen() {
                       ? {uri: profilePicture}
                       : images.default_profile_picture
                   }
-                  className="h-[4.375rem] w-[4.375rem] rounded-full ml-1"></Image>
+                  className={`${isSmallScreen ? 'h-16 w-16' : 'h-[4.375rem] w-[4.375rem]'} rounded-full ml-1`}></Image>
               </TouchableOpacity>
             </View>
             <View>
               <View className="ml-5 flex-row">
-                <Text className="text-blue text-m font-medium">Olá, </Text>
-                <Text className="text-white text-m font-medium">
+                <Text className={`text-blue ${fontSize.medium} font-medium`}>Olá, </Text>
+                <Text className={`text-white ${fontSize.medium} font-medium`}>
                   {getFirstName(userData?.displayName || '')}
                 </Text>
               </View>
               <View className="ml-5">
-                <Text className="text-white text-ss font-regular">
+                <Text className={`text-white ${fontSize.small} font-regular`}>
                   {welcomeMessage}
                 </Text>
               </View>
@@ -276,7 +276,7 @@ export function HomeScreen() {
             </View>
           </View>
 
-          <View className="ml-7 mr-7 h-30 items-center justify-center flex-row gap-3">
+          <View className={`${isSmallScreen ? 'h-20' : 'h-24'} items-center justify-center flex-row gap-3 mt-3 mb-3`} style={{marginHorizontal: horizontalPadding}}>
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={() => {
@@ -284,9 +284,9 @@ export function HomeScreen() {
                   ? setShowModal(true)
                   : navigation.navigate('WaitingConfirmationScreen');
               }}>
-              <View className="bg-transparent flex-row border-[1.5px] rounded-lg border-blue justify-center items-center pr-8 pl-8 pt-6 pb-6">
+              <View className={`bg-transparent flex-row border-[1.5px] rounded-lg border-blue justify-center items-center h-full pr-9 pl-9`}>
                 <IndicarIcon />
-                <Text className="text-white text-bold text-2xl ml-1.5">
+                <Text className={`text-white text-bold ${isSmallScreen ? fontSize.medium : fontSize.large} ml-0.5`}>
                   INDICAR
                 </Text>
               </View>
@@ -294,13 +294,13 @@ export function HomeScreen() {
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={() => navigation.navigate('IndicateInBulk')}>
-              <View className="bg-transparent flex-row border-[1.5px] rounded-lg border-blue justify-center items-center pr-9 pl-9 pt-3 pb-3">
+              <View className={`bg-transparent flex-row border-[1.5px] rounded-lg border-blue justify-center items-center h-full pr-9 pl-9`}>
                 <IndicarEmMassaIcon />
                 <View>
-                  <Text className="text-white text-bold text-2xl ml-1.5">
+                  <Text className={`text-white text-bold ${isSmallScreen ? fontSize.medium : fontSize.large} ml-0.5`}>
                     INDICAR
                   </Text>
-                  <Text className="text-white text-bold text-s ml-2">
+                  <Text className={`text-white text-bold ${fontSize.small} ml-1`}>
                     EM MASSA
                   </Text>
                 </View>
@@ -308,14 +308,14 @@ export function HomeScreen() {
             </TouchableOpacity>
           </View>
 
-          <View className="ml-7 mr-7">
+          <View style={{marginHorizontal: horizontalPadding}}>
             <Button
               text="REGRAS"
               backgroundColor="orange"
               textColor="white"
               fontWeight="bold"
-              fontSize={25}
-              height={70}
+              fontSize={isSmallScreen ? 22 : 25}
+              height={80}
               borderColor="second_orange"
               borderBottomWidth={4}
               borderRightWidth={2}
@@ -323,9 +323,9 @@ export function HomeScreen() {
             />
           </View>
 
-          <View className="mt-6 ml-7 mr-7 bg-[#FFF] rounded-2xl h-[20rem] pt-4 pl-7 pr-7">
+          <View className={`mt-3 bg-[#FFF] rounded-2xl ${isSmallScreen ? 'h-64' : 'h-[20rem]'} pt-3`} style={{marginHorizontal: horizontalPadding, paddingHorizontal: horizontalPadding}}>
             <View className="flex-row items-center justify-between">
-              <Text className="text-primary_purple text-m font-bold">
+              <Text className={`text-primary_purple ${fontSize.medium} font-bold`}>
                 Indicações
               </Text>
               <TouchableOpacity
@@ -342,7 +342,7 @@ export function HomeScreen() {
             <ScrollView
               className="flex-1 pt-1"
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={{paddingBottom: 10}}>
+              contentContainerStyle={{paddingBottom: 6}}>
               <DashboardIndications data={topProducts} isLoading={isLoading} />
             </ScrollView>
 
@@ -352,18 +352,21 @@ export function HomeScreen() {
               options={availableProducts}
               selectedOptions={selectedFilters}
               onSelectOption={handleSelectFilter}
-              position={{ top: 385, right: 40 }}
+              position={{ 
+                top: isSmallScreen ? 320 : 385, 
+                right: isSmallScreen ? horizontalPadding : 40 
+              }}
             />
           </View>
 
-          <View className="mt-6 ml-7 mr-7">
+          <View className="mt-3" style={{marginHorizontal: horizontalPadding}}>
             <Button
               text="STATUS DAS PROPOSTAS"
               backgroundColor="pink"
               textColor="white"
               fontWeight="bold"
-              fontSize={25}
-              height={70}
+              fontSize={isSmallScreen ? 22 : 25}
+              height={80}
               borderColor="sixteen_purple"
               borderBottomWidth={4}
               borderRightWidth={2}

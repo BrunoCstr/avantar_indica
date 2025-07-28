@@ -3,6 +3,7 @@ import {View, Text} from 'react-native';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import IndicationsEmpty from '../assets/images/indications_empty.svg';
 import {Spinner} from './Spinner';
+import {useResponsive} from '../hooks/useResponsive';
 
 type indicationsData = {
   product: string;
@@ -19,6 +20,7 @@ interface DashboardIndicacoesProps {
 }
 
 const DashboardIndicacoes = ({data, isLoading = false}: DashboardIndicacoesProps) => {
+  const { isSmallScreen } = useResponsive();
   const indications = data;
 
   const getIconNameByProduct = (product: string) => {
@@ -60,7 +62,7 @@ const DashboardIndicacoes = ({data, isLoading = false}: DashboardIndicacoesProps
 
   const renderIndicacaoItem = (item: any, index: number) => (
     <View key={index} className="flex-row items-center">
-      <View className="bg-[#E3E3E3] h-10 w-10 rounded-md justify-center items-center mr-4">
+      <View className={`bg-[#E3E3E3] h-10 w-10 rounded-md justify-center items-center mr-4`}>
         <FontAwesome6
           name={getIconNameByProduct(item.product)}
           size={22}
@@ -107,8 +109,8 @@ const DashboardIndicacoes = ({data, isLoading = false}: DashboardIndicacoesProps
       ) : indications.length === 0 ? (
         <View className="items-center justify-center py-12 px-4">
           <IndicationsEmpty
-            width={48}
-            height={48}
+            width={isSmallScreen ? 40 : 48}
+            height={isSmallScreen ? 40 : 48}
             style={{marginBottom: 12, opacity: 0.7}}
           />
           <Text className="text-lg font-bold text-fifth_purple mb-1 text-center">
