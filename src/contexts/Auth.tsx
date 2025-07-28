@@ -1,12 +1,13 @@
 import React, {createContext, useContext, useEffect, useState} from 'react';
 import {Alert} from 'react-native';
-import auth from '@react-native-firebase/auth';
+import auth, {sendEmailVerification, signOut} from '@react-native-firebase/auth';
 import firestore, {
   doc,
   setDoc,
   updateDoc,
   onSnapshot,
   serverTimestamp,
+  getDoc,
 } from '@react-native-firebase/firestore';
 import {getDefaultProfilePicture} from '../utils/getDefaultProfilePicture';
 import messaging from '@react-native-firebase/messaging';
@@ -242,6 +243,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         fcmToken = await messaging().getToken();
       } catch (fcmError) {
         console.warn('Erro ao obter FCM token durante login:', fcmError);
+      }
+
+      // Verificar se é o primeiro login e se o e-mail não está verificado
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        if (userData) {
+          const isFirstLogin = userData.isFirstLogin;
+          const isEmailVerified = user.emailVerified;
+
+          // Se for o primeiro login e o e-mail não estiver verificado, enviar e-mail de verificação
+          if (isFirstLogin && !isEmailVerified) {
+            try {
+              await sendEmailVerification(user);
+              
+              await auth().signOut();
+              setIsLoading(false);
+              return "E-mail de verificação enviado! Verifique sua caixa de entrada e clique no link para confirmar seu e-mail antes de fazer login novamente.";
+            } catch (verificationError: any) {
+              console.error("Erro ao enviar e-mail de verificação:", verificationError);
+              await auth().signOut();
+              setIsLoading(false);
+              return "Erro ao enviar e-mail de verificação. Tente novamente mais tarde.";
+            }
+          }
+        }
       }
 
       // Atualizar o documento do usuário
