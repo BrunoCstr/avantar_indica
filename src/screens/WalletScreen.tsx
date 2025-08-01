@@ -114,6 +114,7 @@ export function WalletScreen() {
         unitId: userData?.affiliated_to || '',
         unitName: userData?.unitName || '',
         userId: userData?.uid || '',
+        profilePicture: userData?.profilePicture || '',
       };
 
       // Criar a solicitação no banco de dados

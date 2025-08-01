@@ -1,11 +1,10 @@
 import React, { useEffect } from 'react';
-import {Text, TextInput, LogBox} from 'react-native';
+import {LogBox, Platform} from 'react-native';
 import './firebaseConfig';
+import './global.css';
 import {Router} from './src/routes/Router';
 import {AuthProvider} from './src/contexts/Auth';
-import './global.css';
 import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
-import {globalStyles} from './src/styles/globalStyles';
 import messaging from '@react-native-firebase/messaging';
 
 // Ignorar warnings específicos que podem estar causando problemas
@@ -19,6 +18,11 @@ LogBox.ignoreLogs([
 // Função para configurar FCM
 async function setupFCM() {
   try {
+    // REGISTRAR o dispositivo para mensagens remotas (obrigatório no iOS)
+    if (Platform.OS === 'ios') {
+      await messaging().registerDeviceForRemoteMessages();
+    }
+
     // Solicitar permissões de notificação
     const authStatus = await messaging().requestPermission();
     const enabled =

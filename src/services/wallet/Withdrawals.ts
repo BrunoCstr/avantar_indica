@@ -8,6 +8,7 @@ export interface WithdrawalRequest {
   createdAt: any;
   updatedAt: any;
   pixKey: string;
+  profilePicture: string;
 }
 
 // Função para obter todas as solicitações de saque do usuário
@@ -30,6 +31,7 @@ export const getUserWithdrawals = async (
         userId: data.userId,
         amount: data.amount,
         status: data.status,
+        profilePicture: data.profilePicture,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
         pixKey: data.pixKey,
@@ -60,6 +62,7 @@ export interface CreateWithdrawalRequest {
   unitId: string;
   unitName: string;
   userId: string;
+  profilePicture: string;
 }
 
 // Função para criar uma solicitação de saque
@@ -107,6 +110,7 @@ export const createWithdrawalRequest = async (
       unitName: withdrawalData.unitName,
       userId: withdrawalData.userId,
       withdrawId: '',
+      profilePicture: withdrawalData.profilePicture,
     };
 
     // Usar uma transação para garantir consistência dos dados

@@ -26,7 +26,6 @@ import {IndicateInBulkSkeleton} from '../components/skeletons/IndicateInBulkSkel
 import {CustomModal} from '../components/CustomModal';
 import {sendBulkIndications} from '../services/bulkIndications/bulkIndications';
 import {Spinner} from '../components/Spinner';
-import {useResponsive} from '../hooks/useResponsive';
 
 type Lead = {
   recordID: string;
@@ -36,7 +35,6 @@ type Lead = {
 
 export function IndicateInBulkScreen() {
   const {userData} = useAuth();
-  const {fontSize, spacing, isSmallScreen} = useResponsive();
   const [isLoading, setIsLoading] = useState(true);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [selecteds, setSelecteds] = useState<{[key: string]: boolean}>({});
@@ -58,6 +56,14 @@ export function IndicateInBulkScreen() {
         return 'never_ask_again';
       }
       return granted === PermissionsAndroid.RESULTS.GRANTED;
+    } else if (Platform.OS === 'ios') {
+      try {
+        const permission = await Contacts.requestPermission();
+        return permission === 'authorized';
+      } catch (error) {
+        console.error('Erro ao solicitar permissão no iOS:', error);
+        return false;
+      }
     }
     return true;
   };
@@ -69,7 +75,12 @@ export function IndicateInBulkScreen() {
     } else if (result === 'never_ask_again') {
       Linking.openSettings();
     } else {
-      setPermissionDenied(true);
+      // No iOS, se a permissão for negada, abrir configurações
+      if (Platform.OS === 'ios') {
+        Linking.openSettings();
+      } else {
+        setPermissionDenied(true);
+      }
     }
   };
 
@@ -80,15 +91,27 @@ export function IndicateInBulkScreen() {
     if (allowed === true) {
       try {
         const all = await Contacts.getAll();
-        const withTelephone: any = all.filter(c => c.phoneNumbers.length > 0);
+        const withTelephone: any = all.filter(c => 
+          c.phoneNumbers && 
+          Array.isArray(c.phoneNumbers) && 
+          c.phoneNumbers.length > 0 &&
+          c.displayName
+        );
         setLeads(withTelephone);
       } catch (e) {
+        console.error('Erro ao carregar contatos:', e);
         setLeads([]);
       }
       setIsLoading(false);
     } else {
-      setPermissionDenied(true);
-      setLeads([]);
+      if (Platform.OS === 'ios') {
+        // No iOS, se a permissão for negada, não mostrar a tela de permissão negada
+        // pois o usuário pode ter negado temporariamente
+        setLeads([]);
+      } else {
+        setPermissionDenied(true);
+        setLeads([]);
+      }
       setIsLoading(false);
     }
   };
@@ -98,10 +121,12 @@ export function IndicateInBulkScreen() {
   }, []);
 
   const toggleContact = (id: string) => {
-    setSelecteds(prev => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
+    if (id) {
+      setSelecteds(prev => ({
+        ...prev,
+        [id]: !prev[id],
+      }));
+    }
   };
 
   const selectAllContacts = () => {
@@ -110,7 +135,9 @@ export function IndicateInBulkScreen() {
 
     const newSelecteds: {[key: string]: boolean} = {};
     contactsToSelect.forEach(contact => {
-      newSelecteds[contact.recordID] = true;
+      if (contact.recordID) {
+        newSelecteds[contact.recordID] = true;
+      }
     });
 
     setSelecteds(newSelecteds);
@@ -131,7 +158,7 @@ export function IndicateInBulkScreen() {
   const selectedCount = Object.values(selecteds).filter(Boolean).length;
 
   const submitSelecteds = async () => {
-    const arrSelecteds = leads.filter(c => selecteds[c.recordID]);
+    const arrSelecteds = leads.filter(c => c.recordID && selecteds[c.recordID]);
 
     if (arrSelecteds.length === 0) {
       setModalMessage({
@@ -145,10 +172,13 @@ export function IndicateInBulkScreen() {
 
     setIsSubmitting(true);
 
-    const indications = arrSelecteds.map(c => ({
-      name: c.displayName,
-      phone: cleanPhoneForBackend(c.phoneNumbers[0].number),
-    }));
+    const indications = arrSelecteds
+      .filter(c => c.displayName && c.phoneNumbers?.[0]?.number)
+      .map(c => ({
+        name: c.displayName || 'Sem nome',
+        phone: cleanPhoneForBackend(c.phoneNumbers?.[0]?.number || ''),
+        status: "PENDENTE CONTATO"
+      }));
 
     try {
       const unitId = userData?.affiliated_to || '';
@@ -203,11 +233,15 @@ export function IndicateInBulkScreen() {
   });
 
   const filteredData = leads.filter(item => {
+    if (!item.displayName || !item.phoneNumbers || !Array.isArray(item.phoneNumbers)) {
+      return false;
+    }
+
     const matchSearchName = item.displayName
       .toLowerCase()
       .includes(search.toLowerCase());
 
-    const matchSearchTel = item.phoneNumbers?.[0]?.number.includes(search);
+    const matchSearchTel = item.phoneNumbers?.[0]?.number?.includes(search) || false;
 
     return matchSearchName || matchSearchTel;
   });
@@ -226,26 +260,26 @@ export function IndicateInBulkScreen() {
               color={colors.primary_purple}
               borderColor={colors.primary_purple}
             />
-            <Text className={`text-primary_purple font-bold ${isSmallScreen ? 'text-2xl' : 'text-3xl'} absolute left-1/2 -translate-x-1/2`}>
+            <Text className="text-primary_purple font-bold text-3xl absolute left-1/2 -translate-x-1/2">
               Indicar em Massa
             </Text>
           </View>
 
           <View className="flex-1 mt-3">
-            <Text className={`${isSmallScreen ? 'text-sm' : fontSize.large} font-bold text-center text-primary_purple`}>
+            <Text className="text-lg font-bold text-center text-primary_purple">
               Selecione os contatos:
             </Text>
 
-            <View className={`flex-row items-center mt-5 w-full ${isSmallScreen ? 'h-14' : 'h-16'} bg-tertiary_purple rounded-xl border-b-4 border-l-2 border-pink px-4`}>
+            <View className="flex-row items-center mt-5 w-full h-16 bg-tertiary_purple rounded-xl border-b-4 border-l-2 border-pink px-4">
               <Ionicons
                 name="search"
-                size={isSmallScreen ? 20 : 24}
+                size={24}
                 color={colors.white}
                 className="absolute left-5"
               />
 
               <TextInput
-                className={`pl-16 pr-5 flex-1 text-white font-regular ${isSmallScreen ? 'text-base' : 'text-lg'}`}
+                className="pl-16 pr-5 flex-1 text-white font-regular text-lg"
                 placeholderTextColor={colors.white}
                 onChangeText={setSearch}
                 value={search}
@@ -255,7 +289,7 @@ export function IndicateInBulkScreen() {
 
             {filteredData.length > 0 && (
               <View className="flex-row justify-between items-center mt-3 mb-2">
-                <Text className={`${isSmallScreen ? 'text-xs' : fontSize.small} text-primary_purple font-medium`}>
+                <Text className="text-sm text-primary_purple font-medium">
                   {selectedCount} de {Math.min(filteredData.length, 1000)}{' '}
                   selecionados
                 </Text>
@@ -269,12 +303,13 @@ export function IndicateInBulkScreen() {
                     }
                     textColor="white"
                     fontWeight="bold"
-                    fontSize={isSmallScreen ? 12 : 16}
+                    fontSize={12}
                     onPress={selectAllContacts}
-                    width={isSmallScreen ? 120 : 130}
-                    height={isSmallScreen ? 20 : 30}
+                    width={120}
+                    height={35}
                     disabled={
-                      selectedCount === Math.min(filteredData.length, 1000)
+                      selectedCount === Math.min(filteredData.length, 1000) ||
+                      filteredData.length === 0
                     }
                   />
                   <Button
@@ -282,11 +317,11 @@ export function IndicateInBulkScreen() {
                     backgroundColor="primary_purple"
                     textColor="white"
                     fontWeight="bold"
-                    fontSize={isSmallScreen ? 10 : 14}
+                    fontSize={14}
                     onPress={clearAllSelections}
-                    width={isSmallScreen ? 75 : 85}
-                    height={isSmallScreen ? 20 : 30}
-                    disabled={selectedCount === 0}
+                    width={80}
+                    height={35}
+                    disabled={selectedCount === 0 || filteredData.length === 0}
                   />
                 </View>
               </View>
@@ -296,7 +331,7 @@ export function IndicateInBulkScreen() {
               <View className="flex-1 justify-center items-center p-10">
                 <Text
                   style={{
-                    fontSize: isSmallScreen ? 20 : 30,
+                    fontSize: 30,
                     color: colors.secondary_purple,
                     fontWeight: 'bold',
                     textAlign: 'center',
@@ -306,7 +341,7 @@ export function IndicateInBulkScreen() {
                 </Text>
                 <Text
                   style={{
-                    fontSize: isSmallScreen ? 12 : 16,
+                    fontSize: 16,
                     color: colors.black,
                     textAlign: 'center',
                     marginBottom: 24,
@@ -315,20 +350,20 @@ export function IndicateInBulkScreen() {
                   permissão para continuar.
                 </Text>
                 <Button
-                  text="Ativar permissão de contatos"
+                  text={Platform.OS === 'ios' ? 'Abrir Configurações' : 'Ativar permissão de contatos'}
                   backgroundColor="primary_purple"
                   textColor="white"
                   fontWeight="bold"
-                  fontSize={isSmallScreen ? 14 : 18}
+                  fontSize={18}
                   onPress={handlePermissionButton}
-                  width={isSmallScreen ? 280 : 300}
+                  width={300}
                 />
               </View>
             ) : leads.length === 0 ? (
               <View className="flex-1 justify-center items-center p-10">
                 <Text
                   style={{
-                    fontSize: isSmallScreen ? 20 : 30,
+                    fontSize: 30,
                     color: colors.secondary_purple,
                     fontWeight: 'bold',
                     textAlign: 'center',
@@ -338,20 +373,33 @@ export function IndicateInBulkScreen() {
                 </Text>
                 <Text
                   style={{
-                    fontSize: isSmallScreen ? 12 : 16,
+                    fontSize: 16,
                     color: colors.black,
                     textAlign: 'center',
                     marginBottom: 24,
                   }}>
-                  Não encontramos contatos com telefone na sua agenda. Adicione
-                  contatos no seu aparelho para usar esta funcionalidade.
+                  {Platform.OS === 'ios' 
+                    ? 'Não encontramos contatos com telefone na sua agenda. Verifique se você concedeu permissão para acessar contatos nas configurações do app.'
+                    : 'Não encontramos contatos com telefone na sua agenda. Adicione contatos no seu aparelho para usar esta funcionalidade.'
+                  }
                 </Text>
+                {Platform.OS === 'ios' && (
+                  <Button
+                    text="Abrir Configurações"
+                    backgroundColor="primary_purple"
+                    textColor="white"
+                    fontWeight="bold"
+                    fontSize={16}
+                    onPress={() => Linking.openSettings()}
+                    width={250}
+                  />
+                )}
               </View>
             ) : (
               <FlatList
                 className="mb-5"
                 data={filteredData}
-                keyExtractor={item => item.recordID}
+                keyExtractor={item => item.recordID || item.displayName || 'unknown'}
                 showsVerticalScrollIndicator={false}
                 renderItem={({item}) => (
                   <ConctactItem
@@ -372,9 +420,9 @@ export function IndicateInBulkScreen() {
               backgroundColor="blue"
               onPress={submitSelecteds}
               textColor="tertiary_purple"
-              fontSize={isSmallScreen ? 20 : 25}
+              fontSize={25}
               fontWeight="bold"
-              disabled={isSubmitting}
+              disabled={isSubmitting || selectedCount === 0}
             />
           </View>
         </View>
@@ -382,7 +430,13 @@ export function IndicateInBulkScreen() {
 
       <CustomModal
         visible={isModalVisible}
-        onClose={() => setIsModalVisible(false)}
+        onClose={() => {
+          setIsModalVisible(false);
+          // Se o envio foi bem-sucedido, recarregar contatos
+          if (modalMessage.title === 'Enviado!') {
+            loadContacts();
+          }
+        }}
         title={modalMessage.title}
         description={modalMessage.description}
         buttonText="FECHAR"

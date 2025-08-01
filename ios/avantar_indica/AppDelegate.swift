@@ -1,17 +1,22 @@
 import UIKit
+import Firebase
+import FirebaseCore
+import FirebaseMessaging
 import React
 import React_RCTAppDelegate
 import ReactAppDependencyProvider
-import Firebase
 import UserNotifications
 
 @main
-class AppDelegate: RCTAppDelegate, UNUserNotificationCenterDelegate {
+@objc(AppDelegate)
+class AppDelegate: RCTAppDelegate, UNUserNotificationCenterDelegate, MessagingDelegate {
   override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-    // Configure Firebase
+    // Inicializar Firebase
     FirebaseApp.configure()
-    
-    // Configure FCM
+    // Delegar mensagens FCM
+    Messaging.messaging().delegate = self
+
+    // Configurar permissões de notificação
     if #available(iOS 10.0, *) {
       UNUserNotificationCenter.current().delegate = self
       let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
@@ -24,17 +29,22 @@ class AppDelegate: RCTAppDelegate, UNUserNotificationCenterDelegate {
         UIUserNotificationSettings(types: [.alert, .badge, .sound], categories: nil)
       application.registerUserNotificationSettings(settings)
     }
-    
+
+    // Registrar para notificações remotas
     application.registerForRemoteNotifications()
-    
+
+    // Configuração do React Native
     self.moduleName = "avantar_indica"
     self.dependencyProvider = RCTAppDependencyProvider()
-
-    // You can add your custom initial props in the dictionary below.
-    // They will be passed down to the ViewController used by React Native.
     self.initialProps = [:]
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  // Implementação necessária para Background Fetch ativado
+  override func application(_ application: UIApplication,
+                            performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+    completionHandler(.noData)
   }
 
   override func sourceURL(for bridge: RCTBridge) -> URL? {
@@ -43,22 +53,28 @@ class AppDelegate: RCTAppDelegate, UNUserNotificationCenterDelegate {
 
   override func bundleURL() -> URL? {
 #if DEBUG
-    RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index")
+    return RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index")
 #else
-    Bundle.main.url(forResource: "main", withExtension: "jsbundle")
+    return Bundle.main.url(forResource: "main", withExtension: "jsbundle")
 #endif
   }
-  
-  // Handle FCM token refresh
-  func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+
+  // Enviar token APNs para o Firebase
+  override func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
     Messaging.messaging().apnsToken = deviceToken
   }
-  
-  // Handle notification when app is in foreground
+
+  // Token FCM atualizado (sem log)
+  func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+    // Você pode salvar ou enviar esse token para o backend, se necessário
+  }
+
+  // Exibir notificações quando o app estiver em primeiro plano
   @available(iOS 10.0, *)
   func userNotificationCenter(_ center: UNUserNotificationCenter,
                               willPresent notification: UNNotification,
                               withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-    completionHandler([[.alert, .sound]])
+    completionHandler([[.alert, .sound, .badge]])
   }
 }
+

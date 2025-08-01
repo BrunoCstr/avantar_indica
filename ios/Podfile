@@ -1,39 +1,77 @@
-# Resolve react_native_pods.rb with node to allow for hoisting
+# Podfile sugerido (reiterando para facilitar):
 require Pod::Executable.execute_command('node', ['-p',
   'require.resolve(
     "react-native/scripts/react_native_pods.rb",
     {paths: [process.argv[1]]},
   )', __dir__]).strip
 
-platform :ios, min_ios_version_supported
+platform :ios, '15.1'
 prepare_react_native_project!
-
-linkage = ENV['USE_FRAMEWORKS']
-if linkage != nil
-  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
-  use_frameworks! :linkage => linkage.to_sym
-end
 
 target 'avantar_indica' do
   config = use_native_modules!
 
+  use_frameworks! :linkage => :static
+
   use_react_native!(
     :path => config[:reactNativePath],
-    # An absolute path to your application root.
-    :app_path => "#{Pod::Config.instance.installation_root}/.."
+    :app_path => "#{Pod::Config.instance.installation_root}/..",
+    :hermes_enabled => true
   )
 
-  # Firebase dependencies
+  # Firebase pods - sem especificar modular_headers para deixar o CocoaPods gerenciar
   pod 'Firebase/Core'
+  pod 'Firebase/Auth'
   pod 'Firebase/Messaging'
+  pod 'Firebase/Storage'
+  pod 'Firebase/Firestore'
+  pod 'Firebase/Functions'
+  pod 'Firebase/RemoteConfig'
+  pod 'Firebase/Crashlytics'
+  pod 'Firebase/Performance'
+  pod 'Firebase/AppCheck'
+
+  # Removido fix gRPC - deixe o Firebase gerenciar as dependências de gRPC
+  # pod 'gRPC-C++', '1.73.1', :modular_headers => true
+  # pod 'gRPC-Core', '1.73.1', :modular_headers => true
 
   post_install do |installer|
-    # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
     react_native_post_install(
       installer,
       config[:reactNativePath],
-      :mac_catalyst_enabled => false,
-      # :ccache_enabled => true
+      :mac_catalyst_enabled => false
     )
+
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.1'
+        config.build_settings['ENABLE_BITCODE'] = 'NO'
+        
+        # Removidas configurações que podem conflitar ou não são necessárias:
+        # config.build_settings['SWIFT_VERSION'] = '5.0' (já é padrão)
+        # config.build_settings['DEFINES_MODULE'] = 'YES' if target.name.include?('Firebase') (gerenciado pelos pods)
+        
+        # Desabilitar RCT_NEW_ARCH_ENABLED para RNReanimated (RN 0.78 não usa a nova arquitetura totalmente)
+        if target.name == 'RNReanimated'
+
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+          # config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'RCT_NEW_ARCH_ENABLED=1' # <--- Desabilite esta linha
+        end
+        
+        # Hermes Engine - configurações de FLAGS extras não são geralmente necessárias
+        if target.name == 'hermes-engine'
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+          # config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'HERMES_ENABLE_DEBUGGER=1' # <--- Desabilite se tiver problemas
+          # config.build_settings['OTHER_CPLUSPLUSFLAGS'] = '$(inherited) -DFOLLY_NO_CONFIG -DFOLLY_MOBILE=1 -DFOLLY_USE_LIBCPP=1' # <--- Desabilite se tiver problemas
+        end
+        
+        # Configurações gerais para evitar problemas de compilação
+        config.build_settings['CLANG_WARN_DOCUMENTATION_COMMENTS'] = 'NO'
+        config.build_settings['CLANG_WARN_STRICT_PROTOTYPES'] = 'NO'
+        config.build_settings['GCC_WARN_64_TO_32_BIT_CONVERSION'] = 'NO'
+        config.build_settings['GCC_WARN_UNUSED_FUNCTION'] = 'NO'
+        config.build_settings['GCC_WARN_UNUSED_VARIABLE'] = 'NO'
+      end
+    end
   end
 end

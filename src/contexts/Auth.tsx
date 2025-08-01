@@ -1,6 +1,5 @@
 import React, {createContext, useContext, useEffect, useState} from 'react';
-import {Alert} from 'react-native';
-import auth, {sendEmailVerification, signOut} from '@react-native-firebase/auth';
+import auth, {sendEmailVerification} from '@react-native-firebase/auth';
 import firestore, {
   doc,
   setDoc,
@@ -210,6 +209,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       );
 
       await user.updateProfile({displayName: fullName});
+      await sendEmailVerification(user);
     } catch (err: any) {
       if (auth().currentUser) {
         await auth().currentUser?.delete();
@@ -260,12 +260,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
             try {
               await sendEmailVerification(user);
               
-              await auth().signOut();
               setIsLoading(false);
-              return "E-mail de verificação enviado! Verifique sua caixa de entrada e clique no link para confirmar seu e-mail antes de fazer login novamente.";
+              return "E-mail de verificação enviado! Verifique sua caixa de entrada e clique no link para confirmar seu e-mail.";
             } catch (verificationError: any) {
               console.error("Erro ao enviar e-mail de verificação:", verificationError);
-              await auth().signOut();
               setIsLoading(false);
               return "Erro ao enviar e-mail de verificação. Tente novamente mais tarde.";
             }

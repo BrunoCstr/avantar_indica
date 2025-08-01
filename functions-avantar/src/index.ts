@@ -12,5 +12,8 @@ export {indicatedInBulk} from './notifications/indicateInBulk';
 export {withdrawRequest} from './notifications/withdrawRequest';
 export {closedProposal} from './notifications/closedProposal';
 export {withdrawalStatus} from './notifications/withdrawalStatus';
+export {onUserUpdate} from './others/usernameSynchronization';
+export {onUnitUpdate} from './others/unitnameSynchronization';
+export {onProfilePictureUpdate} from './others/profilePictureSynchronization';
 export * from './auth/updateUserEmail';
 export * from './auth/toggleUserActive';
