@@ -15,5 +15,6 @@ export {withdrawalStatus} from './notifications/withdrawalStatus';
 export {onUserUpdate} from './others/usernameSynchronization';
 export {onUnitUpdate} from './others/unitnameSynchronization';
 export {onProfilePictureUpdate} from './others/profilePictureSynchronization';
+export {moveToArchived} from './others/moveToArchived';
 export * from './auth/updateUserEmail';
 export * from './auth/toggleUserActive';
