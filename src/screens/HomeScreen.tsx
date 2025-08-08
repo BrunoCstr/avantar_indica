@@ -107,11 +107,11 @@ export function HomeScreen() {
     // Listeners em tempo real para indicações e oportunidades
     const indicationsQuery = query(
       collection(db, 'indications'),
-      where('indicator_id', '==', userData.uid)
+      where('indicator_id', '==', userData.uid),
     );
     const opportunitiesQuery = query(
       collection(db, 'opportunities'),
-      where('indicator_id', '==', userData.uid)
+      where('indicator_id', '==', userData.uid),
     );
 
     let allIndications: any[] = [];
@@ -121,15 +121,15 @@ export function HomeScreen() {
       // Junta tudo e filtra trash/archived
       const all = [
         ...allIndications.filter(
-          (item) => item.trash !== true && item.archived !== true
+          item => item.trash !== true && item.archived !== true,
         ),
         ...allOpportunities.filter(
-          (item) => item.trash !== true && item.archived !== true
+          item => item.trash !== true && item.archived !== true,
         ),
       ];
       // Agrupa por produto
       const productMap = new Map();
-      all.forEach((item) => {
+      all.forEach(item => {
         if (!item.product) return;
         if (!productMap.has(item.product)) {
           productMap.set(item.product, 0);
@@ -147,19 +147,19 @@ export function HomeScreen() {
         .sort((a, b) => b.count - a.count);
       setAllProducts(result);
       setTopProducts(result);
-      setSelectedFilters(result.map((p) => p.product));
+      setSelectedFilters(result.map(p => p.product));
       setIsLoading(false);
     };
 
-    const unsubIndications = onSnapshot(indicationsQuery, (snapshot) => {
-      allIndications = snapshot.docs.map((doc) => ({
+    const unsubIndications = onSnapshot(indicationsQuery, snapshot => {
+      allIndications = snapshot.docs.map(doc => ({
         ...doc.data(),
         id: doc.id,
       }));
       updateDashboard();
     });
-    const unsubOpportunities = onSnapshot(opportunitiesQuery, (snapshot) => {
-      allOpportunities = snapshot.docs.map((doc) => ({
+    const unsubOpportunities = onSnapshot(opportunitiesQuery, snapshot => {
+      allOpportunities = snapshot.docs.map(doc => ({
         ...doc.data(),
         id: doc.id,
       }));
@@ -233,153 +233,179 @@ export function HomeScreen() {
   }, [userData?.uid]);
 
   return (
-    <ImageBackground
-      source={images.bg_home_purple}
-      className="flex-1"
-      resizeMode="cover">
-      {/* Header */}
-      {isLoading ? (
-        <HomeSkeleton />
-      ) : (
-        <View 
-          className="flex-1 justify-center"
-          style={{paddingBottom}}>
-          <View className={`flex-row items-center ${isSmallScreen ? 'mt-14' : 'mt-10'}`} style={{marginHorizontal: horizontalPadding}}>
-            <View>
-              <TouchableOpacity
-                onPress={() => selectImage()}
-                activeOpacity={0.8}>
-                <Image
-                  source={
-                    profilePicture
-                      ? {uri: profilePicture}
-                      : images.default_profile_picture
-                  }
-                  className={`${isSmallScreen ? 'h-16 w-16' : 'h-[4.375rem] w-[4.375rem]'} rounded-full ml-1`}></Image>
-              </TouchableOpacity>
-            </View>
-            <View>
-              <View className="ml-5 flex-row">
-                <Text className={`text-blue ${isSmallScreen ? 'text-lg' : fontSize.xlarge} font-medium`}>Olá, </Text>
-                <Text className={`text-white ${isSmallScreen ? 'text-lg' : fontSize.xlarge} font-medium`}>
-                  {getFirstName(userData?.displayName || '')}
-                </Text>
+    <ScrollView
+      contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}}
+      keyboardShouldPersistTaps="handled">
+      <ImageBackground
+        source={images.bg_home_purple}
+        className="flex-1"
+        resizeMode="cover">
+        {/* Header */}
+        {isLoading ? (
+          <HomeSkeleton />
+        ) : (
+          <View className="flex-1 justify-center" style={{paddingBottom, marginHorizontal: horizontalPadding}}>
+            <View
+              className={`flex-row items-center ${isSmallScreen ? 'mt-14' : 'mt-10'}`}
+              >
+              <View>
+                <TouchableOpacity
+                  onPress={() => selectImage()}
+                  activeOpacity={0.8}>
+                  <Image
+                    source={
+                      profilePicture
+                        ? {uri: profilePicture}
+                        : images.default_profile_picture
+                    }
+                    className={`${isSmallScreen ? 'h-16 w-16' : 'h-[4.375rem] w-[4.375rem]'} rounded-full ml-1`}></Image>
+                </TouchableOpacity>
               </View>
-              <View className="ml-5">
-                <Text className={`text-white ${fontSize.small} font-regular`}>
-                  {welcomeMessage}
-                </Text>
-              </View>
-            </View>
-            <View className="absolute right-0 mr-4">
-              <NotificationButton count={unreadNotifications} />
-            </View>
-          </View>
-
-          <View className={`${isSmallScreen ? 'h-20' : 'h-24'} items-center justify-center flex-row gap-3 mt-5 mb-5`} style={{marginHorizontal: horizontalPadding}}>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() => {
-                registrationStatus
-                  ? setShowModal(true)
-                  : navigation.navigate('WaitingConfirmationScreen');
-              }}>
-              <View className={`bg-transparent flex-row border-[1.5px] rounded-lg border-blue justify-center items-center h-full pr-9 pl-9`}>
-                <IndicarIcon />
-                <Text className={`text-white text-bold ${isSmallScreen ? 'text-lg' : fontSize.xlarge} ml-0.5`}>
-                  INDICAR
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() => navigation.navigate('IndicateInBulk')}>
-              <View className={`bg-transparent flex-row border-[1.5px] rounded-lg border-blue justify-center items-center h-full pr-9 pl-9`}>
-                <IndicarEmMassaIcon />
-                <View>
-                  <Text className={`text-white text-bold ${isSmallScreen ? 'text-lg' : fontSize.xlarge} ml-0.5`}>
-                    INDICAR
+              <View>
+                <View className="ml-5 flex-row">
+                  <Text
+                    className={`text-blue ${isSmallScreen ? 'text-lg' : fontSize.xlarge} font-medium`}>
+                    Olá,{' '}
                   </Text>
-                  <Text className={`text-white text-bold ${fontSize.small} ml-1`}>
-                    EM MASSA
+                  <Text
+                    className={`text-white ${isSmallScreen ? 'text-lg' : fontSize.xlarge} font-medium`}>
+                    {getFirstName(userData?.displayName || '')}
+                  </Text>
+                </View>
+                <View className="ml-5">
+                  <Text className={`text-white ${fontSize.small} font-regular`}>
+                    {welcomeMessage}
                   </Text>
                 </View>
               </View>
-            </TouchableOpacity>
-          </View>
+              <View className="absolute right-0 mr-4">
+                <NotificationButton count={unreadNotifications} />
+              </View>
+            </View>
 
-          <View style={{marginHorizontal: horizontalPadding}}>
-            <Button
-              text="REGRAS"
-              backgroundColor="orange"
-              textColor="white"
-              fontWeight="bold"
-              fontSize={isSmallScreen ? 22 : 25}
-              height={80}
-              borderColor="second_orange"
-              borderBottomWidth={4}
-              borderRightWidth={2}
-              onPress={() => navigation.navigate('Rules')}
-            />
-          </View>
-
-          <View className={`mt-5 bg-[#FFF] rounded-2xl ${isSmallScreen ? 'h-64' : 'h-[20rem]'} pt-4`} style={{marginHorizontal: horizontalPadding, paddingHorizontal: horizontalPadding}}>
-            <View className="flex-row items-center justify-between">
-              <Text className={`text-primary_purple ${isSmallScreen ? 'text-lg' : fontSize.xlarge} font-bold`}>
-                Indicações
-              </Text>
+            <View
+              className={`${isSmallScreen ? 'h-20' : 'h-24'} flex flex-row items-center justify-center gap-3 mt-5 mb-5 w-full`}>
               <TouchableOpacity
-                className="bg-primary_purple h-10 w-10 rounded-lg items-center justify-center"
+                className="flex-1"
                 activeOpacity={0.8}
-                onPress={() => setShowFilter(!showFilter)}>
-                <FontAwesome6
-                  name={showFilter ? 'xmark' : 'sliders'}
-                  size={21}
-                  color={colors.white}
-                />
+                onPress={() => {
+                  registrationStatus
+                    ? setShowModal(true)
+                    : navigation.navigate('WaitingConfirmationScreen');
+                }}>
+                <View
+                  className={`bg-transparent flex-row border-[1.5px] rounded-lg border-blue justify-center items-center h-full`}>
+                  <IndicarIcon />
+                  <Text
+                    className={`text-white text-bold ${isSmallScreen ? 'text-lg' : fontSize.xlarge} ml-0.5`}>
+                    INDICAR
+                  </Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="flex-1"
+                activeOpacity={0.8}
+                onPress={() => navigation.navigate('IndicateInBulk')}>
+                <View
+                  className={`bg-transparent flex-row border-[1.5px] rounded-lg border-blue justify-center items-center h-full`}>
+                  <IndicarEmMassaIcon />
+                  <View>
+                    <Text
+                      className={`text-white text-bold ${isSmallScreen ? 'text-lg' : fontSize.xlarge} ml-0.5`}>
+                      INDICAR
+                    </Text>
+                    <Text
+                      className={`text-white text-bold ${fontSize.small} ml-1`}>
+                      EM MASSA
+                    </Text>
+                  </View>
+                </View>
               </TouchableOpacity>
             </View>
-            <ScrollView
-              className="flex-1 pt-1"
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{paddingBottom: 6}}>
-              <DashboardIndications data={topProducts} isLoading={isLoading} />
-            </ScrollView>
 
-            <FilterDropdown
-              visible={showFilter}
-              onClose={() => setShowFilter(false)}
-              options={availableProducts}
-              selectedOptions={selectedFilters}
-              onSelectOption={handleSelectFilter}
-              position={{ 
-                top: isSmallScreen ? 320 : 385, 
-                right: isSmallScreen ? horizontalPadding : 40 
-              }}
+            <View>
+              <Button
+                text="REGRAS"
+                backgroundColor="orange"
+                textColor="white"
+                fontWeight="bold"
+                fontSize={isSmallScreen ? 22 : 25}
+                height={80}
+                borderColor="second_orange"
+                borderBottomWidth={4}
+                borderRightWidth={2}
+                onPress={() => navigation.navigate('Rules')}
+              />
+            </View>
+
+            <View
+              className={`mt-5 bg-[#FFF] rounded-2xl ${isSmallScreen ? 'h-64' : 'h-[20rem]'} pt-4`}
+              style={{
+                paddingHorizontal: horizontalPadding,
+              }}>
+              <View className="flex-row items-center justify-between">
+                <Text
+                  className={`text-primary_purple ${isSmallScreen ? 'text-lg' : fontSize.xlarge} font-bold`}>
+                  Indicações
+                </Text>
+                <TouchableOpacity
+                  className="bg-primary_purple h-10 w-10 rounded-lg items-center justify-center"
+                  activeOpacity={0.8}
+                  onPress={() => setShowFilter(!showFilter)}>
+                  <FontAwesome6
+                    name={showFilter ? 'xmark' : 'sliders'}
+                    size={21}
+                    color={colors.white}
+                  />
+                </TouchableOpacity>
+              </View>
+              <ScrollView
+                className="flex-1 pt-1"
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{paddingBottom: 6}}>
+                <DashboardIndications
+                  data={topProducts}
+                  isLoading={isLoading}
+                />
+              </ScrollView>
+
+              <FilterDropdown
+                visible={showFilter}
+                onClose={() => setShowFilter(false)}
+                options={availableProducts}
+                selectedOptions={selectedFilters}
+                onSelectOption={handleSelectFilter}
+                position={{
+                  top: isSmallScreen ? 320 : 385,
+                  right: isSmallScreen ? horizontalPadding : 40,
+                }}
+              />
+            </View>
+
+            <View
+              className="mt-5"
+              >
+              <Button
+                text="STATUS DAS PROPOSTAS"
+                backgroundColor="pink"
+                textColor="white"
+                fontWeight="bold"
+                fontSize={isSmallScreen ? 22 : 25}
+                height={80}
+                borderColor="sixteen_purple"
+                borderBottomWidth={4}
+                borderRightWidth={2}
+                onPress={() => navigation.navigate('Status')}
+              />
+            </View>
+
+            <IndicateModal
+              visible={showModal}
+              onClose={() => setShowModal(false)}
             />
           </View>
-
-          <View className="mt-5" style={{marginHorizontal: horizontalPadding}}>
-            <Button
-              text="STATUS DAS PROPOSTAS"
-              backgroundColor="pink"
-              textColor="white"
-              fontWeight="bold"
-              fontSize={isSmallScreen ? 22 : 25}
-              height={80}
-              borderColor="sixteen_purple"
-              borderBottomWidth={4}
-              borderRightWidth={2}
-              onPress={() => navigation.navigate('Status')}
-            />
-          </View>
-
-          <IndicateModal
-            visible={showModal}
-            onClose={() => setShowModal(false)}
-          />
-        </View>
-      )}
-    </ImageBackground>
+        )}
+      </ImageBackground>
+    </ScrollView>
   );
 }

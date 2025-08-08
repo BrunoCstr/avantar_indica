@@ -100,14 +100,14 @@ const DashboardIndicacoes = ({data, isLoading = false}: DashboardIndicacoesProps
   return (
     <View>
       {isLoading ? (
-        <View className="items-center justify-center py-12 px-4">
+        <View className="items-center justify-center py-12">
           <Spinner size={32} variant="purple" />
           <Text className="text-sm text-black text-center mt-4">
             Carregando indicações...
           </Text>
         </View>
       ) : indications.length === 0 ? (
-        <View className="items-center justify-center py-12 px-4">
+        <View className="items-center justify-center py-12">
           <IndicationsEmpty
             width={isSmallScreen ? 40 : 48}
             height={isSmallScreen ? 40 : 48}

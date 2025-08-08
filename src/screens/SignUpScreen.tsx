@@ -176,7 +176,8 @@ export function SignUpScreen() {
       <TouchableWithoutFeedback>
         <ScrollView
           contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}}
-          keyboardShouldPersistTaps="handled">
+          keyboardShouldPersistTaps="handled"
+          >
           <ImageBackground
             source={images.bg_dark}
             className="flex-1"
@@ -184,7 +185,7 @@ export function SignUpScreen() {
             <View className="pt-16 ml-10">
               <BackButton />
             </View>
-            <View className="flex-1 justify-center ml-10 mr-10">
+            <View className="flex-1 justify-center ml-10 mr-10 pb-16">
               <View className="justify-center items-center">
                 <Text className="font-semiBold text-2xl text-white mb-5">
                   Faça seu cadastro

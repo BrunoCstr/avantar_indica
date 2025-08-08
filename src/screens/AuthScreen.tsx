@@ -35,7 +35,7 @@ export function AuthScreen() {
       <View className="mt-8 ml-7 mr-7">
         <LogoAvantarSeguros />
       </View>
-      <View className="flex-1 pl-7 pr-7 w-full mb-10 justify-end">
+      <View className="flex-1 pl-7 pr-7 w-full justify-end">
         <View>
           <View>
             <Text className="font-semiBold -mb-2 text-4xl text-white">
@@ -54,7 +54,7 @@ export function AuthScreen() {
           </View>
         </View>
         {/* Botões */}
-        <View className="gap-4 mt-10 mb-10">
+        <View className="gap-4 mt-8 mb-10">
           <TouchableOpacity
             className="justify-center items-center bg-tertiary_purple h-14 rounded-full"
             onPress={() => navigation.navigate('SignUpScreen')}

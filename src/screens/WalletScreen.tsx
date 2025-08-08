@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react';
 import {
   Alert,
   ImageBackground,
+  ScrollView,
   Text,
   TouchableOpacity,
   View,
@@ -30,7 +31,8 @@ import {useResponsive} from '../hooks/useResponsive';
 export function WalletScreen() {
   const {userData} = useAuth();
   const {paddingBottom} = useBottomNavigationPadding();
-  const {isSmallScreen, isMediumScreen, horizontalPadding, fontSize, spacing} = useResponsive();
+  const {isSmallScreen, isMediumScreen, horizontalPadding, fontSize, spacing} =
+    useResponsive();
   const [data, setData] = useState<WithdrawalRequest[]>([]);
   const [isLoadingBalance, setIsLoadingBalance] = useState(true);
   const [showBalance, setShowBalance] = useState(true);
@@ -84,7 +86,8 @@ export function WalletScreen() {
     if (!userData?.pixKey || userData.pixKey.trim() === '') {
       setModalMessage({
         title: 'Chave PIX não cadastrada',
-        description: 'Para realizar um saque, você precisa cadastrar sua chave PIX no perfil. Acesse Perfil > Dados para Pagamento para atualizar.',
+        description:
+          'Para realizar um saque, você precisa cadastrar sua chave PIX no perfil. Acesse Perfil > Dados para Pagamento para atualizar.',
       });
       setIsModalVisible(true);
       return;
@@ -135,19 +138,23 @@ export function WalletScreen() {
       if (userData?.uid) {
         const data = await getUserWithdrawals(userData.uid);
         setData(data);
-        
+
         // Recarregar o saldo atualizado
         const updatedBalance = await getUserBalance(userData.uid);
         setBalance(updatedBalance);
       }
     } catch (error) {
       console.error('Erro ao criar solicitação de saque:', error);
-      
+
       // Verificar se é erro de chave PIX
-      if (error instanceof Error && error.message === 'Chave PIX não cadastrada') {
+      if (
+        error instanceof Error &&
+        error.message === 'Chave PIX não cadastrada'
+      ) {
         setModalMessage({
           title: 'Chave PIX não cadastrada',
-          description: 'Para realizar um saque, você precisa cadastrar sua chave PIX no perfil. Acesse Perfil > Dados para Pagamento para atualizar.',
+          description:
+            'Para realizar um saque, você precisa cadastrar sua chave PIX no perfil. Acesse Perfil > Dados para Pagamento para atualizar.',
         });
       } else {
         setModalMessage({
@@ -166,167 +173,207 @@ export function WalletScreen() {
   }
 
   return (
-    <ImageBackground source={images.bg_white} className="flex-1">
-      <View className="flex-1 mt-10" style={{paddingBottom}}>
-        <View>
-          <View style={{marginLeft: horizontalPadding, marginRight: horizontalPadding}} className="justify-between items-center flex-row">
-            <BackButton borderColor="#4A04A5" color="#4A04A5" />
-          </View>
-        </View>
-
-        <View>
-          <View style={{marginLeft: horizontalPadding, marginRight: horizontalPadding, marginTop: spacing.medium}} className="bg-fourth_purple rounded-3xl h-30 justify-center items-center">
-            <LinearGradient
-              className="w-[100%] flex-1 justify-center items-center rounded-2xl"
-              style={{borderRadius: 8}}
-              colors={['#4E00A7', '#6800E0']}
-              start={{x: 0, y: 0}}
-              end={{x: 1, y: 0}}>
-              <Text className="text-white font-regular">
-                Saldo Disponível para Saque
-              </Text>
-              <View className="flex-row items-end justify-center mt-2">
-                <Text className={`text-blue ${isSmallScreen ? 'text-base' : 'text-lg'} font-bold`}>R$ </Text>
-
-                {showBalance ? (
-                  <View className="flex-row items-end">
-                    <Text className={`text-blue ${isSmallScreen ? 'text-4xl' : 'text-5xl'} font-bold`}>
-                      {new Intl.NumberFormat('pt-BR', {
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0,
-                      }).format(Math.floor(balance))}
-                    </Text>
-                    <Text className={`text-blue ${isSmallScreen ? 'text-base' : 'text-lg'} font-bold`}>
-                      ,
-                      {new Intl.NumberFormat('pt-BR', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })
-                        .format(balance % 1)
-                        .replace('0,', '')}
-                    </Text>
-                  </View>
-                ) : (
-                  <Text className={`text-blue ${isSmallScreen ? 'text-4xl' : 'text-5xl'} font-bold`}>******</Text>
-                )}
-
-                <TouchableOpacity
-                  className="ml-3 justify-center items-center -top-1/4"
-                  activeOpacity={0.8}
-                  onPress={() => {
-                    setShowBalance(!showBalance);
-                  }}>
-                  <Ionicons
-                    name={showBalance ? 'eye-off' : 'eye'}
-                    size={20}
-                    color={colors.white}
-                  />
-                </TouchableOpacity>
-              </View>
-            </LinearGradient>
+    <ScrollView
+      contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}}
+      keyboardShouldPersistTaps="handled">
+      <ImageBackground source={images.bg_white} className="flex-1">
+        <View className="flex-1 mt-10" style={{paddingBottom}}>
+          <View>
+            <View
+              style={{
+                marginLeft: horizontalPadding,
+                marginRight: horizontalPadding,
+              }}
+              className="justify-between items-center flex-row">
+              <BackButton borderColor="#4A04A5" color="#4A04A5" />
+            </View>
           </View>
 
-          <View style={{marginLeft: horizontalPadding, marginRight: horizontalPadding}} className="bg-[#FFF] border-[1px] border-t-0 rounded-br-2xl rounded-bl-2xl border-[#CDCDCD] h-32 pl-4 pr-4 pt-3 pb-3">
-            {data.length > 0 ? (
-              <FlatList
-                data={data}
-                keyExtractor={item => item.withdrawId}
-                showsVerticalScrollIndicator={false}
-                renderItem={({item}) => (
-                  <View className="bg-[#EDE9FF] w-full p-1 px-3 mt-1 rounded-[0.300rem] flex-row">
-                    <View className="bg-secondary_lillac rounded-[0.250rem] w-8 justify-between items-center mr-3">
-                      <MaterialCommunityIcons
-                        name="cash"
-                        color="white"
-                        size={20}
-                      />
-                    </View>
-                    <View className="flex-1 flex-row justify-between items-center">
-                      <Text className="text-primary_purple font-regular">
-                        {item.createdAt.toDate().toLocaleDateString('pt-BR')}
-                      </Text>
-                      <Text className="text-primary_purple font-semiBold">
+          <View>
+            <View
+              style={{
+                marginLeft: horizontalPadding,
+                marginRight: horizontalPadding,
+                marginTop: spacing.medium,
+              }}
+              className="bg-fourth_purple rounded-3xl h-30 justify-center items-center">
+              <LinearGradient
+                className="w-[100%] flex-1 justify-center items-center rounded-2xl"
+                style={{borderRadius: 8}}
+                colors={['#4E00A7', '#6800E0']}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 0}}>
+                <Text className="text-white font-regular">
+                  Saldo Disponível para Saque
+                </Text>
+                <View className="flex-row items-end justify-center mt-2">
+                  <Text
+                    className={`text-blue ${isSmallScreen ? 'text-base' : 'text-lg'} font-bold`}>
+                    R${' '}
+                  </Text>
+
+                  {showBalance ? (
+                    <View className="flex-row items-end">
+                      <Text
+                        className={`text-blue ${isSmallScreen ? 'text-4xl' : 'text-5xl'} font-bold`}>
                         {new Intl.NumberFormat('pt-BR', {
-                          style: 'currency',
-                          currency: 'BRL',
-                        }).format(item.amount)}
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 0,
+                        }).format(Math.floor(balance))}
                       </Text>
                       <Text
-                        className="font-bold"
-                        style={{
-                          color:
-                            item.status === 'PAGO'
-                              ? colors.green
-                              : item.status === 'RECUSADO'
-                                ? colors.red
-                                : colors.primary_purple,
-                        }}>
-                        {item.status}
+                        className={`text-blue ${isSmallScreen ? 'text-base' : 'text-lg'} font-bold`}>
+                        ,
+                        {new Intl.NumberFormat('pt-BR', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })
+                          .format(balance % 1)
+                          .replace('0,', '')}
                       </Text>
                     </View>
-                  </View>
-                )}
-              />
-            ) : (
-              <View className="flex-1 justify-center items-center">
-                <MaterialCommunityIcons
-                  name="cash-remove"
-                  color={colors.primary_purple}
-                  size={40}
-                />
-                <Text className="text-primary_purple font-regular text-center mt-2">
-                  Nenhuma solicitação de saque encontrada
-                </Text>
-                <Text className="text-gray-500 font-regular text-center text-sm mt-1">
-                  Suas solicitações aparecerão aqui
-                </Text>
-              </View>
-            )}
-          </View>
-
-          <View style={{marginTop: spacing.small, marginLeft: horizontalPadding, marginRight: horizontalPadding}}>
-            <TouchableOpacity
-              className="justify-center items-center h-20"
-              activeOpacity={0.8}
-              onPress={handleWithdrawalRequest}>
-              <LinearGradient
-                className="w-[100%] flex-1 justify-center items-center rounded-lg border-[1px] border-blue"
-                style={{borderRadius: 8}}
-                colors={['#9743F8', '#4F00A9']}
-                start={{x: 0, y: 1}}
-                end={{x: 0, y: 0}}>
-                <Text className={`text-white font-bold ${isSmallScreen ? 'text-3xl' : 'text-4xl'}`}>
-                  {isLoadingButton ? (
-                    <Spinner size={isSmallScreen ? 28 : 32} variant="blue" />
                   ) : (
-                    'Sacar'
+                    <Text
+                      className={`text-blue ${isSmallScreen ? 'text-4xl' : 'text-5xl'} font-bold`}>
+                      ******
+                    </Text>
                   )}
-                </Text>
+
+                  <TouchableOpacity
+                    className="ml-3 justify-center items-center -top-1/4"
+                    activeOpacity={0.8}
+                    onPress={() => {
+                      setShowBalance(!showBalance);
+                    }}>
+                    <Ionicons
+                      name={showBalance ? 'eye-off' : 'eye'}
+                      size={20}
+                      color={colors.white}
+                    />
+                  </TouchableOpacity>
+                </View>
               </LinearGradient>
-            </TouchableOpacity>
+            </View>
+
+            <View
+              style={{
+                marginLeft: horizontalPadding,
+                marginRight: horizontalPadding,
+              }}
+              className="bg-[#FFF] border-[1px] border-t-0 rounded-br-2xl rounded-bl-2xl border-[#CDCDCD] h-32 pl-4 pr-4 pt-3 pb-3">
+              {data.length > 0 ? (
+                <FlatList
+                  data={data}
+                  keyExtractor={item => item.withdrawId}
+                  showsVerticalScrollIndicator={false}
+                  renderItem={({item}) => (
+                    <View className="bg-[#EDE9FF] w-full p-1 px-3 mt-1 rounded-[0.300rem] flex-row">
+                      <View className="bg-secondary_lillac rounded-[0.250rem] w-8 justify-between items-center mr-3">
+                        <MaterialCommunityIcons
+                          name="cash"
+                          color="white"
+                          size={20}
+                        />
+                      </View>
+                      <View className="flex-1 flex-row justify-between items-center">
+                        <Text className="text-primary_purple font-regular">
+                          {item.createdAt.toDate().toLocaleDateString('pt-BR')}
+                        </Text>
+                        <Text className="text-primary_purple font-semiBold">
+                          {new Intl.NumberFormat('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL',
+                          }).format(item.amount)}
+                        </Text>
+                        <Text
+                          className="font-bold"
+                          style={{
+                            color:
+                              item.status === 'PAGO'
+                                ? colors.green
+                                : item.status === 'RECUSADO'
+                                  ? colors.red
+                                  : colors.primary_purple,
+                          }}>
+                          {item.status}
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+                />
+              ) : (
+                <View className="flex-1 justify-center items-center">
+                  <MaterialCommunityIcons
+                    name="cash-remove"
+                    color={colors.primary_purple}
+                    size={40}
+                  />
+                  <Text className="text-primary_purple font-regular text-center mt-2">
+                    Nenhuma solicitação de saque encontrada
+                  </Text>
+                  <Text className="text-gray-500 font-regular text-center text-sm mt-1">
+                    Suas solicitações aparecerão aqui
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            <View
+              style={{
+                marginTop: spacing.small,
+                marginLeft: horizontalPadding,
+                marginRight: horizontalPadding,
+              }}>
+              <TouchableOpacity
+                className="justify-center items-center h-20"
+                activeOpacity={0.8}
+                onPress={handleWithdrawalRequest}>
+                <LinearGradient
+                  className="w-[100%] flex-1 justify-center items-center rounded-lg border-[1px] border-blue"
+                  style={{borderRadius: 8}}
+                  colors={['#9743F8', '#4F00A9']}
+                  start={{x: 0, y: 1}}
+                  end={{x: 0, y: 0}}>
+                  <Text
+                    className={`text-white font-bold ${isSmallScreen ? 'text-3xl' : 'text-4xl'}`}>
+                    {isLoadingButton ? (
+                      <Spinner size={isSmallScreen ? 28 : 32} variant="blue" />
+                    ) : (
+                      'Sacar'
+                    )}
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+
+            <View
+              style={{
+                marginTop: spacing.small,
+                marginBottom: spacing.small,
+                marginLeft: horizontalPadding,
+                marginRight: horizontalPadding,
+              }}>
+              <DashboardWallet />
+            </View>
           </View>
 
-          <View style={{marginTop: spacing.small, marginBottom: spacing.small, marginLeft: horizontalPadding, marginRight: horizontalPadding}}>
-            <DashboardWallet />
-          </View>
+          <CustomModal
+            visible={isModalVisible}
+            onClose={() => setIsModalVisible(false)}
+            title={modalMessage.title}
+            description={modalMessage.description}
+            buttonText="FECHAR"
+          />
+
+          <WithdrawalAmountModal
+            visible={showWithdrawalModal}
+            onClose={() => setShowWithdrawalModal(false)}
+            onConfirm={handleConfirmWithdrawal}
+            balance={balance}
+            isLoading={isLoadingButton}
+          />
         </View>
-
-        <CustomModal
-          visible={isModalVisible}
-          onClose={() => setIsModalVisible(false)}
-          title={modalMessage.title}
-          description={modalMessage.description}
-          buttonText="FECHAR"
-        />
-
-        <WithdrawalAmountModal
-          visible={showWithdrawalModal}
-          onClose={() => setShowWithdrawalModal(false)}
-          onConfirm={handleConfirmWithdrawal}
-          balance={balance}
-          isLoading={isLoadingButton}
-        />
-      </View>
-    </ImageBackground>
+      </ImageBackground>
+    </ScrollView>
   );
 }

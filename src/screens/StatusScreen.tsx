@@ -12,7 +12,14 @@ import {
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {BlurView} from '@react-native-community/blur';
-import firestore, { getFirestore, collection, query, where, orderBy, onSnapshot } from '@react-native-firebase/firestore';
+import firestore, {
+  getFirestore,
+  collection,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
+} from '@react-native-firebase/firestore';
 
 import images from '../data/images';
 import {colors} from '../styles/colors';
@@ -22,14 +29,13 @@ import {FilterDropdown} from '../components/FilterDropdown';
 import {StatusScreenSkeleton} from '../components/skeletons/StatusScreenSkeleton';
 import {useAuth} from '../contexts/Auth';
 import {
-  getAllStatusItemsByUserId,
   filterStatusItems,
   getStatusStats,
   UnifiedStatusItem,
 } from '../services/status/status';
 import {useBottomNavigationPadding} from '../hooks/useBottomNavigationPadding';
 import {useResponsive} from '../hooks/useResponsive';
-import { formatTimeAgo } from '../utils/formatTimeToDistance';
+import {formatTimeAgo} from '../utils/formatTimeToDistance';
 
 export function StatusScreen() {
   const {userData} = useAuth();
@@ -73,11 +79,23 @@ export function StatusScreen() {
     const db = getFirestore();
     const indicationsRef = collection(db, 'indications');
     const opportunitiesRef = collection(db, 'opportunities');
-    const packagedIndicationsRef = firestore().collection('packagedIndications');
+    const packagedIndicationsRef = firestore().collection(
+      'packagedIndications',
+    );
 
-    const indicationsQuery = query(indicationsRef, where('indicator_id', '==', userData.uid));
-    const opportunitiesQuery = query(opportunitiesRef, where('indicator_id', '==', userData.uid));
-    const packagedIndicationsQuery = packagedIndicationsRef.where('indicator_id', '==', userData.uid);
+    const indicationsQuery = query(
+      indicationsRef,
+      where('indicator_id', '==', userData.uid),
+    );
+    const opportunitiesQuery = query(
+      opportunitiesRef,
+      where('indicator_id', '==', userData.uid),
+    );
+    const packagedIndicationsQuery = packagedIndicationsRef.where(
+      'indicator_id',
+      '==',
+      userData.uid,
+    );
 
     let allIndications: any[] = [];
     let allOpportunities: any[] = [];
@@ -89,17 +107,23 @@ export function StatusScreen() {
       all.sort((a, b) => {
         const aTime = a.updatedAtOriginal?.seconds
           ? a.updatedAtOriginal.seconds * 1000
-          : a.updatedAtOriginal?.toDate?.()?.getTime?.() || a.createdAt?.seconds * 1000 || a.createdAt?.toDate?.()?.getTime?.() || 0;
+          : a.updatedAtOriginal?.toDate?.()?.getTime?.() ||
+            a.createdAt?.seconds * 1000 ||
+            a.createdAt?.toDate?.()?.getTime?.() ||
+            0;
         const bTime = b.updatedAtOriginal?.seconds
           ? b.updatedAtOriginal.seconds * 1000
-          : b.updatedAtOriginal?.toDate?.()?.getTime?.() || b.createdAt?.seconds * 1000 || b.createdAt?.toDate?.()?.getTime?.() || 0;
+          : b.updatedAtOriginal?.toDate?.()?.getTime?.() ||
+            b.createdAt?.seconds * 1000 ||
+            b.createdAt?.toDate?.()?.getTime?.() ||
+            0;
         return bTime - aTime;
       });
       setStatusItems(all);
       setIsLoading(false);
     };
 
-    const unsubIndications = onSnapshot(indicationsQuery, (snapshot) => {
+    const unsubIndications = onSnapshot(indicationsQuery, snapshot => {
       allIndications = snapshot.docs
         .map(doc => {
           const data = doc.data();
@@ -121,7 +145,7 @@ export function StatusScreen() {
       updateAndSort();
     });
 
-    const unsubOpportunities = onSnapshot(opportunitiesQuery, (snapshot) => {
+    const unsubOpportunities = onSnapshot(opportunitiesQuery, snapshot => {
       allOpportunities = snapshot.docs
         .map(doc => {
           const data = doc.data();
@@ -143,15 +167,17 @@ export function StatusScreen() {
       updateAndSort();
     });
 
-    const unsubPackaged = packagedIndicationsQuery.onSnapshot((snapshot) => {
+    const unsubPackaged = packagedIndicationsQuery.onSnapshot(snapshot => {
       allBulk = snapshot.docs
         .map(doc => {
           const data = doc.data();
           return {
             id: doc.id,
             name: 'Lote em massa',
-            status: data.status || (data.progress === 100 ? 'Concluído' : 'Em Andamento'),
-            product: `${data.total || (data.indications?.length || 0)} indicações`,
+            status:
+              data.status ||
+              (data.progress === 100 ? 'Concluído' : 'Em Andamento'),
+            product: `${data.total || data.indications?.length || 0} indicações`,
             updatedAt: formatTimeAgo(data.updatedAt || data.createdAt),
             indicator_id: data.indicator_id,
             createdAt: data.createdAt,
@@ -159,7 +185,7 @@ export function StatusScreen() {
             type: 'bulk' as const,
             indications: data.indications || [],
             progress: data.progress || 0,
-            total: data.total || (data.indications?.length || 0),
+            total: data.total || data.indications?.length || 0,
             processed: data.processed || 0,
             packagedIndicationId: data.packagedIndicationId,
             unitName: data.unitName,
@@ -256,6 +282,114 @@ export function StatusScreen() {
     }
   };
 
+  const renderListHeader = () => (
+    <>
+      {/* Header */}
+      <View
+        className={`items-center flex-row justify-between w-full ${isSmallScreen ? 'mt-8' : 'mt-2'}`}>
+        <BackButton
+          color={colors.tertiary_purple}
+          borderColor={colors.tertiary_purple}
+        />
+        <Text
+          className={`text-tertiary_purple font-bold ${isSmallScreen ? 'text-2xl' : 'text-3xl'} mr-6`}>
+          Status
+        </Text>
+        <View>
+          <Text></Text>
+        </View>
+      </View>
+
+      {/* Barra de Pesquisa */}
+      <View
+        className={`flex-row items-center w-full bg-tertiary_purple rounded-xl border-b-4 border-l-2 border-pink px-4 ${isSmallScreen ? 'h-14 mt-6' : 'h-16 mt-8'}`}>
+        <Ionicons
+          name="search"
+          size={isSmallScreen ? 20 : 24}
+          color={colors.white}
+          className="absolute left-5"
+        />
+
+        <TextInput
+          className={`pl-16 pr-5 flex-1 text-white font-regular ${isSmallScreen ? 'text-base' : 'text-lg'}`}
+          placeholderTextColor={colors.white}
+          onChangeText={setSearch}
+          value={search}
+          placeholder="Buscar..."
+        />
+
+        <TouchableOpacity
+          onPress={() => setShowFilter(!showFilter)}
+          className="pr-4">
+          <FontAwesome6
+            name={showFilter ? 'xmark' : 'sliders'}
+            size={isSmallScreen ? 20 : 24}
+            color={colors.white}
+          />
+        </TouchableOpacity>
+
+        <FilterDropdown
+          visible={showFilter}
+          onClose={() => setShowFilter(false)}
+          options={filterOptions}
+          selectedOptions={selectedFilters}
+          onSelectOption={handleSelectFilter}
+          position={{
+            top: isSmallScreen ? 140 : 180,
+            right: isSmallScreen ? horizontalPadding : 20,
+          }}
+        />
+      </View>
+
+      {/* Cards de Estatísticas */}
+      <View
+        className={`${isSmallScreen ? 'mt-3 mb-1' : 'mt-4 mb-1'} w-full ${isSmallScreen ? 'h-16' : 'h-20'}`}
+        style={{ marginBottom: isSmallScreen ? 10 : 14 }}>
+        <View className="flex-row justify-between gap-2 px-1 w-full">
+          {[
+            {label: 'Pendente', value: stats['PENDENTE CONTATO'] || 0},
+            {
+              label: 'Em contato',
+              value:
+                (stats['PROPOSTA APRESENTADA'] || 0) +
+                (stats['CONTATO REALIZADO'] || 0) +
+                (stats['AGUARDANDO CLIENTE'] || 0) +
+                (stats['INICIO DE PROPOSTA'] || 0),
+            },
+            {label: 'Fechados', value: stats['FECHADO'] || 0},
+            {
+              label: 'Não fechado',
+              value:
+                (stats['NÃO FECHADO'] || 0) +
+                (stats['SEGURO RECUSADO'] || 0) +
+                (stats['NÃO INTERESSOU'] || 0),
+            },
+          ].map((item, index) => (
+            <View
+              key={index}
+              className={`bg-white rounded-xl shadow-lg flex-1 ${isSmallScreen ? 'p-2' : 'p-3'}`}
+              style={{
+                shadowColor: '#000',
+                shadowOffset: {width: 0, height: 2},
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 5,
+              }}>
+              <Text
+                className={`${isSmallScreen ? 'text-lg' : 'text-2xl'} font-bold text-tertiary_purple text-center`}>
+                {item.value}
+              </Text>
+              <Text
+                className={`${isSmallScreen ? 'text-xs' : 'text-xs'} text-black text-center mt-1`}>
+                {item.label}
+              </Text>
+            </View>
+          ))}
+        </View>
+      </View>
+    </>
+  );
+
   const renderBulkModal = () => {
     if (!selectedBulk) return null;
     const sentDate = selectedBulk.createdAt;
@@ -265,53 +399,122 @@ export function StatusScreen() {
     }
     const progress = Math.min(Number(selectedBulk.progress) || 0, 100);
     return (
-      <Modal visible={showBulkModal} onRequestClose={() => setShowBulkModal(false)} transparent={true}>
+      <Modal
+        visible={showBulkModal}
+        onRequestClose={() => setShowBulkModal(false)}
+        transparent={true}>
         <BlurView
           style={{flex: 1, backgroundColor: 'transparent'}}
           blurType="dark"
           blurAmount={5}
           reducedTransparencyFallbackColor="transparent">
-          <KeyboardAvoidingView 
+          <KeyboardAvoidingView
             className="flex-1 justify-center items-center px-2"
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
             <View className="w-full max-w-sm bg-white rounded-2xl border-2 border-blue px-4 py-6">
               <View className="justify-between items-center flex-row mb-2">
-                <BackButton onPress={() => setShowBulkModal(false)} color={colors.tertiary_purple} borderColor={colors.tertiary_purple} />
+                <BackButton
+                  onPress={() => setShowBulkModal(false)}
+                  color={colors.tertiary_purple}
+                  borderColor={colors.tertiary_purple}
+                />
                 <Text className="text-tertiary_purple font-bold text-2xl absolute left-1/2 -translate-x-1/2">
                   Detalhes do Lote
                 </Text>
               </View>
-              <ScrollView style={{maxHeight: 400}} contentContainerStyle={{paddingBottom: 12, paddingHorizontal: 2}}>
-                <Text style={{color: colors.black, fontSize: 15, marginBottom: 8, fontWeight: 'bold'}}>
+              <ScrollView
+                style={{maxHeight: 400}}
+                contentContainerStyle={{
+                  paddingBottom: 12,
+                  paddingHorizontal: 2,
+                }}>
+                <Text
+                  style={{
+                    color: colors.black,
+                    fontSize: 15,
+                    marginBottom: 8,
+                    fontWeight: 'bold',
+                  }}>
                   {relativeDate ? `Enviado ${relativeDate}` : ''}
                 </Text>
-                <Text style={{fontWeight: 'bold', color: colors.tertiary_purple, marginBottom: 6}}>
-                  Status: <Text style={{fontWeight: 'normal', color: colors.black}}>{selectedBulk.status}</Text>
+                <Text
+                  style={{
+                    fontWeight: 'bold',
+                    color: colors.tertiary_purple,
+                    marginBottom: 6,
+                  }}>
+                  Status:{' '}
+                  <Text style={{fontWeight: 'normal', color: colors.black}}>
+                    {selectedBulk.status}
+                  </Text>
                 </Text>
                 {/* Barra de progresso visual */}
                 <View style={{marginBottom: 10}}>
-                  <Text style={{color: colors.tertiary_purple, marginBottom: 2, fontWeight: 'bold'}}>Progresso:</Text>
-                  <View style={{height: 14, backgroundColor: '#E6DBFF', borderRadius: 8, overflow: 'hidden', width: '100%'}}>
-                    <View style={{height: '100%', width: `${progress}%`, backgroundColor: colors.tertiary_purple, borderRadius: 8}} />
+                  <Text
+                    style={{
+                      color: colors.tertiary_purple,
+                      marginBottom: 2,
+                      fontWeight: 'bold',
+                    }}>
+                    Progresso:
+                  </Text>
+                  <View
+                    style={{
+                      height: 14,
+                      backgroundColor: '#E6DBFF',
+                      borderRadius: 8,
+                      overflow: 'hidden',
+                      width: '100%',
+                    }}>
+                    <View
+                      style={{
+                        height: '100%',
+                        width: `${progress}%`,
+                        backgroundColor: colors.tertiary_purple,
+                        borderRadius: 8,
+                      }}
+                    />
                   </View>
-                  <Text style={{color: colors.black, fontSize: 13, marginTop: 2}}>{progress}%</Text>
+                  <Text
+                    style={{color: colors.black, fontSize: 13, marginTop: 2}}>
+                    {progress}%
+                  </Text>
                 </View>
-                <Text style={{color: colors.tertiary_purple, fontWeight: 'bold'}}>Total de indicações: <Text style={{fontWeight: 'normal', color: colors.black}}>{selectedBulk.total}</Text></Text>
-                <Text style={{color: colors.tertiary_purple, fontWeight: 'bold'}}>Processadas: <Text style={{fontWeight: 'normal', color: colors.black}}>{selectedBulk.processed}</Text></Text>
-                <Text style={{marginTop: 10, fontWeight: 'bold', color: colors.tertiary_purple}}>Indicações:</Text>
-                {selectedBulk.indications && selectedBulk.indications.length > 0 ? (
-                  <FlatList
-                    data={selectedBulk.indications}
-                    keyExtractor={(_, idx) => idx.toString()}
-                    style={{maxHeight: 120}}
-                    renderItem={({item}) => (
-                      <Text style={{fontSize: 13, color: colors.black}}>
+                <Text
+                  style={{color: colors.tertiary_purple, fontWeight: 'bold'}}>
+                  Total de indicações:{' '}
+                  <Text style={{fontWeight: 'normal', color: colors.black}}>
+                    {selectedBulk.total}
+                  </Text>
+                </Text>
+                <Text
+                  style={{color: colors.tertiary_purple, fontWeight: 'bold'}}>
+                  Processadas:{' '}
+                  <Text style={{fontWeight: 'normal', color: colors.black}}>
+                    {selectedBulk.processed}
+                  </Text>
+                </Text>
+                <Text
+                  style={{
+                    marginTop: 10,
+                    fontWeight: 'bold',
+                    color: colors.tertiary_purple,
+                  }}>
+                  Indicações:
+                </Text>
+                {selectedBulk.indications &&
+                selectedBulk.indications.length > 0 ? (
+                  <ScrollView style={{maxHeight: 120}}>
+                    {selectedBulk.indications.map((item: any, idx: number) => (
+                      <Text key={idx} style={{fontSize: 13, color: colors.black}}>
                         - {item.name} {item.phone ? `(${item.phone})` : ''}
                       </Text>
-                    )}
-                  />
+                    ))}
+                  </ScrollView>
                 ) : (
-                  <Text style={{color: colors.black}}>Nenhuma indicação encontrada neste lote.</Text>
+                  <Text style={{color: colors.black}}>
+                    Nenhuma indicação encontrada neste lote.
+                  </Text>
                 )}
               </ScrollView>
             </View>
@@ -325,40 +528,91 @@ export function StatusScreen() {
     if (!selectedDetail) return null;
     const relativeDate = selectedDetail.updatedAt || '';
     return (
-      <Modal visible={showDetailModal} onRequestClose={() => setShowDetailModal(false)} transparent={true}>
+      <Modal
+        visible={showDetailModal}
+        onRequestClose={() => setShowDetailModal(false)}
+        transparent={true}>
         <BlurView
           style={{flex: 1, backgroundColor: 'transparent'}}
           blurType="dark"
           blurAmount={5}
           reducedTransparencyFallbackColor="transparent">
-          <KeyboardAvoidingView 
+          <KeyboardAvoidingView
             className="flex-1 justify-center items-center px-2"
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
             <View className="w-full max-w-sm bg-white rounded-2xl border-2 border-blue px-4 py-6">
               <View className="justify-between items-center flex-row mb-2">
-                <BackButton onPress={() => setShowDetailModal(false)} color={colors.tertiary_purple} borderColor={colors.tertiary_purple} />
+                <BackButton
+                  onPress={() => setShowDetailModal(false)}
+                  color={colors.tertiary_purple}
+                  borderColor={colors.tertiary_purple}
+                />
                 <Text className="text-tertiary_purple font-bold text-2xl absolute left-1/2 -translate-x-1/2">
                   Detalhes
                 </Text>
               </View>
-              <ScrollView style={{maxHeight: 400}} contentContainerStyle={{paddingBottom: 12, paddingHorizontal: 2}}>
-                <Text style={{color: colors.black, fontSize: 15, marginBottom: 8, fontWeight: 'bold'}}>
+              <ScrollView
+                style={{maxHeight: 400}}
+                contentContainerStyle={{
+                  paddingBottom: 12,
+                  paddingHorizontal: 2,
+                }}>
+                <Text
+                  style={{
+                    color: colors.black,
+                    fontSize: 15,
+                    marginBottom: 8,
+                    fontWeight: 'bold',
+                  }}>
                   {relativeDate}
                 </Text>
-                <Text style={{fontWeight: 'bold', color: colors.tertiary_purple, marginBottom: 6}}>
-                  Nome: <Text style={{fontWeight: 'normal', color: colors.black}}>{selectedDetail.name}</Text>
-                </Text>
-                <Text style={{fontWeight: 'bold', color: colors.tertiary_purple, marginBottom: 6}}>
-                  Produto: <Text style={{fontWeight: 'normal', color: colors.black}}>{selectedDetail.product}</Text>
-                </Text>
-                <Text style={{fontWeight: 'bold', color: colors.tertiary_purple, marginBottom: 6}}>
-                  Status: <Text style={{fontWeight: 'normal', color: colors.black}}>{selectedDetail.status}</Text>
-                </Text>
-                {selectedDetail.type === 'opportunity' && selectedDetail.indicator_id && (
-                  <Text style={{fontWeight: 'bold', color: colors.tertiary_purple, marginBottom: 6}}>
-                    Indicador: <Text style={{fontWeight: 'normal', color: colors.black}}>{selectedDetail.indicator_name}</Text>
+                <Text
+                  style={{
+                    fontWeight: 'bold',
+                    color: colors.tertiary_purple,
+                    marginBottom: 6,
+                  }}>
+                  Nome:{' '}
+                  <Text style={{fontWeight: 'normal', color: colors.black}}>
+                    {selectedDetail.name}
                   </Text>
-                )}
+                </Text>
+                <Text
+                  style={{
+                    fontWeight: 'bold',
+                    color: colors.tertiary_purple,
+                    marginBottom: 6,
+                  }}>
+                  Produto:{' '}
+                  <Text style={{fontWeight: 'normal', color: colors.black}}>
+                    {selectedDetail.product}
+                  </Text>
+                </Text>
+                <Text
+                  style={{
+                    fontWeight: 'bold',
+                    color: colors.tertiary_purple,
+                    marginBottom: 6,
+                  }}>
+                  Status:{' '}
+                  <Text style={{fontWeight: 'normal', color: colors.black}}>
+                    {selectedDetail.status}
+                  </Text>
+                </Text>
+                {selectedDetail.type === 'opportunity' &&
+                  selectedDetail.indicator_id && (
+                    <Text
+                      style={{
+                        fontWeight: 'bold',
+                        color: colors.tertiary_purple,
+                        marginBottom: 6,
+                      }}>
+                      Indicador:{' '}
+                      <Text style={{fontWeight: 'normal', color: colors.black}}>
+                        {selectedDetail.indicator_name}
+                      </Text>
+                    </Text>
+                  )}
               </ScrollView>
             </View>
           </KeyboardAvoidingView>
@@ -375,154 +629,146 @@ export function StatusScreen() {
       {isLoading ? (
         <StatusScreenSkeleton />
       ) : (
-        <View 
-          className="flex-1"
-          style={{
-            paddingBottom,
-            paddingHorizontal: horizontalPadding,
-            paddingTop: isSmallScreen ? 16 : 20
-          }}>
-          {/* Header */}
-          <View className={`items-center flex-row justify-between w-full ${isSmallScreen ? 'mt-8' : 'mt-12'}`}>
-            <BackButton
-              color={colors.tertiary_purple}
-              borderColor={colors.tertiary_purple}
-            />
-            <Text className={`text-tertiary_purple font-bold ${isSmallScreen ? 'text-2xl' : 'text-3xl'} mr-6`}>
-              Status
-            </Text>
-            <View>
-              <Text></Text>
-            </View>
-          </View>
+        <View
+          style={{flex: 1}}
+        >
+          <View
+            className="flex-1"
+            style={{
+              paddingBottom,
+              paddingHorizontal: horizontalPadding,
+              paddingTop: isSmallScreen ? 16 : 20,
+            }}>
 
-          {/* Barra de Pesquisa */}
-          <View className={`flex-row items-center w-full bg-tertiary_purple rounded-xl border-b-4 border-l-2 border-pink px-4 ${isSmallScreen ? 'h-14 mt-6' : 'h-16 mt-8'}`}>
-            <Ionicons
-              name="search"
-              size={isSmallScreen ? 20 : 24}
-              color={colors.white}
-              className="absolute left-5"
-            />
-
-            <TextInput
-              className={`pl-16 pr-5 flex-1 text-white font-regular ${isSmallScreen ? 'text-base' : 'text-lg'}`}
-              placeholderTextColor={colors.white}
-              onChangeText={setSearch}
-              value={search}
-              placeholder="Buscar..."
-            />
-
-            <TouchableOpacity
-              onPress={() => setShowFilter(!showFilter)}
-              className="pr-4">
-              <FontAwesome6
-                name={showFilter ? 'xmark' : 'sliders'}
-                size={isSmallScreen ? 20 : 24}
-                color={colors.white}
-              />
-            </TouchableOpacity>
-
-            <FilterDropdown
-              visible={showFilter}
-              onClose={() => setShowFilter(false)}
-              options={filterOptions}
-              selectedOptions={selectedFilters}
-              onSelectOption={handleSelectFilter}
-              position={{ 
-                top: isSmallScreen ? 140 : 180, 
-                right: isSmallScreen ? horizontalPadding : 20 
-              }}
-            />
-          </View>
-
-          {/* Cards de Estatísticas */}
-          <View className={`${isSmallScreen ? 'mt-3 mb-1' : 'mt-4 mb-1'} w-full ${isSmallScreen ? 'h-16' : 'h-20'}`}>
-            <View className="flex-row justify-between gap-2 px-1 w-full">
-              {[
-                {label: 'Pendente', value: stats['PENDENTE CONTATO'] || 0},
-                {
-                  label: 'Em contato',
-                  value:
-                    (stats['PROPOSTA APRESENTADA'] || 0) +
-                    (stats['CONTATO REALIZADO'] || 0) +
-                    (stats['AGUARDANDO CLIENTE'] || 0) +
-                    (stats['INICIO DE PROPOSTA'] || 0),
-                },
-                {label: 'Fechados', value: stats['FECHADO'] || 0},
-                {
-                  label: 'Não fechado',
-                  value:
-                    (stats['NÃO FECHADO'] || 0) +
-                    (stats['SEGURO RECUSADO'] || 0) +
-                    (stats['NÃO INTERESSOU'] || 0),
-                },
-              ].map((item, index) => (
-                <View
-                  key={index}
-                  className={`bg-white rounded-xl shadow-lg flex-1 ${isSmallScreen ? 'p-2' : 'p-3'}`}
-                  style={{
-                    shadowColor: '#000',
-                    shadowOffset: {width: 0, height: 2},
-                    shadowOpacity: 0.1,
-                    shadowRadius: 4,
-                    elevation: 5,
-                  }}>
-                  <Text className={`${isSmallScreen ? 'text-lg' : 'text-2xl'} font-bold text-tertiary_purple text-center`}>
-                    {item.value}
+            {/* Lista de Status */}
+            <View
+              className="rounded-2xl flex-1"
+              style={{
+                marginTop: isSmallScreen ? 4 : 8,
+                minHeight: isSmallScreen ? 400 : 500,
+              }}>
+              {filteredData.length === 0 ? (
+                <View className="flex-1 justify-center items-center p-10">
+                  <FontAwesome6
+                    name="clipboard-list"
+                    size={isSmallScreen ? 50 : 60}
+                    color={colors.tertiary_purple}
+                    style={{marginBottom: 16, opacity: 0.7}}
+                  />
+                  <Text
+                    className={`${isSmallScreen ? 'text-base' : 'text-lg'} font-bold text-tertiary_purple mb-2 text-center`}>
+                    Nenhum resultado encontrado
                   </Text>
-                  <Text className={`${isSmallScreen ? 'text-xs' : 'text-xs'} text-black text-center mt-1`}>
-                    {item.label}
+                  <Text
+                    className={`${isSmallScreen ? 'text-xs' : 'text-sm'} text-black text-center`}>
+                    {search || selectedFilters.length > 0
+                      ? 'Nenhum item corresponde aos filtros aplicados. Tente ajustar sua busca.'
+                      : 'Você ainda não possui oportunidades ou indicações registradas. Quando você indicar alguém, elas aparecerão aqui!'}
                   </Text>
                 </View>
-              ))}
-            </View>
-          </View>
-
-          {/* Lista de Status */}
-          <View className="rounded-2xl flex-1" style={{
-            marginTop: isSmallScreen ? 4 : 8,
-            minHeight: isSmallScreen ? 400 : 500
-          }}>
-            {filteredData.length === 0 ? (
-              <View className="flex-1 justify-center items-center p-10">
-                <FontAwesome6
-                  name="clipboard-list"
-                  size={isSmallScreen ? 50 : 60}
-                  color={colors.tertiary_purple}
-                  style={{marginBottom: 16, opacity: 0.7}}
-                />
-                <Text className={`${isSmallScreen ? 'text-base' : 'text-lg'} font-bold text-tertiary_purple mb-2 text-center`}>
-                  Nenhum resultado encontrado
-                </Text>
-                <Text className={`${isSmallScreen ? 'text-xs' : 'text-sm'} text-black text-center`}>
-                  {search || selectedFilters.length > 0 
-                    ? 'Nenhum item corresponde aos filtros aplicados. Tente ajustar sua busca.'
-                    : 'Você ainda não possui oportunidades ou indicações registradas. Quando você indicar alguém, elas aparecerão aqui!'
-                  }
-                </Text>
-              </View>
-            ) : (
-              <FlatList
-                data={filteredData}
-                showsVerticalScrollIndicator={false}
-                keyExtractor={item => item.id.toString()}
-                contentContainerStyle={{
-                  paddingVertical: isSmallScreen ? 8 : 12,
-                  paddingBottom: isSmallScreen ? 60 : 80,
-                }}
-                style={{
-                  flex: 1,
-                  minHeight: isSmallScreen ? 380 : 480
-                }}
-                renderItem={({item}) => {
-                  if (item.type === 'bulk') {
-                    // Card especial para indicação em massa
-                    const sentDate = item.createdAt;
-                    let relativeDate = '';
-                    if (sentDate) {
-                      relativeDate = formatTimeAgo(sentDate);
+              ) : (
+                <FlatList
+                  data={filteredData}
+                  showsVerticalScrollIndicator={false}
+                  keyExtractor={item => item.id.toString()}
+                  ListHeaderComponent={renderListHeader}
+                  contentContainerStyle={{
+                    paddingVertical: isSmallScreen ? 8 : 12,
+                    paddingBottom: isSmallScreen ? 60 : 80,
+                    gap: 8,
+                  }}
+                  style={{
+                    flex: 1,
+                    minHeight: isSmallScreen ? 380 : 480,
+                  }}
+                  renderItem={({item}) => {
+                    if (item.type === 'bulk') {
+                      // Card especial para indicação em massa
+                      const sentDate = item.createdAt;
+                      let relativeDate = '';
+                      if (sentDate) {
+                        relativeDate = formatTimeAgo(sentDate);
+                      }
+                      return (
+                        <TouchableOpacity
+                          className="bg-white rounded-xl mb-2"
+                          activeOpacity={0.7}
+                          style={{
+                            shadowColor: '#000',
+                            shadowOffset: {width: 2, height: 2},
+                            shadowOpacity: 0.1,
+                            shadowRadius: 4,
+                            elevation: 5,
+                          }}
+                          onPress={() => {
+                            setSelectedBulk(item);
+                            setShowBulkModal(true);
+                          }}>
+                          <View
+                            className={`flex-row items-center ${isSmallScreen ? 'p-3' : 'p-4'}`}>
+                            {/* Avatar */}
+                            <View
+                              className={`${isSmallScreen ? 'w-10 h-10' : 'w-12 h-12'} rounded-full items-center justify-center mr-4`}
+                              style={{backgroundColor: colors.primary_purple}}>
+                              <FontAwesome6
+                                name="layer-group"
+                                size={isSmallScreen ? 18 : 22}
+                                color={colors.white}
+                              />
+                            </View>
+                            {/* Informações */}
+                            <View className="flex-1">
+                              <View className="flex-row items-center justify-between mb-1">
+                                <Text
+                                  className={`text-black font-bold ${isSmallScreen ? 'text-sm' : 'text-base'} flex-1`}>
+                                  Lote em massa
+                                </Text>
+                                <Text
+                                  className={`${isSmallScreen ? 'text-xs' : 'text-xs'} text-black ml-2`}>
+                                  {relativeDate}
+                                </Text>
+                              </View>
+                              <Text
+                                className={`text-black ${isSmallScreen ? 'text-xs' : 'text-sm'} mb-2`}>
+                                {item.product}
+                              </Text>
+                              <View className="flex-row items-center justify-between">
+                                <View
+                                  className="self-start px-3 py-1 w-auto rounded-full"
+                                  style={{
+                                    backgroundColor:
+                                      item.status === 'Concluído'
+                                        ? '#dcfce7'
+                                        : '#E6DBFF',
+                                  }}>
+                                  <Text
+                                    className={`${isSmallScreen ? 'text-xs' : 'text-xs'} font-semibold`}
+                                    style={{
+                                      color:
+                                        item.status === 'Concluído'
+                                          ? colors.green
+                                          : colors.primary_purple,
+                                    }}>
+                                    {item.status}
+                                  </Text>
+                                </View>
+                                {/* Badge para identificar o tipo */}
+                                <View
+                                  className="px-2 py-1 rounded-md"
+                                  style={{backgroundColor: '#f3e8ff'}}>
+                                  <Text
+                                    className={`${isSmallScreen ? 'text-xs' : 'text-xs'} font-medium`}
+                                    style={{color: colors.primary_purple}}>
+                                    Indicação em massa
+                                  </Text>
+                                </View>
+                              </View>
+                            </View>
+                          </View>
+                        </TouchableOpacity>
+                      );
                     }
+
                     return (
                       <TouchableOpacity
                         className="bg-white rounded-xl mb-2"
@@ -532,51 +778,74 @@ export function StatusScreen() {
                           shadowOffset: {width: 2, height: 2},
                           shadowOpacity: 0.1,
                           shadowRadius: 4,
-                          elevation: 5,
+                          elevation: 5, // necessário para Android
                         }}
                         onPress={() => {
-                          setSelectedBulk(item);
-                          setShowBulkModal(true);
-                        }}
-                      >
-                        <View className={`flex-row items-center ${isSmallScreen ? 'p-3' : 'p-4'}`}>
+                          setSelectedDetail(item);
+                          setShowDetailModal(true);
+                        }}>
+                        <View
+                          className={`flex-row items-center ${isSmallScreen ? 'p-3' : 'p-4'}`}>
                           {/* Avatar */}
                           <View
                             className={`${isSmallScreen ? 'w-10 h-10' : 'w-12 h-12'} rounded-full items-center justify-center mr-4`}
-                            style={{backgroundColor: colors.primary_purple}}>
-                            <FontAwesome6 name="layer-group" size={isSmallScreen ? 18 : 22} color={colors.white} />
+                            style={{backgroundColor: colors.tertiary_purple}}>
+                            <Text
+                              className={`text-white font-bold ${isSmallScreen ? 'text-xs' : 'text-sm'}`}>
+                              {getInitials(item.name)}
+                            </Text>
                           </View>
+
                           {/* Informações */}
                           <View className="flex-1">
                             <View className="flex-row items-center justify-between mb-1">
-                              <Text className={`text-black font-bold ${isSmallScreen ? 'text-sm' : 'text-base'} flex-1`}>
-                                Lote em massa
+                              <Text
+                                className={`text-black font-bold ${isSmallScreen ? 'text-sm' : 'text-base'} flex-1`}>
+                                {limitText(item.name)}
                               </Text>
-                              <Text className={`${isSmallScreen ? 'text-xs' : 'text-xs'} text-black ml-2`}>
-                                {relativeDate}
+                              <Text
+                                className={`${isSmallScreen ? 'text-xs' : 'text-xs'} text-black ml-2`}>
+                                {item.updatedAt}
                               </Text>
                             </View>
-                            <Text className={`text-black ${isSmallScreen ? 'text-xs' : 'text-sm'} mb-2`}>
+                            <Text
+                              className={`text-black ${isSmallScreen ? 'text-xs' : 'text-sm'} mb-2`}>
                               {item.product}
                             </Text>
                             <View className="flex-row items-center justify-between">
                               <View
                                 className="self-start px-3 py-1 w-auto rounded-full"
-                                style={{backgroundColor: item.status === 'Concluído' ? '#dcfce7' : '#E6DBFF'}}>
+                                style={{
+                                  backgroundColor: getStatusBgColor(
+                                    item.status,
+                                  ),
+                                }}>
                                 <Text
                                   className={`${isSmallScreen ? 'text-xs' : 'text-xs'} font-semibold`}
-                                  style={{color: item.status === 'Concluído' ? colors.green : colors.primary_purple}}>
+                                  style={{color: getStatusColor(item.status)}}>
                                   {item.status}
                                 </Text>
                               </View>
                               {/* Badge para identificar o tipo */}
                               <View
                                 className="px-2 py-1 rounded-md"
-                                style={{backgroundColor: '#f3e8ff'}}>
+                                style={{
+                                  backgroundColor:
+                                    item.type === 'opportunity'
+                                      ? '#dcfce7'
+                                      : '#dbeafe',
+                                }}>
                                 <Text
                                   className={`${isSmallScreen ? 'text-xs' : 'text-xs'} font-medium`}
-                                  style={{color: colors.primary_purple}}>
-                                  Indicação em massa
+                                  style={{
+                                    color:
+                                      item.type === 'opportunity'
+                                        ? '#16a34a'
+                                        : '#2563eb',
+                                  }}>
+                                  {item.type === 'opportunity'
+                                    ? 'Oportunidade'
+                                    : 'Indicação'}
                                 </Text>
                               </View>
                             </View>
@@ -584,87 +853,16 @@ export function StatusScreen() {
                         </View>
                       </TouchableOpacity>
                     );
-                  }
-                  // ... existing code for normal cards ...
-                  return (
-                    <TouchableOpacity
-                      className="bg-white rounded-xl mb-2"
-                      activeOpacity={0.7}
-                      style={{
-                        shadowColor: '#000',
-                        shadowOffset: {width: 2, height: 2},
-                        shadowOpacity: 0.1,
-                        shadowRadius: 4,
-                        elevation: 5, // necessário para Android
-                      }}
-                      onPress={() => {
-                        setSelectedDetail(item);
-                        setShowDetailModal(true);
-                      }}
-                    >
-                      <View className={`flex-row items-center ${isSmallScreen ? 'p-3' : 'p-4'}`}>
-                        {/* Avatar */}
-                        <View
-                          className={`${isSmallScreen ? 'w-10 h-10' : 'w-12 h-12'} rounded-full items-center justify-center mr-4`}
-                          style={{backgroundColor: colors.tertiary_purple}}>
-                          <Text className={`text-white font-bold ${isSmallScreen ? 'text-xs' : 'text-sm'}`}>
-                            {getInitials(item.name)}
-                          </Text>
-                        </View>
-
-                        {/* Informações */}
-                        <View className="flex-1">
-                          <View className="flex-row items-center justify-between mb-1">
-                            <Text className={`text-black font-bold ${isSmallScreen ? 'text-sm' : 'text-base'} flex-1`}>
-                              {limitText(item.name)}
-                            </Text>
-                            <Text className={`${isSmallScreen ? 'text-xs' : 'text-xs'} text-black ml-2`}>
-                              {item.updatedAt}
-                            </Text>
-                          </View>
-                          <Text className={`text-black ${isSmallScreen ? 'text-xs' : 'text-sm'} mb-2`}>
-                            {item.product}
-                          </Text>
-                          <View className="flex-row items-center justify-between">
-                            <View
-                              className="self-start px-3 py-1 w-auto rounded-full"
-                              style={{
-                                backgroundColor: getStatusBgColor(item.status),
-                              }}>
-                              <Text
-                                className={`${isSmallScreen ? 'text-xs' : 'text-xs'} font-semibold`}
-                                style={{color: getStatusColor(item.status)}}>
-                                {item.status}
-                              </Text>
-                            </View>
-                            {/* Badge para identificar o tipo */}
-                            <View
-                              className="px-2 py-1 rounded-md"
-                              style={{
-                                backgroundColor: item.type === 'opportunity' ? '#dcfce7' : '#dbeafe',
-                              }}>
-                              <Text
-                                className={`${isSmallScreen ? 'text-xs' : 'text-xs'} font-medium`}
-                                style={{
-                                  color: item.type === 'opportunity' ? '#16a34a' : '#2563eb',
-                                }}>
-                                {item.type === 'opportunity' ? 'Oportunidade' : 'Indicação'}
-                              </Text>
-                            </View>
-                          </View>
-                        </View>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                }}
-                ItemSeparatorComponent={() => <View className="h-1" />}
-              />
-            )}
+                  }}
+                  ItemSeparatorComponent={() => <View className="h-1" />}
+                />
+              )}
+            </View>
+            {/* Modal de detalhes do lote em massa */}
+            {renderBulkModal()}
+            {/* Modal de detalhes de indicação/oportunidade */}
+            {renderDetailModal()}
           </View>
-          {/* Modal de detalhes do lote em massa */}
-          {renderBulkModal()}
-          {/* Modal de detalhes de indicação/oportunidade */}
-          {renderDetailModal()}
         </View>
       )}
     </ImageBackground>

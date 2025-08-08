@@ -36,7 +36,7 @@ export function useResponsive(): ResponsiveConfig {
   const { width: screenWidth, height: screenHeight } = dimensions;
   
   // Breakpoints baseados em dispositivos comuns
-  const isSmallScreen = screenWidth <= 360; // S20, iPhone SE, etc.
+  const isSmallScreen = screenWidth <= 340; // S20, iPhone SE, etc.
   const isMediumScreen = screenWidth > 360 && screenWidth < 400; // S21, iPhone 12, etc.
   const isLargeScreen = screenWidth >= 400; // S22+, iPhone 13+, etc.
 
