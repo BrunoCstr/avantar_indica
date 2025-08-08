@@ -7,10 +7,13 @@ import firestore, {
   onSnapshot,
   serverTimestamp,
   getDoc,
+  addDoc,
+  collection,
 } from '@react-native-firebase/firestore';
 import {getDefaultProfilePicture} from '../utils/getDefaultProfilePicture';
 import messaging from '@react-native-firebase/messaging';
 import {validatePassword} from '../services/settings/settings';
+import {getUserLocation} from '../utils/getUserLocation';
 
 const db = firestore();
 
@@ -210,6 +213,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
       await user.updateProfile({displayName: fullName});
       await sendEmailVerification(user);
+
+      const docRef = doc(collection(db, 'terms_and_conditions'));
+      const docId = docRef.id;
+
+      const location_and_ip_data = await getUserLocation();
+
+      const data = {
+        terms_and_conditionsId: docId,
+        uid: user.uid,
+        terms_version: '1.0.0',
+        accepted_at: serverTimestamp(),
+        ip_address: location_and_ip_data.ip,
+        location: {
+          country: location_and_ip_data.country_name,
+          city: location_and_ip_data.city,
+        },
+      };
+
+      // 3. Salva no Firestore
+      await setDoc(docRef, data);
+
+      console.log('Documento criado com ID:', docId);
     } catch (err: any) {
       if (auth().currentUser) {
         await auth().currentUser?.delete();
@@ -232,10 +257,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         password,
       );
       const user = userCredential.user;
-      
+
       // Atualizar o documento do usuário diretamente
       const userRef = doc(db, 'users', user.uid);
-      
+
       // Solicitar permissões de notificação e obter FCM token
       let fcmToken = null;
       try {
@@ -246,9 +271,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       }
 
       // Verificar se é o primeiro login e se o e-mail não está verificado
-      const userDocRef = doc(db, "users", user.uid);
+      const userDocRef = doc(db, 'users', user.uid);
       const userDoc = await getDoc(userDocRef);
-      
+
       if (userDoc.exists) {
         const userData = userDoc.data();
         if (userData) {
@@ -259,13 +284,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
           if (isFirstLogin && !isEmailVerified) {
             try {
               await sendEmailVerification(user);
-              
+
               setIsLoading(false);
-              return "E-mail de verificação enviado! Verifique sua caixa de entrada e clique no link para confirmar seu e-mail.";
+              return 'E-mail de verificação enviado! Verifique sua caixa de entrada e clique no link para confirmar seu e-mail.';
             } catch (verificationError: any) {
-              console.error("Erro ao enviar e-mail de verificação:", verificationError);
+              console.error(
+                'Erro ao enviar e-mail de verificação:',
+                verificationError,
+              );
               setIsLoading(false);
-              return "Erro ao enviar e-mail de verificação. Tente novamente mais tarde.";
+              return 'Erro ao enviar e-mail de verificação. Tente novamente mais tarde.';
             }
           }
         }
@@ -276,7 +304,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         isFirstLogin: false,
         fcmToken: fcmToken,
       });
-      
     } catch (err: any) {
       console.error('Erro ao logar o usuário:', err);
 

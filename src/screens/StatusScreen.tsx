@@ -645,7 +645,7 @@ export function StatusScreen() {
               className="rounded-2xl flex-1"
               style={{
                 marginTop: isSmallScreen ? 4 : 8,
-                minHeight: isSmallScreen ? 400 : 500,
+                minHeight: isSmallScreen ? 400 : 530,
               }}>
               {filteredData.length === 0 ? (
                 <View className="flex-1 justify-center items-center p-10">
