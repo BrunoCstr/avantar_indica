@@ -1,0 +1,17 @@
+diff --git a/node_modules/react-native-contacts/ios/RCTContacts/RCTContacts.m b/node_modules/react-native-contacts/ios/RCTContacts/RCTContacts.m
+index a303aff..3840281 100644
+--- a/node_modules/react-native-contacts/ios/RCTContacts/RCTContacts.m
++++ b/node_modules/react-native-contacts/ios/RCTContacts/RCTContacts.m
+@@ -1221,8 +1221,11 @@ RCT_EXPORT_METHOD(deleteContact:(NSDictionary *)contactData resolver:(RCTPromise
+     }
+ }
+ 
+-RCT_EXPORT_METHOD(writePhotoToPath:(RCTResponseSenderBlock) rejecter:(RCTPromiseRejectBlock) reject)
++RCT_EXPORT_METHOD(writePhotoToPath:(RCTPromiseResolveBlock)resolve
++                  rejecter:(RCTPromiseRejectBlock)reject)
+ {
++    // Método não implementado. Mantido apenas para compatibilidade com a API JS.
++    // Deve seguir a convenção de Promises: resolve primeiro, depois reject.
+     reject(@"Error", @"not implemented", nil);
+ }
+ 
