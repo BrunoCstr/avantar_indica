@@ -12,7 +12,7 @@ export function Router() {
 
   useEffect(() => {
     const initializeApp = async () => {
-      if (!isLoading) {
+     
         try {
           // Aguardar um tempo mínimo para uma transição mais suave
           await new Promise(resolve => setTimeout(resolve, 500));
@@ -21,15 +21,14 @@ export function Router() {
           await BootSplash.hide({fade: true, duration: 300});
         } catch (error) {
           console.warn('Error hiding bootsplash:', error);
+        }finally {
+          setAppReady(true);
         }
-        setAppReady(true);
-      }
+      
     };
 
     initializeApp();
   }, [isLoading]);
-
-  if(!appReady) return null
 
   return (
     <NavigationContainer>

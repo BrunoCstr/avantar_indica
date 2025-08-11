@@ -29,7 +29,7 @@ function IndicateInBulkWrapper() {
 const Stack = createStackNavigator();
 
 export function AppStack() {
-  const {isLoading} = useAuth();
+  const {registrationStatus, isLoading} = useAuth();
 
   if (isLoading) return <HomeSkeleton />;
 

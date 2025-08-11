@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import {LogBox, Platform} from 'react-native';
+import {LogBox, Platform, Text} from 'react-native';
 import './firebaseConfig';
 import './global.css';
 import {Router} from './src/routes/Router';

@@ -1,0 +1,20 @@
+current directory: /Users/IgorC/avantar_indica/vendor/bundle/ruby/3.4.0/gems/nkf-0.2.0/ext/nkf
+/opt/homebrew/opt/ruby/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /Users/IgorC/avantar_indica/vendor/bundle/ruby/3.4.0/gems/nkf-0.2.0/ext/nkf
+make DESTDIR\= sitearchdir\=./.gem.20250808-87194-cfwrcg sitelibdir\=./.gem.20250808-87194-cfwrcg clean
+
+current directory: /Users/IgorC/avantar_indica/vendor/bundle/ruby/3.4.0/gems/nkf-0.2.0/ext/nkf
+make DESTDIR\= sitearchdir\=./.gem.20250808-87194-cfwrcg sitelibdir\=./.gem.20250808-87194-cfwrcg
+compiling nkf.c
+linking shared-object nkf.bundle
+ld: warning: search path '/opt/homebrew/Cellar/openssl@3/3.5.1/lib' not found
+ld: warning: search path '/opt/homebrew/Cellar/openssl@3/3.5.1/lib' not found
+
+current directory: /Users/IgorC/avantar_indica/vendor/bundle/ruby/3.4.0/gems/nkf-0.2.0/ext/nkf
+make DESTDIR\= sitearchdir\=./.gem.20250808-87194-cfwrcg sitelibdir\=./.gem.20250808-87194-cfwrcg install
+/usr/bin/install -c -m 0755 nkf.bundle ./.gem.20250808-87194-cfwrcg
+
+current directory: /Users/IgorC/avantar_indica/vendor/bundle/ruby/3.4.0/gems/nkf-0.2.0/ext/nkf
+make DESTDIR\= sitearchdir\=./.gem.20250808-87194-cfwrcg sitelibdir\=./.gem.20250808-87194-cfwrcg clean

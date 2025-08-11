@@ -9,3 +9,15 @@ declare module '*.svg' {
   const content: React.FC<SvgProps>;
   export default content;
 }
+
+declare module 'react-native-svg' {
+  export interface SvgProps {
+    width?: number | string;
+    height?: number | string;
+    viewBox?: string;
+    fill?: string;
+    stroke?: string;
+    strokeWidth?: number | string;
+    [key: string]: any;
+  }
+}
