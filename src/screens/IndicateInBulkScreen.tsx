@@ -58,6 +58,11 @@ export function IndicateInBulkScreen() {
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     } else if (Platform.OS === 'ios') {
       try {
+        // Verificar se o módulo Contacts está disponível
+        if (!Contacts || typeof Contacts.requestPermission !== 'function') {
+          console.error('Módulo react-native-contacts não está disponível');
+          return false;
+        }
         const permission = await Contacts.requestPermission();
         return permission === 'authorized';
       } catch (error) {
@@ -87,6 +92,15 @@ export function IndicateInBulkScreen() {
   const loadContacts = async () => {
     setIsLoading(true);
     setPermissionDenied(false);
+    
+    // Verificar se o módulo está disponível antes de prosseguir
+    if (Platform.OS === 'ios' && (!Contacts || typeof Contacts.getAll !== 'function')) {
+      console.error('Módulo react-native-contacts não está disponível no iOS');
+      setLeads([]);
+      setIsLoading(false);
+      return;
+    }
+    
     const allowed = await askForPermission();
     if (allowed === true) {
       try {
@@ -177,7 +191,6 @@ export function IndicateInBulkScreen() {
       .map(c => ({
         name: c.displayName || 'Sem nome',
         phone: cleanPhoneForBackend(c.phoneNumbers?.[0]?.number || ''),
-        status: "PENDENTE CONTATO"
       }));
 
     try {
