@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {BlurView} from '@react-native-community/blur';
+
 import firestore, {
   getFirestore,
   collection,
@@ -335,7 +335,7 @@ export function StatusScreen() {
           selectedOptions={selectedFilters}
           onSelectOption={handleSelectFilter}
           position={{
-            top: isSmallScreen ? 140 : 180,
+            top: isSmallScreen ? 140 : 210,
             right: isSmallScreen ? horizontalPadding : 20,
           }}
         />
@@ -403,11 +403,7 @@ export function StatusScreen() {
         visible={showBulkModal}
         onRequestClose={() => setShowBulkModal(false)}
         transparent={true}>
-        <BlurView
-          style={{flex: 1, backgroundColor: 'transparent'}}
-          blurType="dark"
-          blurAmount={5}
-          reducedTransparencyFallbackColor="transparent">
+        <View style={{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)'}}>
           <KeyboardAvoidingView
             className="flex-1 justify-center items-center px-2"
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
@@ -519,7 +515,7 @@ export function StatusScreen() {
               </ScrollView>
             </View>
           </KeyboardAvoidingView>
-        </BlurView>
+        </View>
       </Modal>
     );
   };
@@ -532,11 +528,7 @@ export function StatusScreen() {
         visible={showDetailModal}
         onRequestClose={() => setShowDetailModal(false)}
         transparent={true}>
-        <BlurView
-          style={{flex: 1, backgroundColor: 'transparent'}}
-          blurType="dark"
-          blurAmount={5}
-          reducedTransparencyFallbackColor="transparent">
+        <View style={{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)'}}>
           <KeyboardAvoidingView
             className="flex-1 justify-center items-center px-2"
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
@@ -616,7 +608,7 @@ export function StatusScreen() {
               </ScrollView>
             </View>
           </KeyboardAvoidingView>
-        </BlurView>
+        </View>
       </Modal>
     );
   };
@@ -645,7 +637,7 @@ export function StatusScreen() {
               className="rounded-2xl flex-1"
               style={{
                 marginTop: isSmallScreen ? 4 : 8,
-                minHeight: isSmallScreen ? 400 : 530,
+                minHeight: isSmallScreen ? 400 : 630,
               }}>
               {filteredData.length === 0 ? (
                 <View className="flex-1 justify-center items-center p-10">

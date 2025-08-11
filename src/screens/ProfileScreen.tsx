@@ -512,6 +512,7 @@ export function ProfileScreen() {
                 textColor="white"
                 fontSize={isSmallScreen ? 22 : 25}
                 fontWeight="bold"
+                height={isSmallScreen ? 40 : 50}
               />
               <Button
                 text="VENDEDORES"
@@ -525,6 +526,7 @@ export function ProfileScreen() {
                   userData?.rule !== 'admin_franqueadora' &&
                   userData?.rule !== 'admin_unidade'
                 }
+                height={isSmallScreen ? 40 : 50}
               />
             </View>
 

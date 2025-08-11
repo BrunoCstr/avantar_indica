@@ -284,7 +284,7 @@ export function HomeScreen() {
             </View>
 
             <View
-              className={`${isSmallScreen ? 'h-20' : 'h-24'} flex flex-row items-center justify-center gap-3 mt-5 mb-5 w-full`}>
+              className={`${isSmallScreen ? 'h-16' : 'h-20'} flex flex-row items-center justify-center gap-3 mt-5 mb-5 w-full`}>
               <TouchableOpacity
                 className="flex-1"
                 activeOpacity={0.8}
@@ -297,7 +297,7 @@ export function HomeScreen() {
                   className={`bg-transparent flex-row border-[1.5px] rounded-lg border-blue justify-center items-center h-full`}>
                   <IndicarIcon />
                   <Text
-                    className={`text-white text-bold ${isSmallScreen ? 'text-lg' : fontSize.xlarge} ml-0.5`}>
+                    className={`text-white text-bold ${isSmallScreen ? 'text-lg' : fontSize.xlarge} ml-1`}>
                     INDICAR
                   </Text>
                 </View>
@@ -330,7 +330,7 @@ export function HomeScreen() {
                 textColor="white"
                 fontWeight="bold"
                 fontSize={isSmallScreen ? 22 : 25}
-                height={80}
+                height={isSmallScreen ? 60 : 70}
                 borderColor="second_orange"
                 borderBottomWidth={4}
                 borderRightWidth={2}
@@ -376,7 +376,7 @@ export function HomeScreen() {
                 selectedOptions={selectedFilters}
                 onSelectOption={handleSelectFilter}
                 position={{
-                  top: isSmallScreen ? 320 : 385,
+                  top: isSmallScreen ? 320 : 400,
                   right: isSmallScreen ? horizontalPadding : 40,
                 }}
               />
@@ -391,7 +391,7 @@ export function HomeScreen() {
                 textColor="white"
                 fontWeight="bold"
                 fontSize={isSmallScreen ? 22 : 25}
-                height={80}
+                height={isSmallScreen ? 60 : 70}
                 borderColor="sixteen_purple"
                 borderBottomWidth={4}
                 borderRightWidth={2}

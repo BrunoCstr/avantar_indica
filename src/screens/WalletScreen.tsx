@@ -195,11 +195,20 @@ export function WalletScreen() {
                 marginLeft: horizontalPadding,
                 marginRight: horizontalPadding,
                 marginTop: spacing.medium,
-              }}
-              className="bg-fourth_purple rounded-3xl h-30 justify-center items-center">
+                backgroundColor: colors.fourth_purple,
+                borderRadius: 24,
+                height: 120,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
               <LinearGradient
-                className="w-[100%] flex-1 justify-center items-center rounded-2xl"
-                style={{borderRadius: 8}}
+                style={{
+                  width: '100%',
+                  flex: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderRadius: 16,
+                }}
                 colors={['#4E00A7', '#6800E0']}
                 start={{x: 0, y: 0}}
                 end={{x: 1, y: 0}}>
@@ -325,17 +334,32 @@ export function WalletScreen() {
                 marginRight: horizontalPadding,
               }}>
               <TouchableOpacity
-                className="justify-center items-center h-20"
+                style={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  height: 80,
+                }}
                 activeOpacity={0.8}
                 onPress={handleWithdrawalRequest}>
                 <LinearGradient
-                  className="w-[100%] flex-1 justify-center items-center rounded-lg border-[1px] border-blue"
-                  style={{borderRadius: 8}}
+                  style={{
+                    width: '100%',
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    borderRadius: 8,
+                    borderWidth: 1,
+                    borderColor: colors.blue,
+                  }}
                   colors={['#9743F8', '#4F00A9']}
                   start={{x: 0, y: 1}}
                   end={{x: 0, y: 0}}>
                   <Text
-                    className={`text-white font-bold ${isSmallScreen ? 'text-3xl' : 'text-4xl'}`}>
+                    style={{
+                      color: 'white',
+                      fontWeight: 'bold',
+                      fontSize: isSmallScreen ? 30 : 36,
+                    }}>
                     {isLoadingButton ? (
                       <Spinner size={isSmallScreen ? 28 : 32} variant="blue" />
                     ) : (

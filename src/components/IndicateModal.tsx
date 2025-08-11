@@ -127,11 +127,7 @@ export function IndicateModal({visible, onClose}: ModalProps) {
 
   return (
     <Modal visible={visible} onRequestClose={onClose} transparent={true}>
-      <BlurView
-        style={{flex: 1, backgroundColor: 'transparent'}}
-        blurType="dark"
-        blurAmount={5}
-        reducedTransparencyFallbackColor="transparent">
+      <View style={{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)'}}>
         <KeyboardAvoidingView
           className="flex-1 justify-center items-center px-5"
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
@@ -265,7 +261,7 @@ export function IndicateModal({visible, onClose}: ModalProps) {
             </View>
           </View>
         </KeyboardAvoidingView>
-      </BlurView>
+      </View>
 
       <CustomModal
         visible={isModalVisible}

@@ -137,7 +137,7 @@ const DashboardChart = () => {
               <View style={{width: isSmallScreen ? 80 : 96}} className="h-6 items-center justify-center">
                                   <Text
                     style={{fontSize: isSmallScreen ? 12 : 14}}
-                    className={`font-semiBold text-center ${
+                    className={`font-regular text-center ${
                       selectedPeriod === period ? 'text-white' : 'text-black'
                     }`}>
                     {period}
