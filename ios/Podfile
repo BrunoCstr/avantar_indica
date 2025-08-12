@@ -19,8 +19,6 @@ prepare_react_native_project!
     'Contacts',
   ])
 
-
-
 target 'avantar_indica' do
   config = use_native_modules!
 
@@ -31,12 +29,6 @@ target 'avantar_indica' do
     :app_path => "#{Pod::Config.instance.installation_root}/..",
     :hermes_enabled => true
   )
-
-
-
-
-
-
 
   # Firebase pods
   pod 'Firebase/Core'
