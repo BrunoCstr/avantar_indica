@@ -195,7 +195,7 @@ export const indicated = functions.firestore.onDocumentCreated(
                 <span>Observações: ${newIndication.observations}</span>
               </div>
               <p></p>
-              <a class='anchorLink' href="indica.avantar.com.br">👉 Acesse agora o painel para conferir os detalhes...</a>
+              <a class='anchorLink' href="https://indica.avantar.com.br">👉 Acesse agora o painel para conferir os detalhes...</a>
               <br>
               <span>Boas vendas! 🚀</span>
               <span style='color:#6600CC'>Equipe de Desenvolvimento Avantar</span>

@@ -72,7 +72,7 @@ export const closedProposal = functions.firestore.onDocumentUpdated(
 
         await notificationRef.set({
           title: '🎉 Sua indicação foi fechada!',
-          body: `Parabéns! A indicação de ${afterData.fullName} foi fechada com sucesso. Você pode verificar sua comissão na carteira.`,
+          body: `Parabéns! A indicação de ${afterData.name} foi fechada com sucesso. Você pode verificar sua comissão na carteira.`,
           read: false,
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
           documentId: notificationRef.id,

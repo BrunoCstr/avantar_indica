@@ -159,7 +159,7 @@ export const withdrawalStatus = functions.firestore.onDocumentUpdated(
             </div>
             <p></p>
             <p>O valor será transferido para sua chave PIX em breve!</p>
-            <a class='anchorLink' href="https://indica.avantar.com.br">👉 Acesse o app para acompanhar suas transações</a>
+            <a class='anchorLink' href="https://indica.avantar.com.br>👉 Acesse o app para acompanhar suas transações</a>
             <br>
             <span>Parabéns! Continue indicando e ganhe mais! 🚀</span>
           `
@@ -174,7 +174,7 @@ export const withdrawalStatus = functions.firestore.onDocumentUpdated(
             </div>
             <p></p>
             <p>Para mais informações sobre o motivo da recusa, entre em contato com sua unidade: ${afterData.unitName || 'unidade responsável'}.</p>
-            <a class='anchorLink' href="https://indica.avantar.com.br">👉 Acesse o app para mais detalhes</a>
+            <a class='anchorLink' href="https://indica.avantar.com.br>👉 Acesse o app para mais detalhes</a>
             <br>
             <span>Continue indicando e tente novamente! 💪</span>
           `;
