@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   ImageBackground,
   Text,
@@ -8,6 +8,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  RefreshControl,
 } from 'react-native';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -50,6 +51,7 @@ export function StatusScreen() {
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [selectedDetail, setSelectedDetail] = useState<any | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const filterOptions = [
     // Filtros por tipo
@@ -59,14 +61,15 @@ export function StatusScreen() {
     // Separador visual (não será usado como filtro real)
     '---',
     // Filtros por status
-    'FECHADO',
-    'NÃO FECHADO',
-    'AGUARDANDO CLIENTE',
-    'CONTATO REALIZADO',
     'PENDENTE CONTATO',
-    'NÃO INTERESSOU',
+    'CONTATO REALIZADO',
     'INICIO DE PROPOSTA',
     'PROPOSTA APRESENTADA',
+    'AGUARDANDO CLIENTE',
+    'AGUARDANDO PAGAMENTO',
+    'FECHADO',
+    'NÃO FECHADO',
+    'NÃO INTERESSOU',
     'SEGURO RECUSADO',
   ];
 
@@ -203,6 +206,52 @@ export function StatusScreen() {
     };
   }, [userData?.uid]);
 
+  // Função do Pull Refresh
+  const onRefresh = useCallback(async () => {
+    console.log('Pull refresh iniciado na StatusScreen');
+    setRefreshing(true);
+    try {
+      // Força uma recarga dos dados do status
+      if (userData?.uid) {
+        // Força uma nova consulta para atualizar os dados
+        const db = getFirestore();
+        const indicationsRef = collection(db, 'indications');
+        const opportunitiesRef = collection(db, 'opportunities');
+        const packagedIndicationsRef = firestore().collection(
+          'packagedIndications',
+        );
+
+        const indicationsQuery = query(
+          indicationsRef,
+          where('indicator_id', '==', userData.uid),
+        );
+        const opportunitiesQuery = query(
+          opportunitiesRef,
+          where('indicator_id', '==', userData.uid),
+        );
+        const packagedIndicationsQuery = packagedIndicationsRef.where(
+          'indicator_id',
+          '==',
+          userData.uid,
+        );
+
+        // Executa as consultas para forçar atualização
+        await Promise.all([
+          indicationsQuery.get(),
+          opportunitiesQuery.get(),
+          packagedIndicationsQuery.get(),
+        ]);
+
+        console.log('Dados de status atualizados com sucesso!');
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar dados de status:', error);
+    } finally {
+      setRefreshing(false);
+      console.log('Pull refresh finalizado na StatusScreen');
+    }
+  }, [userData?.uid]);
+
   // Filtrar dados baseado na busca e filtros selecionados
   const filteredData = filterStatusItems(statusItems, search, selectedFilters);
 
@@ -239,6 +288,8 @@ export function StatusScreen() {
         return colors.red;
       case 'AGUARDANDO CLIENTE':
         return colors.primary_purple;
+      case 'AGUARDANDO PAGAMENTO':
+        return colors.orange;
       case 'CONTATO REALIZADO':
         return colors.primary_purple;
       case 'PENDENTE CONTATO':
@@ -263,6 +314,8 @@ export function StatusScreen() {
         return '#dcfce7';
       case 'NÃO FECHADO':
         return '#fee2e2';
+      case 'AGUARDANDO PAGAMENTO':
+        return '#fed7aa';
       case 'AGUARDANDO CLIENTE':
         return '#E6DBFF';
       case 'CONTATO REALIZADO':
@@ -335,7 +388,7 @@ export function StatusScreen() {
           selectedOptions={selectedFilters}
           onSelectOption={handleSelectFilter}
           position={{
-            top: isSmallScreen ? 140 : 210,
+            top: isSmallScreen ? 140 : 160,
             right: isSmallScreen ? horizontalPadding : 20,
           }}
         />
@@ -344,7 +397,7 @@ export function StatusScreen() {
       {/* Cards de Estatísticas */}
       <View
         className={`${isSmallScreen ? 'mt-3 mb-1' : 'mt-4 mb-1'} w-full ${isSmallScreen ? 'h-16' : 'h-20'}`}
-        style={{ marginBottom: isSmallScreen ? 10 : 14 }}>
+        style={{marginBottom: isSmallScreen ? 10 : 14}}>
         <View className="flex-row justify-between gap-2 px-1 w-full">
           {[
             {label: 'Pendente', value: stats['PENDENTE CONTATO'] || 0},
@@ -354,7 +407,8 @@ export function StatusScreen() {
                 (stats['PROPOSTA APRESENTADA'] || 0) +
                 (stats['CONTATO REALIZADO'] || 0) +
                 (stats['AGUARDANDO CLIENTE'] || 0) +
-                (stats['INICIO DE PROPOSTA'] || 0),
+                (stats['INICIO DE PROPOSTA'] || 0) +
+                (stats['AGUARDANDO PAGAMENTO'] || 0),
             },
             {label: 'Fechados', value: stats['FECHADO'] || 0},
             {
@@ -419,9 +473,9 @@ export function StatusScreen() {
                 </Text>
               </View>
               <ScrollView
-                style={{maxHeight: 400}}
+                style={{maxHeight: 450}}
                 contentContainerStyle={{
-                  paddingBottom: 12,
+                  paddingBottom: 8,
                   paddingHorizontal: 2,
                 }}>
                 <Text
@@ -502,7 +556,9 @@ export function StatusScreen() {
                 selectedBulk.indications.length > 0 ? (
                   <ScrollView style={{maxHeight: 120}}>
                     {selectedBulk.indications.map((item: any, idx: number) => (
-                      <Text key={idx} style={{fontSize: 13, color: colors.black}}>
+                      <Text
+                        key={idx}
+                        style={{fontSize: 13, color: colors.black}}>
                         - {item.name} {item.phone ? `(${item.phone})` : ''}
                       </Text>
                     ))}
@@ -591,20 +647,6 @@ export function StatusScreen() {
                     {selectedDetail.status}
                   </Text>
                 </Text>
-                {selectedDetail.type === 'opportunity' &&
-                  selectedDetail.indicator_id && (
-                    <Text
-                      style={{
-                        fontWeight: 'bold',
-                        color: colors.tertiary_purple,
-                        marginBottom: 6,
-                      }}>
-                      Indicador:{' '}
-                      <Text style={{fontWeight: 'normal', color: colors.black}}>
-                        {selectedDetail.indicator_name}
-                      </Text>
-                    </Text>
-                  )}
               </ScrollView>
             </View>
           </KeyboardAvoidingView>
@@ -621,148 +663,59 @@ export function StatusScreen() {
       {isLoading ? (
         <StatusScreenSkeleton />
       ) : (
-        <View
-          style={{flex: 1}}
-        >
-          <View
-            className="flex-1"
-            style={{
-              paddingBottom,
-              paddingHorizontal: horizontalPadding,
-              paddingTop: isSmallScreen ? 16 : 20,
-            }}>
+        <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={['#820AD1']}
+              tintColor="#820AD1"
+            />
+          }
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingBottom: isSmallScreen ? 100 : 120,
+            paddingHorizontal: horizontalPadding,
+            paddingTop: isSmallScreen ? 16 : 20,
+          }}>
+          {/* Header */}
+          {renderListHeader()}
 
-            {/* Lista de Status */}
-            <View
-              className="rounded-2xl flex-1"
-              style={{
-                marginTop: isSmallScreen ? 4 : 8,
-                minHeight: isSmallScreen ? 400 : 630,
-              }}>
-              {filteredData.length === 0 ? (
-                <View className="flex-1 justify-center items-center p-10">
-                  <FontAwesome6
-                    name="clipboard-list"
-                    size={isSmallScreen ? 50 : 60}
-                    color={colors.tertiary_purple}
-                    style={{marginBottom: 16, opacity: 0.7}}
-                  />
-                  <Text
-                    className={`${isSmallScreen ? 'text-base' : 'text-lg'} font-bold text-tertiary_purple mb-2 text-center`}>
-                    Nenhum resultado encontrado
-                  </Text>
-                  <Text
-                    className={`${isSmallScreen ? 'text-xs' : 'text-sm'} text-black text-center`}>
-                    {search || selectedFilters.length > 0
-                      ? 'Nenhum item corresponde aos filtros aplicados. Tente ajustar sua busca.'
-                      : 'Você ainda não possui oportunidades ou indicações registradas. Quando você indicar alguém, elas aparecerão aqui!'}
-                  </Text>
-                </View>
-              ) : (
-                <FlatList
-                  data={filteredData}
-                  showsVerticalScrollIndicator={false}
-                  keyExtractor={item => item.id.toString()}
-                  ListHeaderComponent={renderListHeader}
-                  contentContainerStyle={{
-                    paddingVertical: isSmallScreen ? 8 : 12,
-                    paddingBottom: isSmallScreen ? 60 : 80,
-                    gap: 8,
-                  }}
-                  style={{
-                    flex: 1,
-                    minHeight: isSmallScreen ? 380 : 480,
-                  }}
-                  renderItem={({item}) => {
-                    if (item.type === 'bulk') {
-                      // Card especial para indicação em massa
-                      const sentDate = item.createdAt;
-                      let relativeDate = '';
-                      if (sentDate) {
-                        relativeDate = formatTimeAgo(sentDate);
-                      }
-                      return (
-                        <TouchableOpacity
-                          className="bg-white rounded-xl mb-2"
-                          activeOpacity={0.7}
-                          style={{
-                            shadowColor: '#000',
-                            shadowOffset: {width: 2, height: 2},
-                            shadowOpacity: 0.1,
-                            shadowRadius: 4,
-                            elevation: 5,
-                          }}
-                          onPress={() => {
-                            setSelectedBulk(item);
-                            setShowBulkModal(true);
-                          }}>
-                          <View
-                            className={`flex-row items-center ${isSmallScreen ? 'p-3' : 'p-4'}`}>
-                            {/* Avatar */}
-                            <View
-                              className={`${isSmallScreen ? 'w-10 h-10' : 'w-12 h-12'} rounded-full items-center justify-center mr-4`}
-                              style={{backgroundColor: colors.primary_purple}}>
-                              <FontAwesome6
-                                name="layer-group"
-                                size={isSmallScreen ? 18 : 22}
-                                color={colors.white}
-                              />
-                            </View>
-                            {/* Informações */}
-                            <View className="flex-1">
-                              <View className="flex-row items-center justify-between mb-1">
-                                <Text
-                                  className={`text-black font-bold ${isSmallScreen ? 'text-sm' : 'text-base'} flex-1`}>
-                                  Lote em massa
-                                </Text>
-                                <Text
-                                  className={`${isSmallScreen ? 'text-xs' : 'text-xs'} text-black ml-2`}>
-                                  {relativeDate}
-                                </Text>
-                              </View>
-                              <Text
-                                className={`text-black ${isSmallScreen ? 'text-xs' : 'text-sm'} mb-2`}>
-                                {item.product}
-                              </Text>
-                              <View className="flex-row items-center justify-between">
-                                <View
-                                  className="self-start px-3 py-1 w-auto rounded-full"
-                                  style={{
-                                    backgroundColor:
-                                      item.status === 'Concluído'
-                                        ? '#dcfce7'
-                                        : '#E6DBFF',
-                                  }}>
-                                  <Text
-                                    className={`${isSmallScreen ? 'text-xs' : 'text-xs'} font-semibold`}
-                                    style={{
-                                      color:
-                                        item.status === 'Concluído'
-                                          ? colors.green
-                                          : colors.primary_purple,
-                                    }}>
-                                    {item.status}
-                                  </Text>
-                                </View>
-                                {/* Badge para identificar o tipo */}
-                                <View
-                                  className="px-2 py-1 rounded-md"
-                                  style={{backgroundColor: '#f3e8ff'}}>
-                                  <Text
-                                    className={`${isSmallScreen ? 'text-xs' : 'text-xs'} font-medium`}
-                                    style={{color: colors.primary_purple}}>
-                                    Indicação em massa
-                                  </Text>
-                                </View>
-                              </View>
-                            </View>
-                          </View>
-                        </TouchableOpacity>
-                      );
+          {/* Lista de Status */}
+          <View className="rounded-2xl flex-1">
+            {filteredData.length === 0 ? (
+              <View className="flex-1 justify-center items-center">
+                <FontAwesome6
+                  name="clipboard-list"
+                  size={isSmallScreen ? 50 : 60}
+                  color={colors.tertiary_purple}
+                  style={{marginBottom: 16, opacity: 0.7}}
+                />
+                <Text
+                  className={`${isSmallScreen ? 'text-base' : 'text-lg'} font-bold text-tertiary_purple mb-2 text-center`}>
+                  Nenhum resultado encontrado
+                </Text>
+                <Text
+                  className={`${isSmallScreen ? 'text-xs' : 'text-sm'} text-black text-center`}>
+                  {search || selectedFilters.length > 0
+                    ? 'Nenhum item corresponde aos filtros aplicados. Tente ajustar sua busca.'
+                    : 'Você ainda não possui oportunidades ou indicações registradas. Quando você indicar alguém, elas aparecerão aqui!'}
+                </Text>
+              </View>
+            ) : (
+              <View style={{flex: 1}}>
+                {filteredData.map((item, index) => {
+                  if (item.type === 'bulk') {
+                    // Card especial para indicação em massa
+                    const sentDate = item.createdAt;
+                    let relativeDate = '';
+                    if (sentDate) {
+                      relativeDate = formatTimeAgo(sentDate);
                     }
-
                     return (
                       <TouchableOpacity
+                        key={item.id}
                         className="bg-white rounded-xl mb-2"
                         activeOpacity={0.7}
                         style={{
@@ -770,34 +723,34 @@ export function StatusScreen() {
                           shadowOffset: {width: 2, height: 2},
                           shadowOpacity: 0.1,
                           shadowRadius: 4,
-                          elevation: 5, // necessário para Android
+                          elevation: 5,
                         }}
                         onPress={() => {
-                          setSelectedDetail(item);
-                          setShowDetailModal(true);
+                          setSelectedBulk(item);
+                          setShowBulkModal(true);
                         }}>
                         <View
                           className={`flex-row items-center ${isSmallScreen ? 'p-3' : 'p-4'}`}>
                           {/* Avatar */}
                           <View
                             className={`${isSmallScreen ? 'w-10 h-10' : 'w-12 h-12'} rounded-full items-center justify-center mr-4`}
-                            style={{backgroundColor: colors.tertiary_purple}}>
-                            <Text
-                              className={`text-white font-bold ${isSmallScreen ? 'text-xs' : 'text-sm'}`}>
-                              {getInitials(item.name)}
-                            </Text>
+                            style={{backgroundColor: colors.primary_purple}}>
+                            <FontAwesome6
+                              name="layer-group"
+                              size={isSmallScreen ? 18 : 22}
+                              color={colors.white}
+                            />
                           </View>
-
                           {/* Informações */}
                           <View className="flex-1">
                             <View className="flex-row items-center justify-between mb-1">
                               <Text
                                 className={`text-black font-bold ${isSmallScreen ? 'text-sm' : 'text-base'} flex-1`}>
-                                {limitText(item.name)}
+                                Lote em massa
                               </Text>
                               <Text
                                 className={`${isSmallScreen ? 'text-xs' : 'text-xs'} text-black ml-2`}>
-                                {item.updatedAt}
+                                {relativeDate}
                               </Text>
                             </View>
                             <Text
@@ -808,36 +761,30 @@ export function StatusScreen() {
                               <View
                                 className="self-start px-3 py-1 w-auto rounded-full"
                                 style={{
-                                  backgroundColor: getStatusBgColor(
-                                    item.status,
-                                  ),
+                                  backgroundColor:
+                                    item.status === 'Concluído'
+                                      ? '#dcfce7'
+                                      : '#E6DBFF',
                                 }}>
                                 <Text
                                   className={`${isSmallScreen ? 'text-xs' : 'text-xs'} font-semibold`}
-                                  style={{color: getStatusColor(item.status)}}>
+                                  style={{
+                                    color:
+                                      item.status === 'Concluído'
+                                        ? colors.green
+                                        : colors.primary_purple,
+                                  }}>
                                   {item.status}
                                 </Text>
                               </View>
                               {/* Badge para identificar o tipo */}
                               <View
                                 className="px-2 py-1 rounded-md"
-                                style={{
-                                  backgroundColor:
-                                    item.type === 'opportunity'
-                                      ? '#dcfce7'
-                                      : '#dbeafe',
-                                }}>
+                                style={{backgroundColor: '#f3e8ff'}}>
                                 <Text
                                   className={`${isSmallScreen ? 'text-xs' : 'text-xs'} font-medium`}
-                                  style={{
-                                    color:
-                                      item.type === 'opportunity'
-                                        ? '#16a34a'
-                                        : '#2563eb',
-                                  }}>
-                                  {item.type === 'opportunity'
-                                    ? 'Oportunidade'
-                                    : 'Indicação'}
+                                  style={{color: colors.primary_purple}}>
+                                  Indicação em massa
                                 </Text>
                               </View>
                             </View>
@@ -845,17 +792,100 @@ export function StatusScreen() {
                         </View>
                       </TouchableOpacity>
                     );
-                  }}
-                  ItemSeparatorComponent={() => <View className="h-1" />}
-                />
-              )}
-            </View>
-            {/* Modal de detalhes do lote em massa */}
-            {renderBulkModal()}
-            {/* Modal de detalhes de indicação/oportunidade */}
-            {renderDetailModal()}
+                  }
+
+                  return (
+                    <TouchableOpacity
+                      key={item.id}
+                      className="bg-white rounded-xl mb-2"
+                      activeOpacity={0.7}
+                      style={{
+                        shadowColor: '#000',
+                        shadowOffset: {width: 2, height: 2},
+                        shadowOpacity: 0.1,
+                        shadowRadius: 4,
+                        elevation: 5, // necessário para Android
+                      }}
+                      onPress={() => {
+                        setSelectedDetail(item);
+                        setShowDetailModal(true);
+                      }}>
+                      <View
+                        className={`flex-row items-center ${isSmallScreen ? 'p-3' : 'p-4'}`}>
+                        {/* Avatar */}
+                        <View
+                          className={`${isSmallScreen ? 'w-10 h-10' : 'w-12 h-12'} rounded-full items-center justify-center mr-4`}
+                          style={{backgroundColor: colors.tertiary_purple}}>
+                          <Text
+                            className={`text-white font-bold ${isSmallScreen ? 'text-xs' : 'text-sm'}`}>
+                            {getInitials(item.name)}
+                          </Text>
+                        </View>
+
+                        {/* Informações */}
+                        <View className="flex-1">
+                          <View className="flex-row items-center justify-between mb-1">
+                            <Text
+                              className={`text-black font-bold ${isSmallScreen ? 'text-sm' : 'text-base'} flex-1`}>
+                              {limitText(item.name)}
+                            </Text>
+                            <Text
+                              className={`${isSmallScreen ? 'text-xs' : 'text-xs'} text-black ml-2`}>
+                              {item.updatedAt}
+                            </Text>
+                          </View>
+                          <Text
+                            className={`text-black ${isSmallScreen ? 'text-xs' : 'text-sm'} mb-2`}>
+                            {item.product}
+                          </Text>
+                          <View className="flex-row items-center justify-between">
+                            <View
+                              className="self-start px-3 py-1 w-auto rounded-full"
+                              style={{
+                                backgroundColor: getStatusBgColor(item.status),
+                              }}>
+                              <Text
+                                className={`${isSmallScreen ? 'text-xs' : 'text-xs'} font-semibold`}
+                                style={{color: getStatusColor(item.status)}}>
+                                {item.status}
+                              </Text>
+                            </View>
+                            {/* Badge para identificar o tipo */}
+                            <View
+                              className="px-2 py-1 rounded-md"
+                              style={{
+                                backgroundColor:
+                                  item.type === 'opportunity'
+                                    ? '#dcfce7'
+                                    : '#dbeafe',
+                              }}>
+                              <Text
+                                className={`${isSmallScreen ? 'text-xs' : 'text-xs'} font-medium`}
+                                style={{
+                                  color:
+                                    item.type === 'opportunity'
+                                      ? '#16a34a'
+                                      : '#2563eb',
+                                }}>
+                                {item.type === 'opportunity'
+                                  ? 'Oportunidade'
+                                  : 'Indicação'}
+                              </Text>
+                            </View>
+                          </View>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            )}
           </View>
-        </View>
+          {/* Modal de detalhes do lote em massa */}
+          {renderBulkModal()}
+          {/* Modal de detalhes de indicação/oportunidade */}
+          {renderDetailModal()}
+        </ScrollView>
       )}
     </ImageBackground>
   );

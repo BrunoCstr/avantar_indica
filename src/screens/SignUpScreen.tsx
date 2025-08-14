@@ -30,6 +30,7 @@ import {colors} from '../styles/colors';
 
 import {BackButton} from '../components/BackButton';
 import {CustomModal} from '../components/CustomModal';
+import RNPickerSelect from 'react-native-picker-select';
 
 const db = getFirestore();
 
@@ -176,8 +177,7 @@ export function SignUpScreen() {
       <TouchableWithoutFeedback>
         <ScrollView
           contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}}
-          keyboardShouldPersistTaps="handled"
-          >
+          keyboardShouldPersistTaps="handled">
           <ImageBackground
             source={images.bg_dark}
             className="flex-1"
@@ -314,31 +314,47 @@ export function SignUpScreen() {
                         borderRadius: 10,
                         backgroundColor: colors.tertiary_purple_opacity,
                         borderColor: errors.affiliated_to ? 'red' : colors.blue,
+                        height: 53,
                       }}>
-                      <Picker
-                        selectedValue={value}
+                      <RNPickerSelect
                         onValueChange={onChange}
+                        value={value}
+                        items={units.map(unit => ({
+                          label: unit.name,
+                          value: unit.unitId,
+                        }))}
+                        placeholder={{
+                          label: 'Selecione uma unidade',
+                          value: '',
+                          color: errors.affiliated_to
+                            ? 'red'
+                            : colors.white_opacity,
+                        }}
                         style={{
-                          height: 53,
-                          width: '100%',
-                        }}>
-                        <Picker.Item
-                          label="Selecione uma unidade"
-                          value=""
-                          style={{
+                          inputIOS: {
+                            fontSize: 16,
+                            paddingVertical: 12,
+                            paddingHorizontal: 10,
+                            color: colors.white,
+                            fontFamily: 'FamiljenGrotesk-Regular',
+                          },
+                          inputAndroid: {
+                            fontSize: 16,
+                            paddingHorizontal: 10,
+                            paddingVertical: 8,
+                            color: colors.white,
+                            fontFamily: 'FamiljenGrotesk-Regular',
+                          },
+                          placeholder: {
                             color: errors.affiliated_to
                               ? 'red'
                               : colors.white_opacity,
-                          }}
-                        />
-                        {units.map(unit => (
-                          <Picker.Item
-                            key={unit.unitId}
-                            label={unit.name}
-                            value={unit.unitId}
-                          />
-                        ))}
-                      </Picker>
+                            fontSize: 16,
+                            fontFamily: 'FamiljenGrotesk-Regular',
+                          },
+                        }}
+                        useNativeAndroidPickerStyle={false}
+                      />
                     </View>
                   )}
                   name="affiliated_to"
@@ -374,7 +390,8 @@ export function SignUpScreen() {
                         size={24}
                         color={errors.acceptTerms ? 'red' : colors.white}
                       />
-                      <TouchableOpacity onPress={() => setIsTermsModalVisible(true)}>
+                      <TouchableOpacity
+                        onPress={() => setIsTermsModalVisible(true)}>
                         <Text
                           className="underline text-center"
                           style={{
@@ -399,8 +416,7 @@ export function SignUpScreen() {
                 visible={isTermsModalVisible}
                 transparent
                 animationType="fade"
-                onRequestClose={() => setIsTermsModalVisible(false)}
-              >
+                onRequestClose={() => setIsTermsModalVisible(false)}>
                 <ScrollView
                   contentContainerStyle={{
                     flexGrow: 1,
@@ -410,112 +426,179 @@ export function SignUpScreen() {
                     minHeight: '100%',
                     paddingHorizontal: 16,
                   }}
-                  keyboardShouldPersistTaps="handled"
-                >
-                  <View style={{
-                    backgroundColor: '#170138',
-                    borderRadius: 14,
-                    padding: 24,
-                    width: '95%',
-                    maxWidth: 420,
-                    borderWidth: 2,
-                    borderColor: '#29F3DF',
-                  }}>
-                    <Text style={{
-                      fontSize: 20,
-                      fontWeight: 'bold',
-                      color: '#fff',
-                      textAlign: 'center',
-                      marginBottom: 16,
+                  keyboardShouldPersistTaps="handled">
+                  <View
+                    style={{
+                      backgroundColor: '#170138',
+                      borderRadius: 14,
+                      padding: 24,
+                      width: '95%',
+                      maxWidth: 420,
+                      borderWidth: 2,
+                      borderColor: '#29F3DF',
                     }}>
+                    <Text
+                      style={{
+                        fontSize: 20,
+                        fontWeight: 'bold',
+                        color: '#fff',
+                        textAlign: 'center',
+                        marginBottom: 16,
+                      }}>
                       Termos de Uso do Aplicativo
                     </Text>
-                    <ScrollView style={{ maxHeight: 400, marginBottom: 20 }} showsVerticalScrollIndicator={true}>
-                      <Text style={{ color: '#fff', fontSize: 15 }}>
-                        <Text style={{ fontWeight: 'bold' }}>1. OBJETIVO{`\n`}</Text>
-                        O presente Termo de Uso regula o acesso e a utilização do aplicativo AVANTAR INDICA destinado a:{`\n\n`}
-                        - Facilitar a indicação de potenciais clientes (leads) para unidades franqueadas;{`\n`}
-                        - Permitir o acompanhamento do status dessas indicações;{`\n`}
-                        - Recompensar os usuários com comissões, cashback em apólices ou bonificações, conforme regras específicas da franqueadora.{`\n\n`}
-
-                        <Text style={{ fontWeight: 'bold' }}>2. DEFINIÇÕES{`\n`}</Text>
-                        - Indicador: Usuário que realiza indicações de leads por meio do aplicativo.{`\n`}
-                        - Franqueado: Unidade autorizada que recebe os leads e realiza o atendimento.{`\n`}
-                        - Administrador: Responsável pela gestão da plataforma e regras operacionais.{`\n`}
-                        - Lead: Potencial cliente indicado.{`\n\n`}
-
-                        <Text style={{ fontWeight: 'bold' }}>3. CONDIÇÕES DE USO{`\n`}</Text>
-                        - O aplicativo deve ser utilizado apenas por maiores de 18 anos com CPF/CNPJ válido.{`\n`}
-                        - É vedado o uso para fins ilegais, fraudulentos ou que violem normas legais e éticas.{`\n`}
-                        - O uso do aplicativo implica na aceitação integral deste termo e da Política de Privacidade.{`\n\n`}
-
-                        <Text style={{ fontWeight: 'bold' }}>4. INDICAÇÕES E RECOMPENSAS{`\n`}</Text>
-                        - As indicações devem conter informações verídicas e atualizadas.{`\n`}
-                        - O recebimento de comissões e bonificações está sujeito ao cumprimento das regras definidas pela franqueadora.{`\n`}
-                        - Indicações indevidas, fraudulentas ou duplicadas poderão ser desconsideradas, sem prejuízo de sanções.{`\n`}
-                        - O indicador é o único responsável por obter o consentimento necessário do lead antes de compartilhar seus dados pessoais na plataforma. A franqueadora recebe essas informações de forma passiva e atua apenas como intermediadora no processo.{`\n`}
-                        - A Avantar não se responsabiliza por quaisquer consequências legais ou pessoais decorrentes da indicação feita sem o devido consentimento do lead.{`\n`}
-                        - Após a concretização da proposta, o lead indicado passa a ser considerado cliente da Avantar e será tratado como tal em toda a rede franqueada.{`\n\n`}
-
-                        <Text style={{ fontWeight: 'bold' }}>5. LIMITAÇÃO DE RESPONSABILIDADE{`\n`}</Text>
-                        - A franqueadora não se responsabiliza por informações fornecidas incorretamente pelos usuários.{`\n`}
-                        - O aplicativo funciona como intermediador das indicações e não garante a concretização de negócios.{`\n\n`}
-
-                        <Text style={{ fontWeight: 'bold' }}>6. MODIFICAÇÕES E ENCERRAMENTO{`\n`}</Text>
-                        - A franqueadora poderá alterar, suspender ou descontinuar o aplicativo a qualquer momento, mediante aviso prévio.{`\n`}
-                        - O uso contínuo após alterações implica aceitação automática dos novos termos.{`\n\n`}
-
-                        <Text style={{ fontWeight: 'bold' }}>7. ACEITE{`\n`}</Text>
-                        O aceite é obrigatório no primeiro acesso ao aplicativo e será registrado com data e hora vinculados ao perfil do usuário.{`\n\n`}
-
-                        <Text style={{ fontWeight: 'bold' }}>8. FORO{`\n`}</Text>
-                        Este Termo é regido pelas leis brasileiras. Fica eleito o foro da comarca de Caratinga/MG da sede da franqueadora, com exclusão de qualquer outro.{`\n\n`}
-
-                        <Text style={{ fontWeight: 'bold' }}>POLÍTICA DE PRIVACIDADE{`\n`}</Text>
-                        <Text style={{ fontWeight: 'bold' }}>Última atualização: 18/07/2025{`\n\n`}</Text>
-
-                        <Text style={{ fontWeight: 'bold' }}>1. COLETA DE DADOS{`\n`}</Text>
-                        Coletamos os seguintes dados:{`\n\n`}
-                        - Dos Indicadores: nome, e-mail, telefone, CPF ou CNPJ, chave PIX;{`\n`}
-                        - Dos Leads: nome, telefone e tipo de seguro de interesse;{`\n`}
-                        - De uso: data e horário das indicações, status da proposta.{`\n\n`}
-
-                        <Text style={{ fontWeight: 'bold' }}>2. FINALIDADES{`\n`}</Text>
-                        Os dados são utilizados para:{`\n\n`}
-                        - Direcionar leads às unidades corretas;{`\n`}
-                        - Permitir comunicação entre franqueado, indicador e lead;{`\n`}
-                        - Avaliar desempenho de unidades e indicadores;{`\n`}
-                        - Processar pagamentos e bonificações;{`\n`}
-                        - Cumprir obrigações legais e operacionais.{`\n\n`}
-
-                        <Text style={{ fontWeight: 'bold' }}>3. COMPARTILHAMENTO DE DADOS{`\n`}</Text>
-                        - Dados dos leads são compartilhados exclusivamente com as unidades franqueadas responsáveis pelo atendimento.{`\n`}
-                        - Dados dos usuários podem ser compartilhados com parceiros operacionais para fins de pagamento, auditoria, marketing e suporte técnico.{`\n`}
-                        - O compartilhamento dos dados do lead ocorre sob a responsabilidade do indicador, que declara possuir autorização para fazê-lo. A Avantar atua como receptora passiva dessas informações.{`\n\n`}
-
-                        <Text style={{ fontWeight: 'bold' }}>4. BASE LEGAL (LGPD){`\n`}</Text>
-                        - Consentimento do usuário no aceite dos termos;{`\n`}
-                        - Legítimo interesse da franqueadora no tratamento das indicações.{`\n\n`}
-
-                        <Text style={{ fontWeight: 'bold' }}>5. SEGURANÇA{`\n`}</Text>
-                        - Dados trafegam via HTTPS e são armazenados em banco de dados seguro.{`\n`}
-                        - O acesso é restrito a usuários autenticados e habilitados.{`\n\n`}
-
-                        <Text style={{ fontWeight: 'bold' }}>6. DIREITOS DOS USUÁRIOS{`\n`}</Text>
-                        Conforme a LGPD, o usuário tem direito de:{`\n\n`}
-                        - Acessar, corrigir ou excluir seus dados;{`\n`}
-                        - Solicitar portabilidade;{`\n`}
-                        - Revogar o consentimento, a qualquer momento, salvo obrigações legais.{`\n\n`}
-                        Solicitações devem ser feitas pelo canal: suporte@indica.avantar.com.br{`\n\n`}
-
-                        <Text style={{ fontWeight: 'bold' }}>7. ARMAZENAMENTO E RETENÇÃO{`\n`}</Text>
-                        - Os dados são armazenados em nuvem, enquanto durar a relação com o usuário ou conforme exigência legal.{`\n`}
-                        - Após esse período, os dados serão anonimizados ou excluídos.{`\n\n`}
-
-                        <Text style={{ fontWeight: 'bold' }}>8. ATUALIZAÇÕES{`\n`}</Text>
-                        A franqueadora poderá atualizar esta Política a qualquer momento. O aviso será feito via aplicativo, e o uso contínuo após alterações implica aceite automático.
-
-                        <Text style={{ fontWeight: 'bold' }} className='text-blue'>{`\n`}{`\n`}Última atualização: 18/07/2025{`\n\n`}</Text>
+                    <ScrollView
+                      style={{maxHeight: 400, marginBottom: 20}}
+                      showsVerticalScrollIndicator={true}>
+                      <Text style={{color: '#fff', fontSize: 15}}>
+                        <Text style={{fontWeight: 'bold'}}>
+                          1. OBJETIVO{`\n`}
+                        </Text>
+                        O presente Termo de Uso regula o acesso e a utilização
+                        do aplicativo AVANTAR INDICA destinado a:{`\n\n`}-
+                        Facilitar a indicação de potenciais clientes (leads)
+                        para unidades franqueadas;{`\n`}- Permitir o
+                        acompanhamento do status dessas indicações;{`\n`}-
+                        Recompensar os usuários com comissões, cashback em
+                        apólices ou bonificações, conforme regras específicas da
+                        franqueadora.{`\n\n`}
+                        <Text style={{fontWeight: 'bold'}}>
+                          2. DEFINIÇÕES{`\n`}
+                        </Text>
+                        - Indicador: Usuário que realiza indicações de leads por
+                        meio do aplicativo.{`\n`}- Franqueado: Unidade
+                        autorizada que recebe os leads e realiza o atendimento.
+                        {`\n`}- Administrador: Responsável pela gestão da
+                        plataforma e regras operacionais.{`\n`}- Lead: Potencial
+                        cliente indicado.{`\n\n`}
+                        <Text style={{fontWeight: 'bold'}}>
+                          3. CONDIÇÕES DE USO{`\n`}
+                        </Text>
+                        - O aplicativo deve ser utilizado apenas por maiores de
+                        18 anos com CPF/CNPJ válido.{`\n`}- É vedado o uso para
+                        fins ilegais, fraudulentos ou que violem normas legais e
+                        éticas.{`\n`}- O uso do aplicativo implica na aceitação
+                        integral deste termo e da Política de Privacidade.
+                        {`\n\n`}
+                        <Text style={{fontWeight: 'bold'}}>
+                          4. INDICAÇÕES E RECOMPENSAS{`\n`}
+                        </Text>
+                        - As indicações devem conter informações verídicas e
+                        atualizadas.{`\n`}- O recebimento de comissões e
+                        bonificações está sujeito ao cumprimento das regras
+                        definidas pela franqueadora.{`\n`}- Indicações
+                        indevidas, fraudulentas ou duplicadas poderão ser
+                        desconsideradas, sem prejuízo de sanções.{`\n`}- O
+                        indicador é o único responsável por obter o
+                        consentimento necessário do lead antes de compartilhar
+                        seus dados pessoais na plataforma. A franqueadora recebe
+                        essas informações de forma passiva e atua apenas como
+                        intermediadora no processo.{`\n`}- A Avantar não se
+                        responsabiliza por quaisquer consequências legais ou
+                        pessoais decorrentes da indicação feita sem o devido
+                        consentimento do lead.{`\n`}- Após a concretização da
+                        proposta, o lead indicado passa a ser considerado
+                        cliente da Avantar e será tratado como tal em toda a
+                        rede franqueada.{`\n\n`}
+                        <Text style={{fontWeight: 'bold'}}>
+                          5. LIMITAÇÃO DE RESPONSABILIDADE{`\n`}
+                        </Text>
+                        - A franqueadora não se responsabiliza por informações
+                        fornecidas incorretamente pelos usuários.{`\n`}- O
+                        aplicativo funciona como intermediador das indicações e
+                        não garante a concretização de negócios.{`\n\n`}
+                        <Text style={{fontWeight: 'bold'}}>
+                          6. MODIFICAÇÕES E ENCERRAMENTO{`\n`}
+                        </Text>
+                        - A franqueadora poderá alterar, suspender ou
+                        descontinuar o aplicativo a qualquer momento, mediante
+                        aviso prévio.{`\n`}- O uso contínuo após alterações
+                        implica aceitação automática dos novos termos.{`\n\n`}
+                        <Text style={{fontWeight: 'bold'}}>
+                          7. ACEITE{`\n`}
+                        </Text>
+                        O aceite é obrigatório no primeiro acesso ao aplicativo
+                        e será registrado com data e hora vinculados ao perfil
+                        do usuário.{`\n\n`}
+                        <Text style={{fontWeight: 'bold'}}>8. FORO{`\n`}</Text>
+                        Este Termo é regido pelas leis brasileiras. Fica eleito
+                        o foro da comarca de Caratinga/MG da sede da
+                        franqueadora, com exclusão de qualquer outro.{`\n\n`}
+                        <Text style={{fontWeight: 'bold'}}>
+                          POLÍTICA DE PRIVACIDADE{`\n`}
+                        </Text>
+                        <Text style={{fontWeight: 'bold'}}>
+                          Última atualização: 18/07/2025{`\n\n`}
+                        </Text>
+                        <Text style={{fontWeight: 'bold'}}>
+                          1. COLETA DE DADOS{`\n`}
+                        </Text>
+                        Coletamos os seguintes dados:{`\n\n`}- Dos Indicadores:
+                        nome, e-mail, telefone, CPF ou CNPJ, chave PIX;{`\n`}-
+                        Dos Leads: nome, telefone e tipo de seguro de interesse;
+                        {`\n`}- De uso: data e horário das indicações, status da
+                        proposta.{`\n\n`}
+                        <Text style={{fontWeight: 'bold'}}>
+                          2. FINALIDADES{`\n`}
+                        </Text>
+                        Os dados são utilizados para:{`\n\n`}- Direcionar leads
+                        às unidades corretas;{`\n`}- Permitir comunicação entre
+                        franqueado, indicador e lead;{`\n`}- Avaliar desempenho
+                        de unidades e indicadores;{`\n`}- Processar pagamentos e
+                        bonificações;{`\n`}- Cumprir obrigações legais e
+                        operacionais.{`\n\n`}
+                        <Text style={{fontWeight: 'bold'}}>
+                          3. COMPARTILHAMENTO DE DADOS{`\n`}
+                        </Text>
+                        - Dados dos leads são compartilhados exclusivamente com
+                        as unidades franqueadas responsáveis pelo atendimento.
+                        {`\n`}- Dados dos usuários podem ser compartilhados com
+                        parceiros operacionais para fins de pagamento,
+                        auditoria, marketing e suporte técnico.{`\n`}- O
+                        compartilhamento dos dados do lead ocorre sob a
+                        responsabilidade do indicador, que declara possuir
+                        autorização para fazê-lo. A Avantar atua como receptora
+                        passiva dessas informações.{`\n\n`}
+                        <Text style={{fontWeight: 'bold'}}>
+                          4. BASE LEGAL (LGPD){`\n`}
+                        </Text>
+                        - Consentimento do usuário no aceite dos termos;{`\n`}-
+                        Legítimo interesse da franqueadora no tratamento das
+                        indicações.{`\n\n`}
+                        <Text style={{fontWeight: 'bold'}}>
+                          5. SEGURANÇA{`\n`}
+                        </Text>
+                        - Dados trafegam via HTTPS e são armazenados em banco de
+                        dados seguro.{`\n`}- O acesso é restrito a usuários
+                        autenticados e habilitados.{`\n\n`}
+                        <Text style={{fontWeight: 'bold'}}>
+                          6. DIREITOS DOS USUÁRIOS{`\n`}
+                        </Text>
+                        Conforme a LGPD, o usuário tem direito de:{`\n\n`}-
+                        Acessar, corrigir ou excluir seus dados;{`\n`}-
+                        Solicitar portabilidade;{`\n`}- Revogar o consentimento,
+                        a qualquer momento, salvo obrigações legais.{`\n\n`}
+                        Solicitações devem ser feitas pelo canal:
+                        suporte@indica.avantar.com.br{`\n\n`}
+                        <Text style={{fontWeight: 'bold'}}>
+                          7. ARMAZENAMENTO E RETENÇÃO{`\n`}
+                        </Text>
+                        - Os dados são armazenados em nuvem, enquanto durar a
+                        relação com o usuário ou conforme exigência legal.{`\n`}
+                        - Após esse período, os dados serão anonimizados ou
+                        excluídos.{`\n\n`}
+                        <Text style={{fontWeight: 'bold'}}>
+                          8. ATUALIZAÇÕES{`\n`}
+                        </Text>
+                        A franqueadora poderá atualizar esta Política a qualquer
+                        momento. O aviso será feito via aplicativo, e o uso
+                        contínuo após alterações implica aceite automático.
+                        <Text
+                          style={{fontWeight: 'bold'}}
+                          className="text-blue">
+                          {`\n`}
+                          {`\n`}Última atualização: 18/07/2025{`\n\n`}
+                        </Text>
                       </Text>
                     </ScrollView>
                     <TouchableOpacity
@@ -525,9 +608,15 @@ export function SignUpScreen() {
                         paddingVertical: 12,
                         alignItems: 'center',
                       }}
-                      onPress={() => setIsTermsModalVisible(false)}
-                    >
-                      <Text style={{ color: '#170138', fontWeight: 'bold', fontSize: 16 }}>FECHAR</Text>
+                      onPress={() => setIsTermsModalVisible(false)}>
+                      <Text
+                        style={{
+                          color: '#170138',
+                          fontWeight: 'bold',
+                          fontSize: 16,
+                        }}>
+                        FECHAR
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 </ScrollView>

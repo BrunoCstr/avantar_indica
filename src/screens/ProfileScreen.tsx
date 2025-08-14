@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {
   Text,
   View,
@@ -10,6 +10,7 @@ import {
   Platform,
   ScrollView,
   TouchableWithoutFeedback,
+  RefreshControl,
 } from 'react-native';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {
@@ -17,6 +18,10 @@ import {
   doc,
   getFirestore,
   onSnapshot,
+  getDocs,
+  query,
+  collection,
+  where,
 } from '@react-native-firebase/firestore';
 import {getAuth, updateProfile} from '@react-native-firebase/auth';
 import storage from '@react-native-firebase/storage';
@@ -96,8 +101,32 @@ export function ProfileScreen() {
     return () => unsubscribe();
   }, [userData?.uid]);
 
+  // Função do Pull Refresh
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      // Recarrega os dados do usuário
+      if (userData?.uid) {
+        const userDoc = await getDocs(query(collection(db, 'users'), where('uid', '==', userData.uid)));
+        if (!userDoc.empty) {
+          const userData = userDoc.docs[0].data();
+          if (userData?.profilePicture) {
+            setProfilePicture(userData.profilePicture);
+          }
+        }
+        
+        console.log("Dados do perfil atualizados com sucesso!");
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar dados do perfil:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [userData?.uid]);
+
   const [isEditingUserInfo, setIsEditingUserInfo] = useState(false);
   const [isEditingPaymentInfo, setIsEditingPaymentInfo] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const [editedName, setEditedName] = useState(userData?.displayName || '');
   const [editedPhone, setEditedPhone] = useState(userData?.phone || '');
@@ -330,6 +359,14 @@ export function ProfileScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <TouchableWithoutFeedback>
         <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={["#820AD1"]}
+              tintColor="#820AD1"
+            />
+          }
           contentContainerStyle={{flexGrow: 1}}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}>

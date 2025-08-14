@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Switch,
   TextInput,
   ScrollView,
+  RefreshControl,
 } from 'react-native';
 import {BackButton} from '../components/BackButton';
 import {colors} from '../styles/colors';
@@ -68,6 +69,7 @@ export function Settings() {
   const [isLoadingPasswordChange, setIsLoadingPasswordChange] = useState(false);
   const [isLoadingDeactivateAccount, setIsLoadingDeactivateAccount] =
     useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchPermissions = async () => {
     if (CONTACTS_PERMISSION) {
@@ -97,6 +99,29 @@ export function Settings() {
     };
 
     loadNotificationPreferences();
+  }, [userData?.uid]);
+
+  // Função do Pull Refresh
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      // Recarrega as permissões
+      await fetchPermissions();
+      
+      // Recarrega as preferências de notificação
+      if (userData?.uid) {
+        const preferences = await getNotificationPreferences(userData.uid);
+        setCampaignsNotification(preferences.campaigns);
+        setStatusNotification(preferences.status);
+        setWithdrawNotification(preferences.withdraw);
+      }
+      
+      console.log("Configurações atualizadas com sucesso!");
+    } catch (error) {
+      console.error("Erro ao atualizar configurações:", error);
+    } finally {
+      setRefreshing(false);
+    }
   }, [userData?.uid]);
 
   useFocusEffect(
@@ -273,6 +298,14 @@ export function Settings() {
   return (
     <ImageBackground source={images.bg_dark} className="flex-1">
       <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#820AD1"]}
+            tintColor="#820AD1"
+          />
+        }
         contentContainerStyle={{flexGrow: 1}}
         showsVerticalScrollIndicator={false}>
         <View className="flex-1 mt-20 px-5">

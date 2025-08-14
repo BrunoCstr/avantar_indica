@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   TextInput,
   Modal,
   Image,
+  RefreshControl,
 } from 'react-native';
 import {BackButton} from '../components/BackButton';
 import {Button} from '../components/Button';
@@ -95,6 +96,7 @@ export function RegisterSellers() {
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [selectedSeller, setSelectedSeller] = useState<any>(null);
   const [isLoadingToggle, setIsLoadingToggle] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   React.useEffect(() => {
     if (
@@ -160,6 +162,20 @@ export function RegisterSellers() {
       setIsLoading(false);
     }
   }
+
+  // Função do Pull Refresh
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      // Recarrega os vendedores
+      await fetchSellers();
+      console.log("Vendedores atualizados com sucesso!");
+    } catch (error) {
+      console.error("Erro ao atualizar vendedores:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
 
   // Função para obter as iniciais do nome
   const getInitials = (name: string) => {
@@ -472,6 +488,14 @@ export function RegisterSellers() {
           keyExtractor={item => item.id}
           renderItem={renderSeller}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={["#820AD1"]}
+              tintColor="#820AD1"
+            />
+          }
           className="mt-4"
           ListEmptyComponent={
             isLoading ? (

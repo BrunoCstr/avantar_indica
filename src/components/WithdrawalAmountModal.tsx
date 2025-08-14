@@ -136,7 +136,7 @@ export function WithdrawalAmountModal({
 
             {/* Saldo disponível */}
             <View className="p-6">
-              <Text className="text-gray-600 text-sm mb-2">
+              <Text className="text-white text-sm mb-2">
                 Saldo disponível
               </Text>
               <View className="flex-row items-start justify-start">
@@ -165,7 +165,7 @@ export function WithdrawalAmountModal({
 
             {/* Input do valor */}
             <View className="px-6 mb-6">
-              <Text className="text-gray-600 text-sm mb-2">Digite o valor</Text>
+              <Text className="text-white text-sm mb-2">Digite o valor</Text>
               <View className="border-2 border-primary_purple rounded-xl p-4">
                 <TextInput
                   className="text-3xl font-bold text-white text-center"
@@ -181,14 +181,14 @@ export function WithdrawalAmountModal({
 
             {/* Botões de valor rápido */}
             <View className="px-6 mb-6">
-              <Text className="text-gray-600 text-sm mb-3">
+              <Text className="text-white text-sm mb-3">
                 Valores rápidos
               </Text>
               <View className="flex-row flex-wrap gap-2">
                 {[100, 200, 500, 1000].map(value => (
                   <TouchableOpacity
                     key={value}
-                    className="bg-gray-100 px-4 py-2 rounded-lg"
+                    className="bg-primary_purple px-4 py-2 rounded-lg"
                     onPress={() => addQuickAmount(value)}>
                     <Text className="text-white font-medium">
                       +R$ {value.toLocaleString('pt-BR')}
@@ -201,17 +201,17 @@ export function WithdrawalAmountModal({
                   <Text className="text-white font-medium">Máximo</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  className="bg-red-100 px-4 py-2 rounded-lg"
+                  className="border-[1px] border-primary_purple px-4 py-2 rounded-lg"
                   onPress={clearAmount}>
-                  <Text className="text-red-600 font-medium">Limpar</Text>
+                  <Text className="text-white font-medium">Limpar</Text>
                 </TouchableOpacity>
               </View>
             </View>
 
             {/* Informações importantes */}
             <View className="px-6 mb-6">
-              <View className="bg-orange-50 p-4 rounded-lg border border-primary_purple">
-                <Text className="text-gray-600 text-sm">
+              <View className="p-4 rounded-lg border border-primary_purple">
+                <Text className="text-white text-sm">
                   • Valor mínimo para saque: R$ 700,00.{'\n'}• O saque será
                   processado pela sua unidade.{'\n'}• Você receberá uma
                   notificação no APP e em seu e-mail quando o pagamento for

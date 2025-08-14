@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  RefreshControl,
 } from 'react-native';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import type {StackNavigationProp} from '@react-navigation/stack';
@@ -100,7 +101,7 @@ export function HomeScreen() {
   };
 
   useEffect(() => {
-    if (!userData?.uid) return;
+    if (!userData?.uid && !userData?.profilePicture) return;
 
     setIsLoading(true);
 
@@ -232,10 +233,59 @@ export function HomeScreen() {
     return () => unsubscribe();
   }, [userData?.uid]);
 
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Função do Pull Refresh
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      // Recarrega as notificações
+      if (userData?.uid) {
+        const notificationsRef = collection(
+          db,
+          'users',
+          userData.uid,
+          'notifications',
+        );
+        const q = query(notificationsRef, orderBy('createdAt', 'desc'));
+        const querySnapshot = await getDocs(q);
+        const notificationsData = querySnapshot.docs.map(doc => doc.data());
+        setUnreadNotifications(
+          notificationsData.filter(notification => !notification.read).length,
+        );
+      }
+      
+      // Recarrega dados do perfil
+      if (userData?.uid) {
+        const userDoc = await getDocs(query(collection(db, 'users'), where('uid', '==', userData.uid)));
+        if (!userDoc.empty) {
+          const userData = userDoc.docs[0].data();
+          if (userData?.profilePicture) {
+            setProfilePicture(userData.profilePicture);
+          }
+        }
+      }
+      
+      console.log("Dados atualizados com sucesso!");
+    } catch (error) {
+      console.error("Erro ao atualizar dados:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [userData?.uid]);
+
   return (
     <ScrollView
-      contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}}
-      keyboardShouldPersistTaps="handled">
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={["#820AD1"]}
+          tintColor="#820AD1"
+        />
+      }
+      contentContainerStyle={{flexGrow: 1}}
+      showsVerticalScrollIndicator={false}>
       <ImageBackground
         source={images.bg_home_purple}
         className="flex-1"
@@ -284,7 +334,7 @@ export function HomeScreen() {
             </View>
 
             <View
-              className={`${isSmallScreen ? 'h-16' : 'h-20'} flex flex-row items-center justify-center gap-3 mt-5 mb-5 w-full`}>
+              className={`${isSmallScreen ? 'h-16' : 'h-24'} flex flex-row items-center justify-center gap-3 mt-5 mb-5 w-full`}>
               <TouchableOpacity
                 className="flex-1"
                 activeOpacity={0.8}
@@ -330,7 +380,7 @@ export function HomeScreen() {
                 textColor="white"
                 fontWeight="bold"
                 fontSize={isSmallScreen ? 22 : 25}
-                height={isSmallScreen ? 60 : 70}
+                height={isSmallScreen ? 60 : 80}
                 borderColor="second_orange"
                 borderBottomWidth={4}
                 borderRightWidth={2}
@@ -370,13 +420,13 @@ export function HomeScreen() {
               </ScrollView>
 
               <FilterDropdown
-                visible={showFilter}
+                visible={showFilter && topProducts.length > 0}
                 onClose={() => setShowFilter(false)}
                 options={availableProducts}
                 selectedOptions={selectedFilters}
                 onSelectOption={handleSelectFilter}
                 position={{
-                  top: isSmallScreen ? 320 : 400,
+                  top: isSmallScreen ? 320 : 370,
                   right: isSmallScreen ? horizontalPadding : 40,
                 }}
               />
@@ -391,7 +441,7 @@ export function HomeScreen() {
                 textColor="white"
                 fontWeight="bold"
                 fontSize={isSmallScreen ? 22 : 25}
-                height={isSmallScreen ? 60 : 70}
+                height={isSmallScreen ? 60 : 80}
                 borderColor="sixteen_purple"
                 borderBottomWidth={4}
                 borderRightWidth={2}

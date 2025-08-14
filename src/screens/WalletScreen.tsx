@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   Alert,
   ImageBackground,
@@ -6,6 +6,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  RefreshControl,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -44,6 +45,7 @@ export function WalletScreen() {
   });
   const [isLoadingButton, setIsLoadingButton] = useState(false);
   const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const isLoading = isLoadingBalance; // Só depende do balance agora
 
@@ -79,6 +81,28 @@ export function WalletScreen() {
 
     fetchData();
     fetchBalance();
+  }, [userData?.uid]);
+
+  // Função do Pull Refresh
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      if (userData?.uid) {
+        // Recarrega os dados de saque
+        const data = await getUserWithdrawals(userData.uid);
+        setData(data);
+        
+        // Recarrega o saldo
+        const balance = await getUserBalance(userData.uid);
+        setBalance(balance);
+        
+        console.log("Dados da carteira atualizados com sucesso!");
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar dados da carteira:", error);
+    } finally {
+      setRefreshing(false);
+    }
   }, [userData?.uid]);
 
   async function handleWithdrawalRequest() {
@@ -174,6 +198,14 @@ export function WalletScreen() {
 
   return (
     <ScrollView
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={["#820AD1"]}
+          tintColor="#820AD1"
+        />
+      }
       contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}}
       keyboardShouldPersistTaps="handled">
       <ImageBackground source={images.bg_white} className="flex-1">

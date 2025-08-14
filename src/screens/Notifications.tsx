@@ -1,10 +1,11 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {
   Text,
   View,
   ImageBackground,
   TouchableOpacity,
   FlatList,
+  RefreshControl,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {useAuth} from '../contexts/Auth';
@@ -33,6 +34,7 @@ export function Notifications() {
   const [showUnread, setShowUnread] = useState(true);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -80,6 +82,54 @@ export function Notifications() {
     };
 
     fetchNotifications();
+  }, [userData?.uid]);
+
+  // Função do Pull Refresh
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      // Força a recarga das notificações
+      if (userData?.uid) {
+        const notificationsRef = collection(
+          db,
+          'users',
+          userData.uid,
+          'notifications',
+        );
+        const q = query(notificationsRef, orderBy('createdAt', 'desc'));
+        const querySnapshot = await getDocs(q);
+        const batch = writeBatch(db);
+        const notificationsData = querySnapshot.docs.map(doc => {
+          const data = doc.data();
+
+          if (!data.read) {
+            batch.update(doc.ref, {read: true});
+          }
+
+          return {
+            id: data.id,
+            read: data.read,
+            ...data,
+            createdAt: data.createdAt?.toDate(),
+          };
+        });
+
+        await batch.commit();
+
+        setReadNotifications(
+          notificationsData.filter(notification => notification.read),
+        );
+        setUnreadNotifications(
+          notificationsData.filter(notification => !notification.read),
+        );
+        
+        console.log("Notificações atualizadas com sucesso!");
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar notificações:", error);
+    } finally {
+      setRefreshing(false);
+    }
   }, [userData?.uid]);
 
   return (
@@ -130,6 +180,14 @@ export function Notifications() {
               data={showUnread ? unreadNotifications : readNotifications}
               keyExtractor={item => item.documentId || "Não possui"}
               showsVerticalScrollIndicator={false}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  colors={["#820AD1"]}
+                  tintColor="#820AD1"
+                />
+              }
               contentContainerStyle={{paddingBottom: 60}}
               renderItem={({item}) => (
                 <View className="flex-row mb-2">

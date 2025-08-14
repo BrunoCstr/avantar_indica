@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   Text,
   View,
@@ -8,6 +8,7 @@ import {
   Platform,
   ImageBackground,
   Linking,
+  RefreshControl,
 } from 'react-native';
 import {indicationSchema, IndicationSchema} from '../schemas/validationSchema';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -46,6 +47,7 @@ export function IndicateInBulkScreen() {
     description: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const askForPermission = async () => {
     if (Platform.OS === 'android') {
@@ -231,6 +233,20 @@ export function IndicateInBulkScreen() {
     }
   };
 
+  // Função do Pull Refresh
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      // Recarrega os contatos
+      await loadContacts();
+      console.log("Contatos atualizados com sucesso!");
+    } catch (error) {
+      console.error("Erro ao atualizar contatos:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [userData?.uid]);
+
   // Envio do Formulário
 
   const {
@@ -414,6 +430,14 @@ export function IndicateInBulkScreen() {
                 data={filteredData}
                 keyExtractor={item => item.recordID || item.displayName || 'unknown'}
                 showsVerticalScrollIndicator={false}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    colors={["#820AD1"]}
+                    tintColor="#820AD1"
+                  />
+                }
                 renderItem={({item}) => (
                   <ConctactItem
                     contact={item}

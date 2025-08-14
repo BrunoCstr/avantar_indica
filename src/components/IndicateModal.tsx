@@ -28,6 +28,7 @@ import {BackButton} from '../components/BackButton';
 import {CustomModal} from '../components/CustomModal';
 import {useAuth} from '../contexts/Auth';
 import firestore from '@react-native-firebase/firestore';
+import RNPickerSelect from 'react-native-picker-select';
 
 const db = getFirestore();
 
@@ -192,31 +193,43 @@ export function IndicateModal({visible, onClose}: ModalProps) {
                       borderRadius: 10,
                       borderColor: errors.product ? 'red' : colors.blue,
                       backgroundColor: colors.tertiary_purple_opacity,
+                      height: 50,
                     }}>
-                    <Picker
-                      selectedValue={value}
+                    <RNPickerSelect
                       onValueChange={onChange}
+                      value={value}
+                      items={products.map(product => ({
+                        label: product,
+                        value: product,
+                      }))}
+                      placeholder={{
+                        label: 'Produto desejado',
+                        value: '',
+                        color: errors.product ? 'red' : colors.white_opacity,
+                      }}
                       style={{
-                        height: 50,
-                        width: '100%',
-                      }}>
-                      <Picker.Item
-                        label="Produto desejado"
-                        value=""
-                        style={{
+                        inputIOS: {
+                          fontSize: 16,
+                          paddingVertical: 12,
+                          paddingHorizontal: 10,
+                          color: colors.white,
+                          fontFamily: 'FamiljenGrotesk-Regular',
+                        },
+                        inputAndroid: {
+                          fontSize: 16,
+                          paddingHorizontal: 10,
+                          paddingVertical: 8,
+                          color: colors.white,
+                          fontFamily: 'FamiljenGrotesk-Regular',
+                        },
+                        placeholder: {
                           color: errors.product ? 'red' : colors.white_opacity,
                           fontSize: 13,
-                          fontFamily: 'FamiljenGrotesk-regular',
-                        }}
-                      />
-                      {products.map(product => (
-                        <Picker.Item
-                          key={product}
-                          label={product}
-                          value={product}
-                        />
-                      ))}
-                    </Picker>
+                          fontFamily: 'FamiljenGrotesk-Regular',
+                        },
+                      }}
+                      useNativeAndroidPickerStyle={false}
+                    />
                   </View>
                 )}
                 name="product"

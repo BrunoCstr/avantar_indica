@@ -18,11 +18,11 @@ import Settings from '../screens/Settings';
 // Componente wrapper para lidar com a lógica condicional
 function IndicateInBulkWrapper() {
   const {registrationStatus} = useAuth();
-  
+
   if (registrationStatus) {
     return <IndicateInBulkScreen />;
   }
-  
+
   return <WaitingConfirmationScreen />;
 }
 
@@ -33,6 +33,9 @@ export function AppStack() {
 
   if (isLoading) return <HomeSkeleton />;
 
+  if (!registrationStatus) {
+    return <WaitingConfirmationScreen />;
+  }
 
   return (
     <Stack.Navigator
