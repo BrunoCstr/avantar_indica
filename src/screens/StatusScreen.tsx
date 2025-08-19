@@ -38,6 +38,7 @@ import {
 import {useBottomNavigationPadding} from '../hooks/useBottomNavigationPadding';
 import {useResponsive} from '../hooks/useResponsive';
 import {formatTimeAgo} from '../utils/formatTimeToDistance';
+import {formatPhoneForDisplay} from '../utils/formatPhoneNumber';
 
 export function StatusScreen() {
   const {userData} = useAuth();
@@ -458,64 +459,86 @@ export function StatusScreen() {
         visible={showBulkModal}
         onRequestClose={() => setShowBulkModal(false)}
         transparent={true}>
-        <View style={{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)'}}>
+        <View style={{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.6)'}}>
           <KeyboardAvoidingView
-            className="flex-1 justify-center items-center px-2"
+            className="flex-1 justify-center items-center px-4"
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-            <View className="w-full max-w-sm bg-white rounded-2xl border-2 border-blue px-4 py-6">
-              <View className="justify-between items-center flex-row mb-2">
-                <BackButton
-                  onPress={() => setShowBulkModal(false)}
-                  color={colors.tertiary_purple}
-                  borderColor={colors.tertiary_purple}
-                />
-                <Text className="text-tertiary_purple font-bold text-2xl absolute left-1/2 -translate-x-1/2">
-                  Detalhes do Lote
-                </Text>
+            <View
+              style={{
+                width: '100%',
+                maxWidth: 380,
+                backgroundColor: '#fff',
+                borderRadius: 12,
+                shadowColor: colors.tertiary_purple,
+                shadowOffset: {width: 0, height: 8},
+                shadowOpacity: 0.3,
+                shadowRadius: 16,
+                elevation: 12,
+              }}>
+              {/* Header com gradiente */}
+              <View
+                style={{
+                  backgroundColor: colors.tertiary_purple,
+                  borderTopLeftRadius: 11,
+                  borderTopRightRadius: 11,
+                  paddingVertical: 20,
+                  paddingHorizontal: 24,
+                  marginBottom: 20,
+                }}
+                className="border-b-4 border-b-pink">
+                <View className="flex-row items-center justify-between">
+                  <BackButton
+                    color={colors.white}
+                    borderColor={colors.white}
+                    onPress={() => setShowBulkModal(false)}
+                  />
+                  <Text
+                    style={{
+                      color: colors.white,
+                      fontSize: 20,
+                      fontWeight: 'bold',
+                      flex: 1,
+                      textAlign: 'center',
+                      marginRight: 36,
+                    }}>
+                    Detalhes do Lote
+                  </Text>
+                </View>
               </View>
+
               <ScrollView
                 style={{maxHeight: 450}}
                 contentContainerStyle={{
-                  paddingBottom: 8,
-                  paddingHorizontal: 2,
-                }}>
-                <Text
+                  paddingHorizontal: 24,
+                  paddingBottom: 24,
+                }}
+                showsVerticalScrollIndicator={false}>
+                {/* Card de progresso */}
+                <View
                   style={{
-                    color: colors.black,
-                    fontSize: 15,
-                    marginBottom: 8,
-                    fontWeight: 'bold',
+                    borderRadius: 10,
+                    marginBottom: 20,
                   }}>
-                  {relativeDate ? `Enviado ${relativeDate}` : ''}
-                </Text>
-                <Text
-                  style={{
-                    fontWeight: 'bold',
-                    color: colors.tertiary_purple,
-                    marginBottom: 6,
-                  }}>
-                  Status:{' '}
-                  <Text style={{fontWeight: 'normal', color: colors.black}}>
-                    {selectedBulk.status}
-                  </Text>
-                </Text>
-                {/* Barra de progresso visual */}
-                <View style={{marginBottom: 10}}>
                   <Text
                     style={{
                       color: colors.tertiary_purple,
-                      marginBottom: 2,
-                      fontWeight: 'bold',
+                      fontSize: 14,
+                      fontWeight: '600',
+                      marginBottom: 12,
                     }}>
-                    Progresso:
+                    ⚡ Progresso
                   </Text>
+
+                  {/* Barra de progresso melhorada */}
                   <View
+                    className="bg-white"
                     style={{
-                      height: 14,
-                      backgroundColor: '#E6DBFF',
-                      borderRadius: 8,
+                      height: 15,
+                      borderRadius: 10,
                       overflow: 'hidden',
-                      width: '100%',
+                      marginBottom: 8,
+                      borderWidth: 1,
+                      borderColor: 'rgba(130, 10, 209, 0.1)',
                     }}>
                     <View
                       style={{
@@ -523,52 +546,246 @@ export function StatusScreen() {
                         width: `${progress}%`,
                         backgroundColor: colors.tertiary_purple,
                         borderRadius: 8,
+                        shadowColor: colors.tertiary_purple,
+                        shadowOffset: {width: 0, height: 2},
+                        shadowOpacity: 0.3,
+                        shadowRadius: 4,
+                        elevation: 3,
                       }}
                     />
                   </View>
+
                   <Text
-                    style={{color: colors.black, fontSize: 13, marginTop: 2}}>
-                    {progress}%
+                    style={{
+                      color: colors.tertiary_purple,
+                      fontSize: 16,
+                      fontWeight: 'bold',
+                      textAlign: 'center',
+                    }}>
+                    {progress}% concluído
                   </Text>
                 </View>
-                <Text
-                  style={{color: colors.tertiary_purple, fontWeight: 'bold'}}>
-                  Total de indicações:{' '}
-                  <Text style={{fontWeight: 'normal', color: colors.black}}>
-                    {selectedBulk.total}
-                  </Text>
-                </Text>
-                <Text
-                  style={{color: colors.tertiary_purple, fontWeight: 'bold'}}>
-                  Processadas:{' '}
-                  <Text style={{fontWeight: 'normal', color: colors.black}}>
-                    {selectedBulk.processed}
-                  </Text>
-                </Text>
-                <Text
-                  style={{
-                    marginTop: 10,
-                    fontWeight: 'bold',
-                    color: colors.tertiary_purple,
-                  }}>
-                  Indicações:
-                </Text>
-                {selectedBulk.indications &&
-                selectedBulk.indications.length > 0 ? (
-                  <ScrollView style={{maxHeight: 120}}>
-                    {selectedBulk.indications.map((item: any, idx: number) => (
-                      <Text
-                        key={idx}
-                        style={{fontSize: 13, color: colors.black}}>
-                        - {item.name} {item.phone ? `(${item.phone})` : ''}
-                      </Text>
-                    ))}
-                  </ScrollView>
-                ) : (
-                  <Text style={{color: colors.black}}>
-                    Nenhuma indicação encontrada neste lote.
-                  </Text>
+
+                {/* Cards de estatísticas */}
+                <View className="flex-row gap-3 mb-6">
+                  <View
+                    className="bg-white"
+                    style={{
+                      flex: 1,
+                      borderRadius: 12,
+                      padding: 16,
+                      borderWidth: 1,
+                      borderColor: 'rgba(37, 99, 235, 0.1)',
+                    }}>
+                    <Text
+                      className="text-black"
+                      style={{
+                        fontSize: 12,
+                        fontWeight: '600',
+                        marginBottom: 4,
+                      }}>
+                      Total
+                    </Text>
+                    <Text
+                      style={{
+                        color: colors.black,
+                        fontSize: 20,
+                        fontWeight: 'bold',
+                      }}>
+                      {selectedBulk.total}
+                    </Text>
+                  </View>
+
+                  <View
+                    style={{
+                      flex: 1,
+                      backgroundColor: '#f0fdf4',
+                      borderRadius: 12,
+                      padding: 16,
+                      borderWidth: 1,
+                      borderColor: 'rgba(34, 197, 94, 0.1)',
+                    }}>
+                    <Text
+                      className="text-black"
+                      style={{
+                        fontSize: 12,
+                        fontWeight: '600',
+                        marginBottom: 4,
+                      }}>
+                      Processadas
+                    </Text>
+                    <Text
+                      style={{
+                        color: colors.green,
+                        fontSize: 20,
+                        fontWeight: 'bold',
+                      }}>
+                      {selectedBulk.processed}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Card de data */}
+                {relativeDate && (
+                  <View>
+                    <Text
+                      style={{
+                        color: colors.black,
+                        fontSize: 12,
+                        fontWeight: '600',
+                      }}>
+                      Enviado {relativeDate}
+                    </Text>
+                  </View>
                 )}
+
+                {/* Card de status */}
+                <View
+                  style={{
+                    paddingTop: 16,
+                    marginBottom: 20,
+                  }}>
+                  <Text
+                    style={{
+                      color: colors.tertiary_purple,
+                      fontSize: 14,
+                      fontWeight: '600',
+                      marginBottom: 8,
+                    }}>
+                    Status
+                  </Text>
+                  <View
+                    style={{
+                      backgroundColor:
+                        selectedBulk.status === 'Em Andamento'
+                          ? 'rgba(255, 165, 0, 0.1)'
+                          : selectedBulk.status === 'Concluído'
+                            ? 'rgba(34, 197, 94, 0.1)'
+                            : colors.white,
+                      borderRadius: 8,
+                      padding: 12,
+                      borderWidth: 1,
+                      borderColor:
+                        selectedBulk.status === 'Em Andamento'
+                          ? 'rgba(255, 165, 0, 0.2)'
+                          : selectedBulk.status === 'Concluído'
+                            ? 'rgba(34, 197, 94, 0.2)'
+                            : 'rgba(130, 10, 209, 0.1)',
+                    }}>
+                    <Text
+                      style={{
+                        color:
+                          selectedBulk.status === 'Em Andamento'
+                            ? colors.orange
+                            : selectedBulk.status === 'Concluído'
+                              ? colors.green
+                              : colors.black,
+                        fontSize: 16,
+                        fontWeight: '500',
+                      }}>
+                      {selectedBulk.status}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Lista de indicações */}
+                <View>
+                  <Text
+                    style={{
+                      color: colors.tertiary_purple,
+                      fontSize: 14,
+                      fontWeight: '600',
+                      marginBottom: 12,
+                    }}>
+                    Indicações ({selectedBulk.indications?.length || 0})
+                  </Text>
+
+                  {selectedBulk.indications &&
+                  selectedBulk.indications.length > 0 ? (
+                    <View
+                      style={{
+                        backgroundColor: colors.white,
+                        borderRadius: 8,
+                        padding: 12,
+                        maxHeight: 120,
+                        borderWidth: 1,
+                        borderColor: 'rgba(130, 10, 209, 0.1)',
+                      }}>
+                      <ScrollView showsVerticalScrollIndicator={false}>
+                        {selectedBulk.indications.map(
+                          (item: any, idx: number) => (
+                            <View
+                              key={idx}
+                              style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                paddingVertical: 6,
+                                borderBottomWidth:
+                                  idx < selectedBulk.indications.length - 1
+                                    ? 1
+                                    : 0,
+                                borderBottomColor: 'rgba(130, 10, 209, 0.05)',
+                              }}>
+                              <View
+                                style={{
+                                  width: 8,
+                                  height: 8,
+                                  borderRadius: 4,
+                                  backgroundColor: colors.tertiary_purple,
+                                  marginRight: 12,
+                                }}
+                              />
+                              <Text
+                                style={{
+                                  fontSize: 14,
+                                  color: colors.black,
+                                  flex: 1,
+                                }}>
+                                {item.name}
+                              </Text>
+                              {item.phone && (
+                                <Text
+                                  style={{
+                                    fontSize: 12,
+                                    color: colors.tertiary_purple,
+                                    fontWeight: '500',
+                                  }}>
+                                  {formatPhoneForDisplay(item.phone)}
+                                </Text>
+                              )}
+                            </View>
+                          ),
+                        )}
+                      </ScrollView>
+                    </View>
+                  ) : (
+                    <View
+                      style={{
+                        backgroundColor: colors.white,
+                        borderRadius: 8,
+                        padding: 16,
+                        alignItems: 'center',
+                        borderWidth: 1,
+                        borderColor: 'rgba(130, 10, 209, 0.1)',
+                      }}>
+                      <FontAwesome6
+                        name="clipboard-list"
+                        size={24}
+                        color={colors.tertiary_purple}
+                        style={{marginBottom: 8, opacity: 0.7}}
+                      />
+                      <Text
+                        style={{
+                          color: colors.black,
+                          fontSize: 14,
+                          textAlign: 'center',
+                          opacity: 0.7,
+                        }}>
+                        Nenhuma indicação encontrada neste lote.
+                      </Text>
+                    </View>
+                  )}
+                </View>
               </ScrollView>
             </View>
           </KeyboardAvoidingView>
@@ -580,74 +797,281 @@ export function StatusScreen() {
   const renderDetailModal = () => {
     if (!selectedDetail) return null;
     const relativeDate = selectedDetail.updatedAt || '';
+
+    // Função para obter a cor do status
+    const getStatusColor = (status: string) => {
+      switch (status) {
+        case 'FECHADO':
+          return colors.green;
+        case 'NÃO FECHADO':
+          return colors.red;
+        case 'AGUARDANDO CLIENTE':
+          return colors.primary_purple;
+        case 'AGUARDANDO PAGAMENTO':
+          return colors.orange;
+        case 'CONTATO REALIZADO':
+          return colors.primary_purple;
+        case 'PENDENTE CONTATO':
+          return colors.orange;
+        case 'NÃO INTERESSOU':
+          return colors.red;
+        case 'INICIO DE PROPOSTA':
+          return colors.primary_purple;
+        case 'PROPOSTA APRESENTADA':
+          return colors.primary_purple;
+        case 'SEGURO RECUSADO':
+          return colors.red;
+        default:
+          return colors.black;
+      }
+    };
+
+    // Função para obter cor de fundo do status
+    const getStatusBgColor = (status: string) => {
+      switch (status) {
+        case 'FECHADO':
+          return '#dcfce7';
+        case 'NÃO FECHADO':
+          return '#fee2e2';
+        case 'AGUARDANDO PAGAMENTO':
+          return '#fed7aa';
+        case 'AGUARDANDO CLIENTE':
+          return '#E6DBFF';
+        case 'CONTATO REALIZADO':
+          return '#E6DBFF';
+        case 'PENDENTE CONTATO':
+          return '#fed7aa';
+        case 'NÃO INTERESSOU':
+          return '#fee2e2';
+        case 'INICIO DE PROPOSTA':
+          return '#E6DBFF';
+        case 'PROPOSTA APRESENTADA':
+          return '#E6DBFF';
+        case 'SEGURO RECUSADO':
+          return '#fee2e2';
+        default:
+          return '#f3f4f6';
+      }
+    };
+
     return (
       <Modal
         visible={showDetailModal}
         onRequestClose={() => setShowDetailModal(false)}
         transparent={true}>
-        <View style={{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)'}}>
+        <View style={{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.6)'}}>
           <KeyboardAvoidingView
-            className="flex-1 justify-center items-center px-2"
+            className="flex-1 justify-center items-center px-4"
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-            <View className="w-full max-w-sm bg-white rounded-2xl border-2 border-blue px-4 py-6">
-              <View className="justify-between items-center flex-row mb-2">
-                <BackButton
-                  onPress={() => setShowDetailModal(false)}
-                  color={colors.tertiary_purple}
-                  borderColor={colors.tertiary_purple}
-                />
-                <Text className="text-tertiary_purple font-bold text-2xl absolute left-1/2 -translate-x-1/2">
-                  Detalhes
-                </Text>
+            <View
+              style={{
+                width: '100%',
+                maxWidth: 380,
+                backgroundColor: '#fff',
+                borderRadius: 12,
+                shadowColor: colors.tertiary_purple,
+                shadowOffset: {width: 0, height: 8},
+                shadowOpacity: 0.3,
+                shadowRadius: 16,
+                elevation: 12,
+              }}>
+              {/* Header com gradiente */}
+              <View
+                style={{
+                  backgroundColor: colors.tertiary_purple,
+                  borderTopLeftRadius: 11,
+                  borderTopRightRadius: 11,
+                  paddingVertical: 20,
+                  paddingHorizontal: 24,
+                  marginBottom: 20,
+                }}
+                className="border-b-4 border-b-pink">
+                <View className="flex-row items-center justify-between">
+                  <BackButton
+                    color={colors.white}
+                    borderColor={colors.white}
+                    onPress={() => setShowDetailModal(false)}
+                  />
+                  <Text
+                    style={{
+                      color: colors.white,
+                      fontSize: 20,
+                      fontWeight: 'bold',
+                      flex: 1,
+                      textAlign: 'center',
+                      marginRight: 36,
+                    }}>
+                    Detalhes da{' '}
+                    {selectedDetail.type === 'opportunity'
+                      ? 'Oportunidade'
+                      : 'Indicação'}
+                  </Text>
+                </View>
               </View>
+
               <ScrollView
                 style={{maxHeight: 400}}
                 contentContainerStyle={{
-                  paddingBottom: 12,
-                  paddingHorizontal: 2,
-                }}>
-                <Text
+                  paddingHorizontal: 24,
+                  paddingBottom: 24,
+                }}
+                showsVerticalScrollIndicator={false}>
+                {/* Card de data */}
+                {relativeDate && (
+                  <View>
+                    <Text
+                      style={{
+                        color: colors.black,
+                        fontSize: 12,
+                        fontWeight: '600',
+                      }}>
+                      Última atualização: {relativeDate}
+                    </Text>
+                  </View>
+                )}
+
+                {/* Nome */}
+                <View
                   style={{
-                    color: colors.black,
-                    fontSize: 15,
-                    marginBottom: 8,
-                    fontWeight: 'bold',
+                    paddingTop: 16,
+                    marginBottom: 20,
                   }}>
-                  {relativeDate}
-                </Text>
-                <Text
-                  style={{
-                    fontWeight: 'bold',
-                    color: colors.tertiary_purple,
-                    marginBottom: 6,
-                  }}>
-                  Nome:{' '}
-                  <Text style={{fontWeight: 'normal', color: colors.black}}>
-                    {selectedDetail.name}
+                  <Text
+                    style={{
+                      color: colors.tertiary_purple,
+                      fontSize: 14,
+                      fontWeight: '600',
+                      marginBottom: 8,
+                    }}>
+                    Nome
                   </Text>
-                </Text>
-                <Text
+                  <View
+                    style={{
+                      backgroundColor: colors.white,
+                      borderRadius: 8,
+                      padding: 12,
+                      borderWidth: 1,
+                      borderColor: 'rgba(130, 10, 209, 0.1)',
+                    }}>
+                    <Text
+                      style={{
+                        color: colors.black,
+                        fontSize: 16,
+                        fontWeight: '500',
+                      }}>
+                      {selectedDetail.name}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Produto */}
+                <View
                   style={{
-                    fontWeight: 'bold',
-                    color: colors.tertiary_purple,
-                    marginBottom: 6,
+                    marginBottom: 20,
                   }}>
-                  Produto:{' '}
-                  <Text style={{fontWeight: 'normal', color: colors.black}}>
-                    {selectedDetail.product}
+                  <Text
+                    style={{
+                      color: colors.tertiary_purple,
+                      fontSize: 14,
+                      fontWeight: '600',
+                      marginBottom: 8,
+                    }}>
+                    Produto
                   </Text>
-                </Text>
-                <Text
+                  <View
+                    style={{
+                      backgroundColor: colors.white,
+                      borderRadius: 8,
+                      padding: 12,
+                      borderWidth: 1,
+                      borderColor: 'rgba(130, 10, 209, 0.1)',
+                    }}>
+                    <Text
+                      style={{
+                        color: colors.black,
+                        fontSize: 16,
+                        fontWeight: '500',
+                      }}>
+                      {selectedDetail.product}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Status */}
+                <View
                   style={{
-                    fontWeight: 'bold',
-                    color: colors.tertiary_purple,
-                    marginBottom: 6,
+                    marginBottom: 20,
                   }}>
-                  Status:{' '}
-                  <Text style={{fontWeight: 'normal', color: colors.black}}>
-                    {selectedDetail.status}
+                  <Text
+                    style={{
+                      color: colors.tertiary_purple,
+                      fontSize: 14,
+                      fontWeight: '600',
+                      marginBottom: 8,
+                    }}>
+                    Status
                   </Text>
-                </Text>
+                  <View
+                    style={{
+                      backgroundColor: colors.white,
+                      borderRadius: 8,
+                      padding: 12,
+                      borderWidth: 1,
+                      borderColor: 'rgba(130, 10, 209, 0.1)',
+                    }}>
+                    <View
+                      style={{
+                        backgroundColor: getStatusBgColor(
+                          selectedDetail.status,
+                        ),
+                        borderRadius: 6,
+                        paddingHorizontal: 12,
+                        paddingVertical: 6,
+                        alignSelf: 'flex-start',
+                      }}>
+                      <Text
+                        style={{
+                          color: getStatusColor(selectedDetail.status),
+                          fontSize: 14,
+                          fontWeight: '600',
+                        }}>
+                        {selectedDetail.status}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Card de tipo */}
+                <View
+                  className="bg-white"
+                  style={{
+                    borderRadius: 12,
+                    padding: 16,
+                    borderWidth: 1,
+                    borderColor: 'rgba(130, 10, 209, 0.1)',
+                  }}>
+                  <Text
+                    style={{
+                      color: colors.primary_purple,
+                      fontSize: 14,
+                      fontWeight: '600',
+                      marginBottom: 8,
+                    }}>
+                    {selectedDetail.type === 'opportunity'
+                      ? 'Tipo: Oportunidade'
+                      : 'Tipo: Indicação'}
+                  </Text>
+                  <Text
+                    style={{
+                      color: colors.black,
+                      fontSize: 14,
+                      opacity: 0.8,
+                    }}>
+                    {selectedDetail.type === 'opportunity'
+                      ? 'Esta é uma oportunidade de negócio identificada, ou seja, o lead já está interessado em adquirir o produto.'
+                      : 'O tipo ainda está como indicação, isso significa que ou está pendente o contato, ou o contato foi realizado e está aguardando a resposta do lead.'}
+                  </Text>
+                </View>
               </ScrollView>
             </View>
           </KeyboardAvoidingView>
@@ -664,14 +1088,30 @@ export function StatusScreen() {
       {isLoading ? (
         <StatusScreenSkeleton />
       ) : (
-        <View style={{flex: 1, paddingHorizontal: horizontalPadding, paddingTop: isSmallScreen ? 16 : 20}}>
+        <View
+          style={{
+            flex: 1,
+            paddingHorizontal: horizontalPadding,
+            paddingTop: isSmallScreen ? 16 : 20,
+          }}>
           {/* Header */}
           {renderListHeader()}
 
           {/* Lista de Status */}
-          <View style={{flex: 1, marginBottom: isSmallScreen ? paddingBottom * 0.3 : paddingBottom * 0.5}}>
+          <View
+            style={{
+              flex: 1,
+              marginBottom: isSmallScreen
+                ? paddingBottom * 0.3
+                : paddingBottom * 0.5,
+            }}>
             {filteredData.length === 0 ? (
-              <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
                 <FontAwesome6
                   name="clipboard-list"
                   size={isSmallScreen ? 50 : 60}
@@ -692,7 +1132,7 @@ export function StatusScreen() {
             ) : (
               <FlatList
                 data={filteredData}
-                keyExtractor={(item) => item.id}
+                keyExtractor={item => item.id}
                 renderItem={({item}) => {
                   if (item.type === 'bulk') {
                     // Card especial para indicação em massa
