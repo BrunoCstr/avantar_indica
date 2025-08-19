@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   RefreshControl,
+  FlatList,
 } from 'react-native';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -24,7 +25,7 @@ import firestore, {
 
 import images from '../data/images';
 import {colors} from '../styles/colors';
-import {FlatList, TextInput} from 'react-native-gesture-handler';
+import {TextInput} from 'react-native-gesture-handler';
 import {BackButton} from '../components/BackButton';
 import {FilterDropdown} from '../components/FilterDropdown';
 import {StatusScreenSkeleton} from '../components/skeletons/StatusScreenSkeleton';
@@ -663,29 +664,14 @@ export function StatusScreen() {
       {isLoading ? (
         <StatusScreenSkeleton />
       ) : (
-        <ScrollView
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={['#820AD1']}
-              tintColor="#820AD1"
-            />
-          }
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            flexGrow: 1,
-            paddingBottom: isSmallScreen ? 100 : 120,
-            paddingHorizontal: horizontalPadding,
-            paddingTop: isSmallScreen ? 16 : 20,
-          }}>
+        <View style={{flex: 1, paddingHorizontal: horizontalPadding, paddingTop: isSmallScreen ? 16 : 20}}>
           {/* Header */}
           {renderListHeader()}
 
           {/* Lista de Status */}
-          <View className="rounded-2xl flex-1">
+          <View style={{flex: 1, marginBottom: isSmallScreen ? paddingBottom * 0.3 : paddingBottom * 0.5}}>
             {filteredData.length === 0 ? (
-              <View className="flex-1 justify-center items-center">
+              <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                 <FontAwesome6
                   name="clipboard-list"
                   size={isSmallScreen ? 50 : 60}
@@ -704,8 +690,10 @@ export function StatusScreen() {
                 </Text>
               </View>
             ) : (
-              <View style={{flex: 1}}>
-                {filteredData.map((item, index) => {
+              <FlatList
+                data={filteredData}
+                keyExtractor={(item) => item.id}
+                renderItem={({item}) => {
                   if (item.type === 'bulk') {
                     // Card especial para indicação em massa
                     const sentDate = item.createdAt;
@@ -715,7 +703,6 @@ export function StatusScreen() {
                     }
                     return (
                       <TouchableOpacity
-                        key={item.id}
                         className="bg-white rounded-xl mb-2"
                         activeOpacity={0.7}
                         style={{
@@ -796,7 +783,6 @@ export function StatusScreen() {
 
                   return (
                     <TouchableOpacity
-                      key={item.id}
                       className="bg-white rounded-xl mb-2"
                       activeOpacity={0.7}
                       style={{
@@ -877,15 +863,28 @@ export function StatusScreen() {
                       </View>
                     </TouchableOpacity>
                   );
-                })}
-              </View>
+                }}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    colors={['#820AD1']}
+                    tintColor="#820AD1"
+                  />
+                }
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{
+                  paddingBottom: 20,
+                  flexGrow: 1,
+                }}
+              />
             )}
           </View>
           {/* Modal de detalhes do lote em massa */}
           {renderBulkModal()}
           {/* Modal de detalhes de indicação/oportunidade */}
           {renderDetailModal()}
-        </ScrollView>
+        </View>
       )}
     </ImageBackground>
   );

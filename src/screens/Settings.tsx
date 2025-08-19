@@ -670,6 +670,13 @@ export function Settings() {
               </Text>
             </TouchableOpacity>
           </View>
+
+          <View className="flex-row items-center justify-between">
+            <Text className="text-white text-sm font-regular mb-2">
+              Versão do Aplicativo
+            </Text>
+            <Text className="text-white text-sm font-regular mb-2">1.0.0</Text>
+          </View>
         </View>
       </ScrollView>
       <CustomModal
