@@ -101,6 +101,40 @@ export const createUserAsAdmin = functions.https.onCall(
           balance: 0,
         });
 
+      // Registrar aceite dos termos para usuários criados por admin
+      // Como é criação por admin, assumimos que os termos foram aceitos
+      const acceptTermsData = {
+        uid: userRecord.uid,
+        email: email,
+        fullName: fullName,
+        ip: null, // Não disponível em criação por admin
+        location: {
+          city: null,
+          region: null,
+          country: null,
+          latitude: null,
+          longitude: null,
+          timezone: null,
+        },
+        acceptedAt: admin.firestore.FieldValue.serverTimestamp(),
+        userAgent: 'Admin Creation',
+        deviceInfo: {
+          platform: 'admin',
+          timestamp: new Date().toISOString(),
+          createdBy: requesterUid,
+        },
+        acceptedByAdmin: true,
+        adminUid: requesterUid
+      };
+
+      // Criar como subcoleção da coleção users
+      await db
+        .collection('users')
+        .doc(userRecord.uid)
+        .collection('accept_terms')
+        .doc('terms_acceptance')
+        .set(acceptTermsData);
+
       return userRecord.uid;
     } catch (error: any) {
       console.error('Erro ao criar usuário como admin:', error);

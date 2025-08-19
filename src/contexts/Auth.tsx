@@ -7,8 +7,11 @@ import firestore, {
   updateDoc,
   onSnapshot,
   serverTimestamp,
+  collection,
 } from '@react-native-firebase/firestore';
+import functions from '@react-native-firebase/functions';
 import {getDefaultProfilePicture} from '../utils/getDefaultProfilePicture';
+import {getUserLocation, getDeviceInfo} from '../utils/getUserLocation';
 import messaging from '@react-native-firebase/messaging';
 import {validatePassword} from '../services/settings/settings';
 
@@ -180,6 +183,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       const profilePictureUrl = await getDefaultProfilePicture();
       const fcmToken = await messaging().getToken();
 
+      // Obter localização do usuário
+      const userLocation = await getUserLocation();
+      const deviceInfo = getDeviceInfo();
+
       await setDoc(
         doc(db, 'users', user.uid),
         {
@@ -209,6 +216,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         },
         {merge: true},
       );
+
+      // Registrar aceite dos termos usando Cloud Function
+      try {
+        await functions().httpsCallable('registerTermsAcceptance')({
+          uid: user.uid,
+          email: email,
+          fullName: fullName,
+          userLocation: userLocation,
+          deviceInfo: deviceInfo,
+        });
+      } catch (termsError) {
+        console.warn('Erro ao registrar aceite dos termos:', termsError);
+        // Não falha o cadastro se o registro dos termos falhar
+      }
 
       await user.updateProfile({displayName: fullName});
     } catch (err: any) {

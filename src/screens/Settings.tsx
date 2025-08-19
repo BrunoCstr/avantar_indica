@@ -41,6 +41,11 @@ const CONTACTS_PERMISSION = Platform.select({
   android: PERMISSIONS.ANDROID.READ_CONTACTS,
 });
 
+export const versionApp = {
+  version: '1.0.0',
+  date: '2025-08-19',
+};
+
 export function Settings() {
   const [contactsStatus, setContactsStatus] = useState('loading');
   const [contactsEnabled, setContactsEnabled] = useState(false);
@@ -107,7 +112,7 @@ export function Settings() {
     try {
       // Recarrega as permissões
       await fetchPermissions();
-      
+
       // Recarrega as preferências de notificação
       if (userData?.uid) {
         const preferences = await getNotificationPreferences(userData.uid);
@@ -115,10 +120,10 @@ export function Settings() {
         setStatusNotification(preferences.status);
         setWithdrawNotification(preferences.withdraw);
       }
-      
-      console.log("Configurações atualizadas com sucesso!");
+
+      console.log('Configurações atualizadas com sucesso!');
     } catch (error) {
-      console.error("Erro ao atualizar configurações:", error);
+      console.error('Erro ao atualizar configurações:', error);
     } finally {
       setRefreshing(false);
     }
@@ -302,7 +307,7 @@ export function Settings() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#820AD1"]}
+            colors={['#820AD1']}
             tintColor="#820AD1"
           />
         }
@@ -675,7 +680,9 @@ export function Settings() {
             <Text className="text-white text-sm font-regular mb-2">
               Versão do Aplicativo
             </Text>
-            <Text className="text-white text-sm font-regular mb-2">1.0.0</Text>
+            <Text className="text-white text-sm font-regular mb-2">
+              {versionApp.version}
+            </Text>
           </View>
         </View>
       </ScrollView>

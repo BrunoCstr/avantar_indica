@@ -16,5 +16,6 @@ export {onUserUpdate} from './others/usernameSynchronization';
 export {onUnitUpdate} from './others/unitnameSynchronization';
 export {onProfilePictureUpdate} from './others/profilePictureSynchronization';
 export {moveToArchived} from './others/moveToArchived';
+export {registerTermsAcceptance} from './auth/registerTermsAcceptance';
 export * from './auth/updateUserEmail';
 export * from './auth/toggleUserActive';
