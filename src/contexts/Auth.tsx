@@ -193,6 +193,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
           fullName,
           email,
           affiliated_to,
+          unitId: affiliated_to,
           registration_status: false,
           createdAt: serverTimestamp(),
           uid: user.uid,
@@ -254,10 +255,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         password,
       );
       const user = userCredential.user;
-      
+
       // Atualizar o documento do usuário diretamente
       const userRef = doc(db, 'users', user.uid);
-      
+
       // Solicitar permissões de notificação e obter FCM token
       let fcmToken = null;
       try {
@@ -272,7 +273,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         isFirstLogin: false,
         fcmToken: fcmToken,
       });
-      
     } catch (err: any) {
       console.error('Erro ao logar o usuário:', err);
 

@@ -56,7 +56,10 @@ export function SignUpScreen() {
         const unitsSnapshot = await getDocs(unitsCollection);
         const unitsList = unitsSnapshot.docs.map(doc => doc.data());
 
-        setUnits(unitsList);
+        // Filtrar a unidade "Avantar Franqueadora" da lista
+        const filteredUnits = unitsList.filter(unit => unit.name !== 'Avantar Franqueadora');
+
+        setUnits(filteredUnits);
       } catch (error) {
         console.error('Erro ao buscar unidades:', error);
       }
@@ -267,7 +270,7 @@ export function SignUpScreen() {
                       setShowPassword(!showPassword);
                     }}>
                     <Ionicons
-                      name={showPassword ? 'eye-off' : 'eye'}
+                      name={showPassword ? 'eye' : 'eye-off'}
                       size={20}
                       color={colors.white}
                     />
@@ -296,7 +299,7 @@ export function SignUpScreen() {
                       setShowConfirmPassword(!showConfirmPassword)
                     }>
                     <Ionicons
-                      name={showConfirmPassword ? 'eye-off' : 'eye'}
+                      name={showConfirmPassword ? 'eye' : 'eye-off'}
                       size={20}
                       color={colors.white}
                     />

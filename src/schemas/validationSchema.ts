@@ -47,3 +47,16 @@ export const indicationSchema = z.object({
 
 export type IndicationSchema = z.infer<typeof indicationSchema>;
 
+// Validação do valor de saque
+export const withdrawalAmountSchema = z.object({
+  amount: z.number()
+    .min(700, "O valor mínimo para saque é R$ 700,00")
+    .positive("O valor deve ser maior que zero")
+    .finite("O valor deve ser um número válido")
+    .refine((val) => !isNaN(val), {
+      message: "O valor deve ser um número válido"
+    })
+})
+
+export type WithdrawalAmountFormData = z.infer<typeof withdrawalAmountSchema>;
+

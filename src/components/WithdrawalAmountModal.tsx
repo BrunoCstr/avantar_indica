@@ -14,6 +14,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {colors} from '../styles/colors';
 import {CustomModal} from './CustomModal';
+import {withdrawalAmountSchema} from '../schemas/validationSchema';
 
 interface WithdrawalAmountModalProps {
   visible: boolean;
@@ -50,6 +51,12 @@ export function WithdrawalAmountModal({
 
     // Converte para centavos
     const cents = parseInt(numericValue, 10);
+    
+    // Verifica se é um número válido
+    if (isNaN(cents)) {
+      return '';
+    }
+    
     const reais = cents / 100;
 
     // Formata para moeda brasileira
@@ -61,6 +68,19 @@ export function WithdrawalAmountModal({
     }).format(reais);
   };
 
+  // Função para validar e processar o input
+  const handleAmountChange = (value: string) => {
+    // Remove tudo que não é número
+    const numericValue = value.replace(/\D/g, '');
+    
+    // Limita o valor a um máximo razoável (R$ 999.999,99)
+    if (numericValue.length > 8) {
+      return;
+    }
+    
+    setAmount(numericValue);
+  };
+
   // Atualiza o valor formatado quando o usuário digita
   useEffect(() => {
     setFormattedAmount(formatCurrency(amount));
@@ -68,9 +88,10 @@ export function WithdrawalAmountModal({
 
   // Função para adicionar valor rápido
   const addQuickAmount = (value: number) => {
-    const currentAmount = parseFloat(amount.replace(/\D/g, '')) / 100 || 0;
+    const currentAmount = parseFloat(amount) / 100 || 0;
     const newAmount = currentAmount + value;
-    setAmount(Math.floor(newAmount * 100).toString());
+    const newAmountCents = Math.floor(newAmount * 100);
+    setAmount(newAmountCents.toString());
   };
 
   // Função para definir valor máximo
@@ -83,19 +104,38 @@ export function WithdrawalAmountModal({
     setAmount('');
   };
 
+  // Função para obter o valor numérico atual
+  const getCurrentNumericAmount = (): number => {
+    const numericAmount = parseFloat(amount) / 100;
+    return isNaN(numericAmount) ? 0 : numericAmount;
+  };
+
+  // Função para validar o valor usando o schema
+  const validateAmount = (amount: number) => {
+    try {
+      withdrawalAmountSchema.parse({ amount });
+      return { isValid: true, error: null };
+    } catch (error: any) {
+      return { isValid: false, error: error.errors[0]?.message || 'Valor inválido' };
+    }
+  };
+
   // Função para confirmar saque
   const handleConfirm = () => {
-    const numericAmount = parseFloat(amount.replace(/\D/g, '')) / 100;
+    const numericAmount = getCurrentNumericAmount();
 
-    if (numericAmount < 700) {
+    // Validação usando o schema
+    const validation = validateAmount(numericAmount);
+    if (!validation.isValid) {
       setIsModalVisible(true);
       setModalMessage({
-        title: 'Valor mínimo',
-        description: 'O valor mínimo para saque é R$ 700,00',
+        title: 'Valor inválido',
+        description: validation.error || 'Digite um valor válido para o saque',
       });
       return;
     }
 
+    // Validação adicional: valor máximo (saldo disponível)
     if (numericAmount > balance) {
       setIsModalVisible(true);
       setModalMessage({
@@ -106,6 +146,13 @@ export function WithdrawalAmountModal({
     }
 
     onConfirm(numericAmount);
+  };
+
+  // Verifica se o botão deve estar habilitado
+  const isButtonEnabled = () => {
+    const numericAmount = getCurrentNumericAmount();
+    const validation = validateAmount(numericAmount);
+    return amount.length > 0 && validation.isValid && numericAmount <= balance && !isLoading;
   };
 
   return (
@@ -170,13 +217,18 @@ export function WithdrawalAmountModal({
                 <TextInput
                   className="text-3xl font-bold text-white text-center"
                   value={formattedAmount}
-                  onChangeText={setAmount}
+                  onChangeText={handleAmountChange}
                   placeholder="R$ 0,00"
                   placeholderTextColor={colors.gray}
                   keyboardType="numeric"
                   autoFocus
+                  maxLength={20}
                 />
               </View>
+              {/* Indicador de valor mínimo */}
+              <Text className="text-white text-xs mt-2 text-center">
+                Valor mínimo: R$ 700,00
+              </Text>
             </View>
 
             {/* Botões de valor rápido */}
@@ -185,7 +237,7 @@ export function WithdrawalAmountModal({
                 Valores rápidos
               </Text>
               <View className="flex-row flex-wrap gap-2">
-                {[100, 200, 500, 1000].map(value => (
+                {[700, 1000, 1500, 2000].map(value => (
                   <TouchableOpacity
                     key={value}
                     className="bg-primary_purple px-4 py-2 rounded-lg"
@@ -223,9 +275,11 @@ export function WithdrawalAmountModal({
             {/* Botão confirmar */}
             <View className="px-6 pb-6">
               <TouchableOpacity
-                className="h-16 rounded-xl overflow-hidden border-[1px] border-blue"
+                className={`h-16 rounded-xl overflow-hidden border-[1px] border-blue ${
+                  !isButtonEnabled() ? 'opacity-50' : ''
+                }`}
                 onPress={handleConfirm}
-                disabled={isLoading || !amount}>
+                disabled={!isButtonEnabled()}>
                 <LinearGradient
                   className="flex-1 justify-center items-center"
                   colors={['#9743F8', '#4F00A9']}

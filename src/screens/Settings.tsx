@@ -579,7 +579,7 @@ export function Settings() {
                   style={{position: 'absolute', right: 10, top: 12}}
                   onPress={() => setShowCurrentPassword(prev => !prev)}>
                   <Feather
-                    name={showCurrentPassword ? 'eye' : 'eye-off'}
+                    name={showCurrentPassword ? 'eye-off' : 'eye'}
                     size={22}
                     color={colors.gray_dark}
                   />
@@ -606,7 +606,7 @@ export function Settings() {
                   style={{position: 'absolute', right: 10, top: 12}}
                   onPress={() => setShowNewPassword(prev => !prev)}>
                   <Feather
-                    name={showNewPassword ? 'eye' : 'eye-off'}
+                    name={showNewPassword ? 'eye-off' : 'eye'}
                     size={22}
                     color={colors.gray_dark}
                   />
@@ -633,7 +633,7 @@ export function Settings() {
                   style={{position: 'absolute', right: 10, top: 12}}
                   onPress={() => setShowConfirmPassword(prev => !prev)}>
                   <Feather
-                    name={showConfirmPassword ? 'eye' : 'eye-off'}
+                    name={showConfirmPassword ? 'eye-off' : 'eye'}
                     size={22}
                     color={colors.gray_dark}
                   />
@@ -681,7 +681,7 @@ export function Settings() {
               Versão do Aplicativo
             </Text>
             <Text className="text-white text-sm font-regular mb-2">
-              {versionApp.version}
+              {versionApp}
             </Text>
           </View>
         </View>
