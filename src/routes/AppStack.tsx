@@ -42,6 +42,7 @@ export function AppStack() {
       screenOptions={{
         gestureEnabled: false,
         headerShown: false,
+        gestureResponseDistance: 0,
       }}>
       <Stack.Screen
         name="BottomNavigator"

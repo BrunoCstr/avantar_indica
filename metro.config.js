@@ -10,6 +10,9 @@ const config = mergeConfig(defaultConfig, {
   resolver: {
     assetExts: defaultConfig.resolver.assetExts.filter(ext => ext !== "svg"),
     sourceExts: [...defaultConfig.resolver.sourceExts, "svg"],
+    alias: {
+      'react-native-gesture-handler': require.resolve('react-native-gesture-handler'),
+    },
   },
 });
 

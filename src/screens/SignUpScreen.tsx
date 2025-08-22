@@ -1,7 +1,6 @@
-import React, {useEffect, useState} from 'react';
-import {Picker} from '@react-native-picker/picker';
-import {useForm, Controller} from 'react-hook-form';
-import {zodResolver} from '@hookform/resolvers/zod';
+import React, { useEffect, useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
@@ -21,16 +20,18 @@ import {
   getFirestore,
 } from '@react-native-firebase/firestore';
 
-import {signUpSchema, SignUpFormData} from '../schemas/validationSchema';
-import {FormInput} from '../components/FormInput';
+import { signUpSchema, SignUpFormData } from '../schemas/validationSchema';
+import { FormInput } from '../components/FormInput';
 import images from '../data/images';
-import {Button} from '../components/Button';
-import {useAuth} from '../contexts/Auth';
-import {colors} from '../styles/colors';
+import { Button } from '../components/Button';
+import { useAuth } from '../contexts/Auth';
+import { colors } from '../styles/colors';
 
-import {BackButton} from '../components/BackButton';
-import {CustomModal} from '../components/CustomModal';
+import { BackButton } from '../components/BackButton';
+import { CustomModal } from '../components/CustomModal';
 import RNPickerSelect from 'react-native-picker-select';
+import Dropdown from 'react-native-dropdown-picker';
+import UnitsIcon from '../assets/images/residencial.svg';
 
 const db = getFirestore();
 
@@ -45,8 +46,11 @@ export function SignUpScreen() {
     description: '',
   });
   const [isTermsModalVisible, setIsTermsModalVisible] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState('');
+  const [items, setItems] = useState<any[]>([]);
 
-  const {signUp} = useAuth();
+  const { signUp } = useAuth();
 
   useEffect(() => {
     // Pegar as unidades do Firebase
@@ -60,6 +64,13 @@ export function SignUpScreen() {
         const filteredUnits = unitsList.filter(unit => unit.name !== 'Avantar Franqueadora');
 
         setUnits(filteredUnits);
+
+        // Configurar items para o dropdown
+        const dropdownItems = filteredUnits.map(unit => ({
+          label: unit.name,
+          value: unit.unitId,
+        }));
+        setItems(dropdownItems);
       } catch (error) {
         console.error('Erro ao buscar unidades:', error);
       }
@@ -71,7 +82,7 @@ export function SignUpScreen() {
   const {
     control,
     handleSubmit,
-    formState: {errors},
+    formState: { errors },
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
@@ -86,7 +97,7 @@ export function SignUpScreen() {
   });
 
   const onSubmit = async (data: SignUpFormData) => {
-    const {confirmPassword, ...dataFiltred} = data;
+    const { confirmPassword, ...dataFiltred } = data;
 
     const unit = units.find(u => u.unitId === dataFiltred.affiliated_to);
     const unitName = unit?.name ?? '';
@@ -178,9 +189,9 @@ export function SignUpScreen() {
       className="flex-1"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <TouchableWithoutFeedback>
-        <ScrollView
-          contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}}
-          keyboardShouldPersistTaps="handled">
+        <View
+          style={{ flexGrow: 1, justifyContent: 'center' }}
+        >
           <ImageBackground
             source={images.bg_dark}
             className="flex-1"
@@ -309,56 +320,45 @@ export function SignUpScreen() {
                 {/* Input de Seleção da Unidade */}
                 <Controller
                   control={control}
-                  render={({field: {onChange, value}}) => (
-                    <View
-                      className={'px-2 justify-center'}
+                  render={({ field: { onChange, value: fieldValue } }) => (
+                    <Dropdown
+                      open={open}
+                      value={fieldValue}
+                      items={items}
+                      setOpen={setOpen}
+                      setValue={(val) => {
+                        setValue(val);
+                        onChange(val);
+                      }}
+                      setItems={setItems}
                       style={{
                         borderWidth: 1,
-                        borderRadius: 10,
-                        backgroundColor: colors.tertiary_purple_opacity,
                         borderColor: errors.affiliated_to ? 'red' : colors.blue,
-                        height: 53,
-                      }}>
-                      <RNPickerSelect
-                        onValueChange={onChange}
-                        value={value}
-                        items={units.map(unit => ({
-                          label: unit.name,
-                          value: unit.unitId,
-                        }))}
-                        placeholder={{
-                          label: 'Selecione uma unidade',
-                          value: '',
-                          color: errors.affiliated_to
-                            ? 'red'
-                            : colors.white_opacity,
-                        }}
-                        style={{
-                          inputIOS: {
-                            fontSize: 16,
-                            paddingVertical: 12,
-                            paddingHorizontal: 10,
-                            color: colors.white,
-                            fontFamily: 'FamiljenGrotesk-Regular',
-                          },
-                          inputAndroid: {
-                            fontSize: 16,
-                            paddingHorizontal: 10,
-                            paddingVertical: 8,
-                            color: colors.white,
-                            fontFamily: 'FamiljenGrotesk-Regular',
-                          },
-                          placeholder: {
-                            color: errors.affiliated_to
-                              ? 'red'
-                              : colors.white_opacity,
-                            fontSize: 16,
-                            fontFamily: 'FamiljenGrotesk-Regular',
-                          },
-                        }}
-                        useNativeAndroidPickerStyle={false}
-                      />
-                    </View>
+                        backgroundColor: colors.tertiary_purple_opacity,
+                        marginBottom: 6,
+                        height: 55,
+                        width: '100%',
+                        padding: 15,
+                        paddingLeft: 20,
+                        borderRadius: 10,
+                      }}
+                      placeholderStyle={{
+                        color: errors.affiliated_to ? 'red' : colors.white_opacity,
+                      }}
+                      textStyle={{
+                        color: colors.white,
+                        fontFamily: 'FamiljenGrotesk-regular',
+                        fontSize: 14,
+                      }}
+                      listItemLabelStyle={{
+                        color: 'black',
+                      }}
+                      searchable
+                      maxHeight={300}
+                      placeholder="Selecione uma unidade"
+                      searchPlaceholder="Pesquisar..."
+
+                    />
                   )}
                   name="affiliated_to"
                 />
@@ -381,7 +381,7 @@ export function SignUpScreen() {
               <View className="mt-5 flex-row justify-center gap-2">
                 <Controller
                   control={control}
-                  render={({field: {onChange, value}}) => (
+                  render={({ field: { onChange, value } }) => (
                     <TouchableOpacity
                       activeOpacity={0.8}
                       onPress={() => onChange(!value)}
@@ -451,10 +451,10 @@ export function SignUpScreen() {
                       Termos de Uso do Aplicativo
                     </Text>
                     <ScrollView
-                      style={{maxHeight: 400, marginBottom: 20}}
+                      style={{ maxHeight: 400, marginBottom: 20 }}
                       showsVerticalScrollIndicator={true}>
-                      <Text style={{color: '#fff', fontSize: 15}}>
-                        <Text style={{fontWeight: 'bold'}}>
+                      <Text style={{ color: '#fff', fontSize: 15 }}>
+                        <Text style={{ fontWeight: 'bold' }}>
                           1. OBJETIVO{`\n`}
                         </Text>
                         O presente Termo de Uso regula o acesso e a utilização
@@ -465,7 +465,7 @@ export function SignUpScreen() {
                         Recompensar os usuários com comissões, cashback em
                         apólices ou bonificações, conforme regras específicas da
                         franqueadora.{`\n\n`}
-                        <Text style={{fontWeight: 'bold'}}>
+                        <Text style={{ fontWeight: 'bold' }}>
                           2. DEFINIÇÕES{`\n`}
                         </Text>
                         - Indicador: Usuário que realiza indicações de leads por
@@ -474,7 +474,7 @@ export function SignUpScreen() {
                         {`\n`}- Administrador: Responsável pela gestão da
                         plataforma e regras operacionais.{`\n`}- Lead: Potencial
                         cliente indicado.{`\n\n`}
-                        <Text style={{fontWeight: 'bold'}}>
+                        <Text style={{ fontWeight: 'bold' }}>
                           3. CONDIÇÕES DE USO{`\n`}
                         </Text>
                         - O aplicativo deve ser utilizado apenas por maiores de
@@ -483,7 +483,7 @@ export function SignUpScreen() {
                         éticas.{`\n`}- O uso do aplicativo implica na aceitação
                         integral deste termo e da Política de Privacidade.
                         {`\n\n`}
-                        <Text style={{fontWeight: 'bold'}}>
+                        <Text style={{ fontWeight: 'bold' }}>
                           4. INDICAÇÕES E RECOMPENSAS{`\n`}
                         </Text>
                         - As indicações devem conter informações verídicas e
@@ -503,37 +503,37 @@ export function SignUpScreen() {
                         proposta, o lead indicado passa a ser considerado
                         cliente da Avantar e será tratado como tal em toda a
                         rede franqueada.{`\n\n`}
-                        <Text style={{fontWeight: 'bold'}}>
+                        <Text style={{ fontWeight: 'bold' }}>
                           5. LIMITAÇÃO DE RESPONSABILIDADE{`\n`}
                         </Text>
                         - A franqueadora não se responsabiliza por informações
                         fornecidas incorretamente pelos usuários.{`\n`}- O
                         aplicativo funciona como intermediador das indicações e
                         não garante a concretização de negócios.{`\n\n`}
-                        <Text style={{fontWeight: 'bold'}}>
+                        <Text style={{ fontWeight: 'bold' }}>
                           6. MODIFICAÇÕES E ENCERRAMENTO{`\n`}
                         </Text>
                         - A franqueadora poderá alterar, suspender ou
                         descontinuar o aplicativo a qualquer momento, mediante
                         aviso prévio.{`\n`}- O uso contínuo após alterações
                         implica aceitação automática dos novos termos.{`\n\n`}
-                        <Text style={{fontWeight: 'bold'}}>
+                        <Text style={{ fontWeight: 'bold' }}>
                           7. ACEITE{`\n`}
                         </Text>
                         O aceite é obrigatório no primeiro acesso ao aplicativo
                         e será registrado com data e hora vinculados ao perfil
                         do usuário.{`\n\n`}
-                        <Text style={{fontWeight: 'bold'}}>8. FORO{`\n`}</Text>
+                        <Text style={{ fontWeight: 'bold' }}>8. FORO{`\n`}</Text>
                         Este Termo é regido pelas leis brasileiras. Fica eleito
                         o foro da comarca de Caratinga/MG da sede da
                         franqueadora, com exclusão de qualquer outro.{`\n\n`}
-                        <Text style={{fontWeight: 'bold'}}>
+                        <Text style={{ fontWeight: 'bold' }}>
                           POLÍTICA DE PRIVACIDADE{`\n`}
                         </Text>
-                        <Text style={{fontWeight: 'bold'}}>
+                        <Text style={{ fontWeight: 'bold' }}>
                           Última atualização: 18/07/2025{`\n\n`}
                         </Text>
-                        <Text style={{fontWeight: 'bold'}}>
+                        <Text style={{ fontWeight: 'bold' }}>
                           1. COLETA DE DADOS{`\n`}
                         </Text>
                         Coletamos os seguintes dados:{`\n\n`}- Dos Indicadores:
@@ -541,7 +541,7 @@ export function SignUpScreen() {
                         Dos Leads: nome, telefone e tipo de seguro de interesse;
                         {`\n`}- De uso: data e horário das indicações, status da
                         proposta.{`\n\n`}
-                        <Text style={{fontWeight: 'bold'}}>
+                        <Text style={{ fontWeight: 'bold' }}>
                           2. FINALIDADES{`\n`}
                         </Text>
                         Os dados são utilizados para:{`\n\n`}- Direcionar leads
@@ -550,7 +550,7 @@ export function SignUpScreen() {
                         de unidades e indicadores;{`\n`}- Processar pagamentos e
                         bonificações;{`\n`}- Cumprir obrigações legais e
                         operacionais.{`\n\n`}
-                        <Text style={{fontWeight: 'bold'}}>
+                        <Text style={{ fontWeight: 'bold' }}>
                           3. COMPARTILHAMENTO DE DADOS{`\n`}
                         </Text>
                         - Dados dos leads são compartilhados exclusivamente com
@@ -562,19 +562,19 @@ export function SignUpScreen() {
                         responsabilidade do indicador, que declara possuir
                         autorização para fazê-lo. A Avantar atua como receptora
                         passiva dessas informações.{`\n\n`}
-                        <Text style={{fontWeight: 'bold'}}>
+                        <Text style={{ fontWeight: 'bold' }}>
                           4. BASE LEGAL (LGPD){`\n`}
                         </Text>
                         - Consentimento do usuário no aceite dos termos;{`\n`}-
                         Legítimo interesse da franqueadora no tratamento das
                         indicações.{`\n\n`}
-                        <Text style={{fontWeight: 'bold'}}>
+                        <Text style={{ fontWeight: 'bold' }}>
                           5. SEGURANÇA{`\n`}
                         </Text>
                         - Dados trafegam via HTTPS e são armazenados em banco de
                         dados seguro.{`\n`}- O acesso é restrito a usuários
                         autenticados e habilitados.{`\n\n`}
-                        <Text style={{fontWeight: 'bold'}}>
+                        <Text style={{ fontWeight: 'bold' }}>
                           6. DIREITOS DOS USUÁRIOS{`\n`}
                         </Text>
                         Conforme a LGPD, o usuário tem direito de:{`\n\n`}-
@@ -583,21 +583,21 @@ export function SignUpScreen() {
                         a qualquer momento, salvo obrigações legais.{`\n\n`}
                         Solicitações devem ser feitas pelo canal:
                         suporte@indica.avantar.com.br{`\n\n`}
-                        <Text style={{fontWeight: 'bold'}}>
+                        <Text style={{ fontWeight: 'bold' }}>
                           7. ARMAZENAMENTO E RETENÇÃO{`\n`}
                         </Text>
                         - Os dados são armazenados em nuvem, enquanto durar a
                         relação com o usuário ou conforme exigência legal.{`\n`}
                         - Após esse período, os dados serão anonimizados ou
                         excluídos.{`\n\n`}
-                        <Text style={{fontWeight: 'bold'}}>
+                        <Text style={{ fontWeight: 'bold' }}>
                           8. ATUALIZAÇÕES{`\n`}
                         </Text>
                         A franqueadora poderá atualizar esta Política a qualquer
                         momento. O aviso será feito via aplicativo, e o uso
                         contínuo após alterações implica aceite automático.
                         <Text
-                          style={{fontWeight: 'bold'}}
+                          style={{ fontWeight: 'bold' }}
                           className="text-blue">
                           {`\n`}
                           {`\n`}Última atualização: 18/07/2025{`\n\n`}
@@ -626,8 +626,8 @@ export function SignUpScreen() {
               </Modal>
             </View>
           </ImageBackground>
-        </ScrollView>
+        </View>
       </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+    </KeyboardAvoidingView >
   );
 }

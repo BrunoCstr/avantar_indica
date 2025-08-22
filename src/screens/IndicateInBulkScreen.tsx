@@ -110,9 +110,11 @@ export function IndicateInBulkScreen() {
         const withTelephone: any = all.filter(c => 
           c.phoneNumbers && 
           Array.isArray(c.phoneNumbers) && 
-          c.phoneNumbers.length > 0 &&
-          c.displayName
-        );
+          c.phoneNumbers.length > 0
+        ).map(c => ({
+          ...c,
+          displayName: c.displayName || `${c.givenName || ''} ${c.familyName || ''}`.trim()
+        }));
         setLeads(withTelephone);
       } catch (e) {
         console.error('Erro ao carregar contatos:', e);

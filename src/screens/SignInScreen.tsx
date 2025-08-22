@@ -9,7 +9,6 @@ import {
   Text,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
   TouchableWithoutFeedback,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
@@ -139,9 +138,9 @@ export function SignInScreen() {
       className="flex-1"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <TouchableWithoutFeedback>
-        <ScrollView
-          contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}}
-          keyboardShouldPersistTaps="handled">
+        <View
+          style={{flexGrow: 1, justifyContent: 'center'}}
+          >
           <ImageBackground
             source={images.bg_login}
             style={{flex: 1}}
@@ -227,7 +226,7 @@ export function SignInScreen() {
               />
             </View>
           </ImageBackground>
-        </ScrollView>
+        </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );

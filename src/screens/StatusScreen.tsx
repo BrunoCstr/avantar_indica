@@ -695,7 +695,7 @@ export function StatusScreen() {
                       color: colors.tertiary_purple,
                       fontSize: 14,
                       fontWeight: '600',
-                      marginBottom: 12,
+                      marginTop: 12,
                     }}>
                     Indicações ({selectedBulk.indications?.length || 0})
                   </Text>

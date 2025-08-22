@@ -7,11 +7,9 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import {BlurView} from '@react-native-community/blur';
 import {indicationSchema, IndicationSchema} from '../schemas/validationSchema';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useForm, Controller} from 'react-hook-form';
-import {Picker} from '@react-native-picker/picker';
 import {
   getFirestore,
   collection,
@@ -28,7 +26,7 @@ import {BackButton} from '../components/BackButton';
 import {CustomModal} from '../components/CustomModal';
 import {useAuth} from '../contexts/Auth';
 import firestore from '@react-native-firebase/firestore';
-import RNPickerSelect from 'react-native-picker-select';
+import Dropdown from 'react-native-dropdown-picker';
 
 const db = getFirestore();
 
@@ -46,6 +44,9 @@ export function IndicateModal({visible, onClose}: ModalProps) {
     description: '',
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState('');
+  const [items, setItems] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -59,6 +60,13 @@ export function IndicateModal({visible, onClose}: ModalProps) {
           .sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
         setProducts(sortedProducts);
+
+        // Configurar items para o dropdown
+        const dropdownItems = sortedProducts.map(product => ({
+          label: product,
+          value: product,
+        }));
+        setItems(dropdownItems);
       } catch (error) {
         console.error('Erro ao buscar os produtos:', error);
       }
@@ -132,7 +140,7 @@ export function IndicateModal({visible, onClose}: ModalProps) {
         <KeyboardAvoidingView
           className="flex-1 justify-center items-center px-5"
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <View className="w-full max-w-sm bg-fifth_purple rounded-2xl border-2 border-blue px-7 py-7">
+          <View className="w-full max-w-sm bg-fifth_purple rounded-2xl border-2 border-blue px-7 py-7" style={{ zIndex: 999 }}>
             <View className="justify-between items-center flex-row">
               <BackButton onPress={onClose} />
               <Text className="text-blue font-bold text-3xl absolute left-1/2 -translate-x-1/2">
@@ -185,52 +193,45 @@ export function IndicateModal({visible, onClose}: ModalProps) {
 
               <Controller
                 control={control}
-                render={({field: {onChange, value}}) => (
-                  <View
-                    className={'px-2 justify-center'}
+                render={({ field: { onChange, value: fieldValue } }) => (
+                  <Dropdown
+                    open={open}
+                    value={fieldValue}
+                    items={items}
+                    setOpen={setOpen}
+                    setValue={(val) => {
+                      setValue(val);
+                      onChange(val);
+                    }}
+                    setItems={setItems}
                     style={{
                       borderWidth: 1,
-                      borderRadius: 10,
                       borderColor: errors.product ? 'red' : colors.blue,
                       backgroundColor: colors.tertiary_purple_opacity,
+                      marginBottom: 6,
                       height: 50,
-                    }}>
-                    <RNPickerSelect
-                      onValueChange={onChange}
-                      value={value}
-                      items={products.map(product => ({
-                        label: product,
-                        value: product,
-                      }))}
-                      placeholder={{
-                        label: 'Produto desejado',
-                        value: '',
-                        color: errors.product ? 'red' : colors.white_opacity,
-                      }}
-                      style={{
-                        inputIOS: {
-                          fontSize: 16,
-                          paddingVertical: 12,
-                          paddingHorizontal: 10,
-                          color: colors.white,
-                          fontFamily: 'FamiljenGrotesk-Regular',
-                        },
-                        inputAndroid: {
-                          fontSize: 16,
-                          paddingHorizontal: 10,
-                          paddingVertical: 8,
-                          color: colors.white,
-                          fontFamily: 'FamiljenGrotesk-Regular',
-                        },
-                        placeholder: {
-                          color: errors.product ? 'red' : colors.white_opacity,
-                          fontSize: 13,
-                          fontFamily: 'FamiljenGrotesk-Regular',
-                        },
-                      }}
-                      useNativeAndroidPickerStyle={false}
-                    />
-                  </View>
+                      width: '100%',
+                      padding: 15,
+                      paddingLeft: 20,
+                      borderRadius: 10,
+                      zIndex: 1000,
+                    }}
+                    placeholderStyle={{
+                      color: errors.product ? 'red' : colors.white_opacity,
+                    }}
+                    textStyle={{
+                      color: colors.white,
+                      fontFamily: 'FamiljenGrotesk-Regular',
+                      fontSize: 14,
+                    }}
+                    listItemLabelStyle={{
+                      color: 'black',
+                    }}
+                    searchable
+                    maxHeight={300}
+                    placeholder="Produto desejado"
+                    searchPlaceholder="Pesquisar..."
+                  />
                 )}
                 name="product"
               />

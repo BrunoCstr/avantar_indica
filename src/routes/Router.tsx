@@ -1,54 +1,39 @@
 import React, { useEffect, useState } from 'react';
 import {NavigationContainer} from '@react-navigation/native';
-import BootSplash from 'react-native-bootsplash'
+import BootSplash from 'react-native-bootsplash';
 
 import {AuthStack} from './AuthStack';
 import {AppStack} from './AppStack';
 import {useAuth} from '../contexts/Auth';
 
 export function Router() {
-  const {userAuthenticated, isLoading, userData} = useAuth();
-  const [appReady, setAppReady] = useState(false);
+  const {userAuthenticated, isLoading} = useAuth();
+  const [splashHidden, setSplashHidden] = useState(false);
 
   useEffect(() => {
-    const initializeApp = async () => {
-      // Aguardar o carregamento da autenticação E dos dados do usuário
-      if (!isLoading) {
-        // Se o usuário está autenticado, aguardar também os dados do usuário
-        if (userAuthenticated && userData) {
-          try {
-            // Aguardar um tempo mínimo para uma transição mais suave
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
-            // Esconder splash screen com fade
-            await BootSplash.hide({fade: true});
-          } catch (error) {
-            console.warn('Error hiding bootsplash:', error);
-          } finally {
-            setAppReady(true);
-          }
-        } else if (!userAuthenticated) {
-          // Se não está autenticado, pode esconder o splash imediatamente
-          try {
-            await new Promise(resolve => setTimeout(resolve, 500));
-            await BootSplash.hide({fade: true});
-          } catch (error) {
-            console.warn('Error hiding bootsplash:', error);
-          } finally {
-            setAppReady(true);
-          }
+    const hideSplash = async () => {
+      // Só esconder o splash se ainda não foi escondido
+      if (!splashHidden) {
+        try {
+          
+          await BootSplash.hide({fade: true});
+         
+          setSplashHidden(true);
+        } catch (error) {
+          console.warn('Error hiding bootsplash:', error);
+          setSplashHidden(true); // Marcar como escondido mesmo com erro
         }
       }
     };
 
-    initializeApp();
-  }, [isLoading, userAuthenticated, userData]);
+    // Esconder splash quando não estiver carregando
+    if (!isLoading) {
+      hideSplash();
+    }
+  }, [isLoading, splashHidden]);
 
-  // Não renderizar nada até que o app esteja pronto e a autenticação tenha sido verificada
-  if (!appReady || isLoading) {
-    return null;
-  }
 
+  // Renderizar sempre, mas só esconder splash quando não estiver carregando
   return (
     <NavigationContainer>
       {userAuthenticated ? <AppStack /> : <AuthStack />}

@@ -273,15 +273,25 @@ export function WithdrawalAmountModal({
             </View>
 
             {/* Botão confirmar */}
-            <View className="px-6 pb-6">
+            <View className="px-6 pb-6 mb-6">
               <TouchableOpacity
-                className={`h-16 rounded-xl overflow-hidden border-[1px] border-blue ${
-                  !isButtonEnabled() ? 'opacity-50' : ''
-                }`}
+                style={{
+                  height: 64,
+                  borderRadius: 12,
+                  overflow: 'hidden',
+                  borderWidth: 1,
+                  borderColor: colors.blue,
+                  opacity: !isButtonEnabled() ? 0.5 : 1,
+                }}
                 onPress={handleConfirm}
                 disabled={!isButtonEnabled()}>
                 <LinearGradient
-                  className="flex-1 justify-center items-center"
+                  style={{
+                    width: '100%',
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
                   colors={['#9743F8', '#4F00A9']}
                   start={{x: 0, y: 1}}
                   end={{x: 0, y: 0}}>
