@@ -140,7 +140,9 @@ export function IndicateModal({visible, onClose}: ModalProps) {
         <KeyboardAvoidingView
           className="flex-1 justify-center items-center px-5"
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <View className="w-full max-w-sm bg-fifth_purple rounded-2xl border-2 border-blue px-7 py-7" style={{ zIndex: 999 }}>
+          <View
+            className="w-full max-w-sm bg-fifth_purple rounded-2xl border-2 border-blue px-7 py-7"
+            style={{zIndex: 999}}>
             <View className="justify-between items-center flex-row">
               <BackButton onPress={onClose} />
               <Text className="text-blue font-bold text-3xl absolute left-1/2 -translate-x-1/2">
@@ -193,13 +195,32 @@ export function IndicateModal({visible, onClose}: ModalProps) {
 
               <Controller
                 control={control}
-                render={({ field: { onChange, value: fieldValue } }) => (
+                render={({field: {onChange, value: fieldValue}}) => (
                   <Dropdown
+                    arrowIconStyle={{
+                      tintColor: colors.white,
+                    }}
+                    listItemLabelStyle={{
+                      color: colors.white,
+                    }}
+                    searchPlaceholderTextColor={colors.white_opacity}
+                    arrowIconColor={colors.white}
+                    dropDownContainerStyle={{
+                      backgroundColor: colors.tertiary_purple,
+                      borderColor: colors.blue,
+                    }}
+                    searchContainerStyle={{
+                      backgroundColor: colors.tertiary_purple,
+                      borderColor: colors.blue,
+                    }}
+                    searchTextInputStyle={{
+                      borderColor: colors.blue,
+                    }}
                     open={open}
                     value={fieldValue}
                     items={items}
                     setOpen={setOpen}
-                    setValue={(val) => {
+                    setValue={val => {
                       setValue(val);
                       onChange(val);
                     }}
@@ -223,9 +244,6 @@ export function IndicateModal({visible, onClose}: ModalProps) {
                       color: colors.white,
                       fontFamily: 'FamiljenGrotesk-Regular',
                       fontSize: 14,
-                    }}
-                    listItemLabelStyle={{
-                      color: 'black',
                     }}
                     searchable
                     maxHeight={300}
