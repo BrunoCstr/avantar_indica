@@ -86,8 +86,8 @@ export function Rules() {
             title="TIPOS DE USUÁRIOS"
             titleDescription="Cliente Indicador"
             description={`• Pode indicar amigos e familiares para contratação de seguros.
-• Recebe cashback em forma de desconto na renovação ou contratação de novos seguros.,
-• Não é possível sacar dinheiro, apenas trocar por benefícios.,
+• Recebe cashback em forma de desconto na renovação ou contratação de novos seguros.
+• Não é possível sacar dinheiro, apenas trocar por benefícios.
 • Cadastro simples, com vinculação a uma unidade.`}
             titleDescription2="Parceiro Indicador & Sub Indicador"
             description2={`• Indicadores profissionais autorizados por uma unidade franqueada.
@@ -103,6 +103,8 @@ export function Rules() {
             bonusParameters={commissioningParameters}
             unitName={unitName}
             updatedAt={updatedAt}
+            showPartnerSection={userData?.rule !== 'cliente_indicador'}
+            userRule={userData?.rule}
           />
         </View>
       </View>

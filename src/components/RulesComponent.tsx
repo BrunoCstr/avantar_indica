@@ -71,6 +71,8 @@ interface RulesComponentProps {
   bonusParameters?: CommissioningParameters;
   unitName: string;
   updatedAt: string;
+  showPartnerSection?: boolean;
+  userRule?: string;
 }
 
 export function RulesComponent({
@@ -85,6 +87,8 @@ export function RulesComponent({
   bonusParameters,
   unitName,
   updatedAt,
+  showPartnerSection = true,
+  userRule,
 }: RulesComponentProps) {
 
   // Função para formatar datas do Firestore ou objeto Timestamp
@@ -105,37 +109,28 @@ export function RulesComponent({
   return (
     <ScrollView className="flex-1 bg-gray-100 w-full">
       <ExpandableSection title={title}>
-        {description2 ? (
+        <Text className="text-white font-bold text-base">
+          {titleDescription}
+        </Text>
+        <Text className="text-white font-regular mt-1 text-sm">
+          {description}
+        </Text>
+        {showPartnerSection && (
           <>
-            <Text className="text-white font-bold text-base">
-              {titleDescription}
-            </Text>
-            <Text className="text-white font-regular mt-1 text-sm">
-              {description}
-            </Text>
             <Text className="text-white font-bold text-base">
               {titleDescription2}
             </Text>
             <Text className="text-white font-regular mt-1 text-sm">
               {description2}
             </Text>
-            <Text className="text-blue font-bold text-base mt-3">
-              {titleDescription3}
-            </Text>
-            <Text className="text-white font-regular text-sm">
-              {description3}
-            </Text>
-          </>
-        ) : (
-          <>
-            <Text className="text-white font-bold text-base">
-              {titleDescription}
-            </Text>
-            <Text className="text-white font-regular mt-1 text-sm">
-              {description}
-            </Text>
           </>
         )}
+        <Text className="text-blue font-bold text-base mt-3">
+          {titleDescription3}
+        </Text>
+        <Text className="text-white font-regular text-sm">
+          {description3}
+        </Text>
       </ExpandableSection>
 
       <ExpandableSection title="RECOMPENSAS">
@@ -152,37 +147,43 @@ export function RulesComponent({
           <Text className="text-blue font-bold">
             {unitName}
           </Text>
-          <Text className="text-blue font-bold text-base mt-2">
-            Cashback por produto:
-          </Text>
-          {bonusParameters?.cashbackPerProduct && (
-            <View className='flex-col'>
-              <Text className='text-white font-regular text-sm'>Auto: {formatCurrency(bonusParameters?.cashbackPerProduct?.auto)}</Text>
-              <Text className='text-white font-regular text-sm'>Consórcio: {formatCurrency(bonusParameters?.cashbackPerProduct?.consorcio)}</Text>
-              <Text className='text-white font-regular text-sm'>Empresarial: {formatCurrency(bonusParameters?.cashbackPerProduct?.empresarial)}</Text>
-              <Text className='text-white font-regular text-sm'>Vida: {formatCurrency(bonusParameters?.cashbackPerProduct?.vida)}</Text>
-            </View>
-          )}
-          <Text className="text-blue font-bold text-base mt-2">
-            Comissão por produto:
-          </Text>
-          {bonusParameters?.commissionPerProduct && (
-            <View className='flex-col'>
-              <Text className='text-white font-regular text-sm'>Auto: {bonusParameters?.commissionPerProduct?.auto}%</Text>
-              <Text className='text-white font-regular text-sm'>Consórcio: {bonusParameters?.commissionPerProduct?.consorcio}%</Text>
-              <Text className='text-white font-regular text-sm'>Empresarial: {bonusParameters?.commissionPerProduct?.empresarial}%</Text>
-              <Text className='text-white font-regular text-sm'>Vida: {bonusParameters?.commissionPerProduct?.vida}%</Text>
-            </View>
+          {userRule !== 'parceiro_indicador' && (
+            <>
+              <Text className="text-blue font-bold text-base mt-2">
+                Cashback por produto:
+              </Text>
+              {bonusParameters?.cashbackPerProduct && (
+                <View className='flex-col'>
+                  <Text className='text-white font-regular text-sm'>Auto: {formatCurrency(bonusParameters?.cashbackPerProduct?.auto)}</Text>
+                  <Text className='text-white font-regular text-sm'>Consórcio: {formatCurrency(bonusParameters?.cashbackPerProduct?.consorcio)}</Text>
+                  <Text className='text-white font-regular text-sm'>Empresarial: {formatCurrency(bonusParameters?.cashbackPerProduct?.empresarial)}</Text>
+                  <Text className='text-white font-regular text-sm'>Vida: {formatCurrency(bonusParameters?.cashbackPerProduct?.vida)}</Text>
+                </View>
+              )}
+              <Text className="text-white font-regular text-base mt-2">
+                <Text className='text-blue font-bold'>Demais ramos (cashback):</Text> {formatCurrency(bonusParameters?.defaultCashback || 0)}
+              </Text>
+            </>
           )}
 
-          <Text className="text-white font-regular text-base mt-2">
-            <Text className='text-blue font-bold'>Demais ramos (comissão):</Text> {bonusParameters?.defaultCommission}%
-          </Text>
-        
-
-          <Text className="text-white font-regular text-base mt-2">
-            <Text className='text-blue font-bold'>Demais ramos (cashback):</Text> {formatCurrency(bonusParameters?.defaultCashback || 0)}
-          </Text>
+          {userRule !== 'cliente_indicador' && (
+            <>
+              <Text className="text-blue font-bold text-base mt-2">
+                Comissão por produto:
+              </Text>
+              {bonusParameters?.commissionPerProduct && (
+                <View className='flex-col'>
+                  <Text className='text-white font-regular text-sm'>Auto: {bonusParameters?.commissionPerProduct?.auto}%</Text>
+                  <Text className='text-white font-regular text-sm'>Consórcio: {bonusParameters?.commissionPerProduct?.consorcio}%</Text>
+                  <Text className='text-white font-regular text-sm'>Empresarial: {bonusParameters?.commissionPerProduct?.empresarial}%</Text>
+                  <Text className='text-white font-regular text-sm'>Vida: {bonusParameters?.commissionPerProduct?.vida}%</Text>
+                </View>
+              )}
+              <Text className="text-white font-regular text-base mt-2">
+                <Text className='text-blue font-bold'>Demais ramos (comissão):</Text> {bonusParameters?.defaultCommission}%
+              </Text>
+            </>
+          )}
 
           <Text className="text-white font-bold text-base mt-2">
             Última atualização: {formatDate(updatedAt)}
