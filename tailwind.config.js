@@ -10,10 +10,14 @@ module.exports = {
       colors,
       fontFamily: {
         sans: ['FamiljenGrotesk-Regular', 'system-ui', 'sans-serif'],
-        regular: "FamiljenGrotesk-Regular",
-        medium: "FamiljenGrotesk-Medium",
-        semiBold: "FamiljenGrotesk-SemiBold",
-        bold: "FamiljenGrotesk-Bold"
+        regular: ['FamiljenGrotesk-Regular', 'system-ui', 'sans-serif'],
+        medium: ['FamiljenGrotesk-Medium', 'system-ui', 'sans-serif'],
+        semibold: ['FamiljenGrotesk-SemiBold', 'system-ui', 'sans-serif'],
+        bold: ['FamiljenGrotesk-Bold', 'system-ui', 'sans-serif'],
+        italic: ['FamiljenGrotesk-Italic', 'system-ui', 'sans-serif'],
+        'medium-italic': ['FamiljenGrotesk-MediumItalic', 'system-ui', 'sans-serif'],
+        'semibold-italic': ['FamiljenGrotesk-SemiBoldItalic', 'system-ui', 'sans-serif'],
+        'bold-italic': ['FamiljenGrotesk-BoldItalic', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         ss: '12px',

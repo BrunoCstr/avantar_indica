@@ -1,20 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Text,
-  View,
-  ImageBackground,
-} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {Text, View, ImageBackground} from 'react-native';
 
 import {colors} from '../styles/colors';
 import images from '../data/images';
 import {BackButton} from '../components/BackButton';
-import {CommissioningParameters, RulesComponent} from '../components/RulesComponent';
-import { useAuth } from '../contexts/Auth';
-import { getFirestore, collection, getDocs, query, where } from '@react-native-firebase/firestore';
+import {
+  CommissioningParameters,
+  RulesComponent,
+} from '../components/RulesComponent';
+import {useAuth} from '../contexts/Auth';
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  where,
+} from '@react-native-firebase/firestore';
 
 export function Rules() {
-  const { userData } = useAuth();
-  const [commissioningParameters, setCommissioningParameters] = useState<CommissioningParameters>();
+  const {userData} = useAuth();
+  const [commissioningParameters, setCommissioningParameters] =
+    useState<CommissioningParameters>();
   const [unitData, setUnitData] = useState<any>(null);
 
   function formatRule(rule: string | undefined) {
@@ -40,7 +46,10 @@ export function Rules() {
       try {
         const db = getFirestore();
         const unitsRef = collection(db, 'units');
-        const q = query(unitsRef, where('unitId', '==', userData.affiliated_to));
+        const q = query(
+          unitsRef,
+          where('unitId', '==', userData.affiliated_to),
+        );
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
           const data = querySnapshot.docs[0].data();
@@ -80,20 +89,17 @@ export function Rules() {
 • Recebe cashback em forma de desconto na renovação ou contratação de novos seguros.,
 • Não é possível sacar dinheiro, apenas trocar por benefícios.,
 • Cadastro simples, com vinculação a uma unidade.`}
-           
-           titleDescription2='Parceiro Indicador & Sub Indicador'
-           description2={`• Indicadores profissionais autorizados por uma unidade franqueada.
+            titleDescription2="Parceiro Indicador & Sub Indicador"
+            description2={`• Indicadores profissionais autorizados por uma unidade franqueada.
 • Pode indicar normalmente e resgatar valores em dinheiro, com valor mínimo de saque equivalente a meio salário mínimo.
 • Somente Parceiro Indicador pode cadastrar sub-indicadores (ex: equipe de vendas).`}
             titleDescription3="Sua permissão atual:"
             description3={userRule}
-
             rewards={`• As recompensas variam de acordo com o produto indicado configurado pela sua unidade.
   • Cada produto possui um valor de recompensa diferente.
   • Franqueados podem personalizar os valores de cashback para campanhas específicas.
   • O sistema aceita personalização de recompensas tanto para clientes quanto para parceiros.
   • Para parceiros indicadores, saque mínimo de meio salário mínimo.`}
-
             bonusParameters={commissioningParameters}
             unitName={unitName}
             updatedAt={updatedAt}

@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {View, Text, TouchableOpacity, Pressable, ScrollView} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { useResponsive } from '../hooks/useResponsive';
+import { formatCurrency } from '../utils/formatCurrency';
 
 const ExpandableSection = ({
   title,
@@ -156,10 +157,10 @@ export function RulesComponent({
           </Text>
           {bonusParameters?.cashbackPerProduct && (
             <View className='flex-col'>
-              <Text className='text-white font-regular text-sm'>Auto: {bonusParameters?.cashbackPerProduct?.auto}</Text>
-              <Text className='text-white font-regular text-sm'>Consórcio: {bonusParameters?.cashbackPerProduct?.consorcio}</Text>
-              <Text className='text-white font-regular text-sm'>Empresarial: {bonusParameters?.cashbackPerProduct?.empresarial}</Text>
-              <Text className='text-white font-regular text-sm'>Vida: {bonusParameters?.cashbackPerProduct?.vida}</Text>
+              <Text className='text-white font-regular text-sm'>Auto: {formatCurrency(bonusParameters?.cashbackPerProduct?.auto)}</Text>
+              <Text className='text-white font-regular text-sm'>Consórcio: {formatCurrency(bonusParameters?.cashbackPerProduct?.consorcio)}</Text>
+              <Text className='text-white font-regular text-sm'>Empresarial: {formatCurrency(bonusParameters?.cashbackPerProduct?.empresarial)}</Text>
+              <Text className='text-white font-regular text-sm'>Vida: {formatCurrency(bonusParameters?.cashbackPerProduct?.vida)}</Text>
             </View>
           )}
           <Text className="text-blue font-bold text-base mt-2">
@@ -180,7 +181,7 @@ export function RulesComponent({
         
 
           <Text className="text-white font-regular text-base mt-2">
-            <Text className='text-blue font-bold'>Demais ramos (cashback):</Text> {bonusParameters?.defaultCashback}
+            <Text className='text-blue font-bold'>Demais ramos (cashback):</Text> {formatCurrency(bonusParameters?.defaultCashback || 0)}
           </Text>
 
           <Text className="text-white font-bold text-base mt-2">

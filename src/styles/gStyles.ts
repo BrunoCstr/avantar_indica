@@ -4,13 +4,13 @@ import {colors} from './colors';
 
 const gStyles = StyleSheet.create({
   titleWaiting: {
-    fontFamily: 'FamiljenGrotesk-regular',
+    fontFamily: 'FamiljenGrotesk-Regular',
     fontSize: 30,
     color: colors.secondary_purple,
     fontWeight: 700
   },
   smallTextWaiting: {
-    fontFamily: 'FamiljenGrotesk-regular',
+    fontFamily: 'FamiljenGrotesk-Regular',
     fontSize: 15,
     color: colors.black,
     textAlign: "center",
@@ -19,7 +19,7 @@ const gStyles = StyleSheet.create({
     paddingRight: 20,
   },
   avantarVoceAFrente: {
-    fontFamily: 'FamiljenGrotesk-regular',
+    fontFamily: 'FamiljenGrotesk-Regular',
     height: 130
   }
 });

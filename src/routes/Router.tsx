@@ -7,7 +7,7 @@ import {AppStack} from './AppStack';
 import {useAuth} from '../contexts/Auth';
 
 export function Router() {
-  const {userAuthenticated, isLoading} = useAuth();
+  const {userAuthenticated, isLoading, isFirebaseInitialized} = useAuth();
   const [splashHidden, setSplashHidden] = useState(false);
 
   useEffect(() => {
@@ -15,9 +15,7 @@ export function Router() {
       // Só esconder o splash se ainda não foi escondido
       if (!splashHidden) {
         try {
-          
           await BootSplash.hide({fade: true});
-         
           setSplashHidden(true);
         } catch (error) {
           console.warn('Error hiding bootsplash:', error);
@@ -26,14 +24,13 @@ export function Router() {
       }
     };
 
-    // Esconder splash quando não estiver carregando
-    if (!isLoading) {
+    // Esconder splash apenas quando o Firebase estiver inicializado E não estiver carregando
+    if (isFirebaseInitialized && !isLoading) {
       hideSplash();
     }
-  }, [isLoading, splashHidden]);
+  }, [isFirebaseInitialized, isLoading, splashHidden]);
 
-
-  // Renderizar sempre, mas só esconder splash quando não estiver carregando
+  // Renderizar sempre, mas só esconder splash quando o Firebase estiver pronto
   return (
     <NavigationContainer>
       {userAuthenticated ? <AppStack /> : <AuthStack />}

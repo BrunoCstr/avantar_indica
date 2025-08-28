@@ -35,6 +35,7 @@ import {applyMaskTelephone} from '../utils/applyMaskTelephone';
 import {getDefaultProfilePicture} from '../utils/getDefaultProfilePicture';
 import {Spinner} from '../components/Spinner';
 import {SellerSkeleton} from '../components/skeletons/SellerSkeleton';
+import {fonts} from '../config/fontConfig';
 
 const db = getFirestore();
 
@@ -471,7 +472,7 @@ export function RegisterSellers() {
             style={{
               flex: 1,
               color: colors.white,
-              fontFamily: 'FamiljenGrotesk-regular',
+              fontFamily: fonts.regular,
               fontSize: 16,
               paddingLeft: 40,
               paddingRight: 10,
@@ -578,7 +579,7 @@ export function RegisterSellers() {
                       paddingLeft: 20,
                       fontSize: 13,
                       marginBottom: 2,
-                      fontFamily: 'FamiljenGrotesk-regular',
+                      fontFamily: fonts.regular,
                     }}
                   />
                 )}
@@ -610,7 +611,7 @@ export function RegisterSellers() {
                       paddingLeft: 20,
                       fontSize: 13,
                       marginBottom: 2,
-                      fontFamily: 'FamiljenGrotesk-regular',
+                      fontFamily: fonts.regular,
                     }}
                   />
                 )}
@@ -649,7 +650,7 @@ export function RegisterSellers() {
                       paddingLeft: 20,
                       fontSize: 13,
                       marginBottom: 2,
-                      fontFamily: 'FamiljenGrotesk-regular',
+                      fontFamily: fonts.regular,
                     }}
                   />
                 )}
@@ -709,7 +710,7 @@ export function RegisterSellers() {
                       paddingLeft: 20,
                       fontSize: 13,
                       marginBottom: 2,
-                      fontFamily: 'FamiljenGrotesk-regular',
+                      fontFamily: fonts.regular,
                     }}
                   />
                 )}
@@ -744,7 +745,7 @@ export function RegisterSellers() {
                           paddingLeft: 20,
                           fontSize: 13,
                           marginBottom: 2,
-                          fontFamily: 'FamiljenGrotesk-regular',
+                          fontFamily: fonts.regular,
                         }}
                       />
                     )}
@@ -791,7 +792,7 @@ export function RegisterSellers() {
                           paddingLeft: 20,
                           fontSize: 13,
                           marginBottom: 2,
-                          fontFamily: 'FamiljenGrotesk-regular',
+                          fontFamily: fonts.regular,
                         }}
                       />
                     )}
@@ -883,7 +884,7 @@ export function RegisterSellers() {
                   paddingLeft: 20,
                   fontSize: 13,
                   marginBottom: 2,
-                  fontFamily: 'FamiljenGrotesk-regular',
+                  fontFamily: fonts.regular,
                 }}
               />
               <TextInput
@@ -903,7 +904,7 @@ export function RegisterSellers() {
                   paddingLeft: 20,
                   fontSize: 13,
                   marginBottom: 2,
-                  fontFamily: 'FamiljenGrotesk-regular',
+                  fontFamily: fonts.regular,
                 }}
               />
               <TextInput
@@ -930,7 +931,7 @@ export function RegisterSellers() {
                   paddingLeft: 20,
                   fontSize: 13,
                   marginBottom: 2,
-                  fontFamily: 'FamiljenGrotesk-regular',
+                  fontFamily: fonts.regular,
                 }}
               />
               <TextInput
@@ -984,7 +985,7 @@ export function RegisterSellers() {
                   paddingLeft: 20,
                   fontSize: 13,
                   marginBottom: 2,
-                  fontFamily: 'FamiljenGrotesk-regular',
+                  fontFamily: fonts.regular,
                 }}
               />
               <View className="w-full">
@@ -1007,7 +1008,7 @@ export function RegisterSellers() {
                       paddingLeft: 20,
                       fontSize: 13,
                       marginBottom: 2,
-                      fontFamily: 'FamiljenGrotesk-regular',
+                      fontFamily: fonts.regular,
                     }}
                   />
                 </View>
@@ -1032,7 +1033,7 @@ export function RegisterSellers() {
                       paddingLeft: 20,
                       fontSize: 13,
                       marginBottom: 2,
-                      fontFamily: 'FamiljenGrotesk-regular',
+                      fontFamily: fonts.regular,
                     }}
                   />
                 </View>

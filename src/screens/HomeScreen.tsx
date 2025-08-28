@@ -347,7 +347,7 @@ export function HomeScreen() {
                   className={`bg-transparent flex-row border-[1.5px] rounded-lg border-blue justify-center items-center h-full`}>
                   <IndicarIcon />
                   <Text
-                    className={`text-white text-bold ${isSmallScreen ? 'text-lg' : fontSize.xlarge} ml-1`}>
+                    className={`text-white font-regular ${isSmallScreen ? 'text-lg' : fontSize.xlarge} ml-1`}>
                     INDICAR
                   </Text>
                 </View>
@@ -361,11 +361,11 @@ export function HomeScreen() {
                   <IndicarEmMassaIcon />
                   <View>
                     <Text
-                      className={`text-white text-bold ${isSmallScreen ? 'text-lg' : fontSize.xlarge} ml-0.5`}>
+                      className={`text-white text-bold font-regular ${isSmallScreen ? 'text-lg' : fontSize.xlarge} ml-0.5`}>
                       INDICAR
                     </Text>
                     <Text
-                      className={`text-white text-bold ${fontSize.small} ml-1`}>
+                      className={`text-white text-bold font-regular ${fontSize.small} ml-1`}>
                       EM MASSA
                     </Text>
                   </View>

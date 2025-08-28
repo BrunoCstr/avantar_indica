@@ -44,6 +44,7 @@ interface AuthContextData {
   forgotPassword: (email: string) => Promise<string | null>;
   isLoading: boolean;
   userData: UserData | null;
+  isFirebaseInitialized: boolean;
 }
 
 interface AuthProviderProps {
@@ -59,6 +60,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const [registrationStatus, setregistrationStatus] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [isFirebaseInitialized, setIsFirebaseInitialized] = useState(false);
 
   useEffect(() => {
     let unsubscribeSnapshot: (() => void) | null = null;
@@ -123,12 +125,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
                 } finally {
                   console.log('Auth: Setting isLoading to false (success)');
                   setIsLoading(false);
+                  setIsFirebaseInitialized(true);
                 }
               },
               error => {
                 console.error('Erro no snapshot:', error);
                 console.log('Auth: Setting isLoading to false (error)');
                 setIsLoading(false);
+                setIsFirebaseInitialized(true);
               },
             );
           } catch (err) {
@@ -143,6 +147,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
             setUserData(null);
             console.log('Auth: Setting isLoading to false (auth error)');
             setIsLoading(false);
+            setIsFirebaseInitialized(true);
           }
         } else {
           console.log('Auth: No user, setting as not authenticated');
@@ -151,6 +156,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
           setUserData(null);
           console.log('Auth: Setting isLoading to false (no user)');
           setIsLoading(false);
+          setIsFirebaseInitialized(true);
         }
       } catch (error) {
         console.error('Erro geral no contexto de autenticação:', error);
@@ -159,6 +165,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         setUserData(null);
         console.log('Auth: Setting isLoading to false (general error)');
         setIsLoading(false);
+        setIsFirebaseInitialized(true);
       }
     });
 
@@ -336,6 +343,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         forgotPassword,
         isLoading,
         userData,
+        isFirebaseInitialized,
       }}>
       {children}
     </AuthContext.Provider>

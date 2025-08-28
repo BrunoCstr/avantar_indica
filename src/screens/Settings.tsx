@@ -42,8 +42,8 @@ const CONTACTS_PERMISSION = Platform.select({
 });
 
 export const versionApp = {
-  version: '1.0.0',
-  date: '2025-08-19',
+  version: '1.1.0',
+  date: '2025-08-28',
 };
 
 export function Settings() {
@@ -681,7 +681,7 @@ export function Settings() {
               Versão do Aplicativo
             </Text>
             <Text className="text-white text-sm font-regular mb-2">
-              {versionApp}
+              {versionApp.version} - {versionApp.date}
             </Text>
           </View>
         </View>

@@ -27,6 +27,7 @@ import {CustomModal} from '../components/CustomModal';
 import {useAuth} from '../contexts/Auth';
 import firestore from '@react-native-firebase/firestore';
 import Dropdown from 'react-native-dropdown-picker';
+import {withDefaultFont} from '../config/fontConfig';
 
 const db = getFirestore();
 
@@ -206,11 +207,11 @@ export function IndicateModal({visible, onClose}: ModalProps) {
                     searchPlaceholderTextColor={colors.white_opacity}
                     arrowIconColor={colors.white}
                     dropDownContainerStyle={{
-                      backgroundColor: colors.tertiary_purple,
+                      backgroundColor: colors.fifth_purple,
                       borderColor: colors.blue,
                     }}
                     searchContainerStyle={{
-                      backgroundColor: colors.tertiary_purple,
+                      backgroundColor: colors.fifth_purple,
                       borderColor: colors.blue,
                     }}
                     searchTextInputStyle={{
@@ -240,11 +241,10 @@ export function IndicateModal({visible, onClose}: ModalProps) {
                     placeholderStyle={{
                       color: errors.product ? 'red' : colors.white_opacity,
                     }}
-                    textStyle={{
+                    textStyle={withDefaultFont({
                       color: colors.white,
-                      fontFamily: 'FamiljenGrotesk-Regular',
                       fontSize: 14,
-                    }}
+                    })}
                     searchable
                     maxHeight={300}
                     placeholder="Produto desejado"

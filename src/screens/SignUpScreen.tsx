@@ -30,6 +30,7 @@ import {colors} from '../styles/colors';
 import {BackButton} from '../components/BackButton';
 import {CustomModal} from '../components/CustomModal';
 import Dropdown from 'react-native-dropdown-picker';
+import {withDefaultFont} from '../config/fontConfig';
 
 const db = getFirestore();
 
@@ -329,11 +330,11 @@ export function SignUpScreen() {
                       searchPlaceholderTextColor={colors.white_opacity}
                       arrowIconColor={colors.white}
                       dropDownContainerStyle={{
-                        backgroundColor: colors.tertiary_purple,
+                        backgroundColor: colors.fifth_purple,
                         borderColor: colors.blue,
                       }}
                       searchContainerStyle={{
-                        backgroundColor: colors.tertiary_purple,
+                        backgroundColor: colors.fifth_purple,
                         borderColor: colors.blue,
                       }}
                       searchTextInputStyle={{
@@ -364,11 +365,10 @@ export function SignUpScreen() {
                           ? 'red'
                           : colors.white_opacity,
                       }}
-                      textStyle={{
+                      textStyle={withDefaultFont({
                         color: colors.white,
-                        fontFamily: 'FamiljenGrotesk-regular',
                         fontSize: 14,
-                      }}
+                      })}
                       searchable
                       maxHeight={300}
                       placeholder="Selecione uma unidade"

@@ -4,5 +4,38 @@
 
 /* Configuração de fonte padrão para todo o aplicativo */
 * {
-  font-family: 'familjen_grotesk_regular', 'FamiljenGrotesk-Regular', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-family: 'FamiljenGrotesk-Regular', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Configurações específicas para diferentes pesos de fonte */
+.font-regular {
+  font-family: 'FamiljenGrotesk-Regular';
+}
+
+.font-medium {
+  font-family: 'FamiljenGrotesk-Medium';
+}
+
+.font-semibold {
+  font-family: 'FamiljenGrotesk-SemiBold';
+}
+
+.font-bold {
+  font-family: 'FamiljenGrotesk-Bold';
+}
+
+.font-italic {
+  font-family: 'FamiljenGrotesk-Italic';
+}
+
+.font-medium-italic {
+  font-family: 'FamiljenGrotesk-MediumItalic';
+}
+
+.font-semibold-italic {
+  font-family: 'FamiljenGrotesk-SemiBoldItalic';
+}
+
+.font-bold-italic {
+  font-family: 'FamiljenGrotesk-BoldItalic';
 }
