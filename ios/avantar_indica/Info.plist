@@ -39,8 +39,6 @@
 	<string></string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Preciso de permissão para acessar sua galeria de fotos</string>
-	<key>NSUserTrackingUsageDescription</key>
-	<string>Este app usará notificações para mantê-lo informado</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>FamiljenGrotesk-Bold.ttf</string>
