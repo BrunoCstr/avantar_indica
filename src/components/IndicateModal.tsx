@@ -221,8 +221,11 @@ export function IndicateModal({visible, onClose}: ModalProps) {
                     value={fieldValue}
                     items={items}
                     setOpen={setOpen}
-                    setValue={val => {
-                      setValue(val);
+                    setValue={callback => {
+                      const newValue = callback(fieldValue);
+                      onChange(newValue);
+                    }}
+                    onChangeValue={val => {
                       onChange(val);
                     }}
                     setItems={setItems}
