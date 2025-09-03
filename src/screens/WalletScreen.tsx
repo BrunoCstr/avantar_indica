@@ -95,8 +95,6 @@ export function WalletScreen() {
         // Recarrega o saldo
         const balance = await getUserBalance(userData.uid);
         setBalance(balance);
-        
-        console.log("Dados da carteira atualizados com sucesso!");
       }
     } catch (error) {
       console.error("Erro ao atualizar dados da carteira:", error);

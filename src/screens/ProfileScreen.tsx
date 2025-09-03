@@ -114,8 +114,6 @@ export function ProfileScreen() {
             setProfilePicture(userData.profilePicture);
           }
         }
-        
-        console.log("Dados do perfil atualizados com sucesso!");
       }
     } catch (error) {
       console.error("Erro ao atualizar dados do perfil:", error);

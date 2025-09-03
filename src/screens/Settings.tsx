@@ -121,7 +121,6 @@ export function Settings() {
         setWithdrawNotification(preferences.withdraw);
       }
 
-      console.log('Configurações atualizadas com sucesso!');
     } catch (error) {
       console.error('Erro ao atualizar configurações:', error);
     } finally {

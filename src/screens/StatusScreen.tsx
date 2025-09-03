@@ -210,7 +210,6 @@ export function StatusScreen() {
 
   // Função do Pull Refresh
   const onRefresh = useCallback(async () => {
-    console.log('Pull refresh iniciado na StatusScreen');
     setRefreshing(true);
     try {
       // Força uma recarga dos dados do status
@@ -244,13 +243,11 @@ export function StatusScreen() {
           packagedIndicationsQuery.get(),
         ]);
 
-        console.log('Dados de status atualizados com sucesso!');
       }
     } catch (error) {
       console.error('Erro ao atualizar dados de status:', error);
     } finally {
       setRefreshing(false);
-      console.log('Pull refresh finalizado na StatusScreen');
     }
   }, [userData?.uid]);
 

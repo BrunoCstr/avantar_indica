@@ -16,10 +16,8 @@ export function useFCM() {
         authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
       if (enabled) {
-        console.log('Permissões de notificação concedidas');
         return true;
       } else {
-        console.log('Permissões de notificação negadas');
         return false;
       }
     } catch (error) {
@@ -31,7 +29,6 @@ export function useFCM() {
   const getToken = async () => {
     try {
       const token = await messaging().getToken();
-      console.log('FCM Token obtido:', token);
       setFcmToken(token);
       return token;
     } catch (error) {
@@ -51,7 +48,6 @@ export function useFCM() {
       await updateDoc(userRef, {
         fcmToken: token,
       });
-      console.log('FCM Token atualizado no Firestore para o usuário:', userData.uid);
       return true;
     } catch (error) {
       console.error('Erro ao atualizar FCM token no Firestore:', error);
@@ -81,7 +77,6 @@ export function useFCM() {
 
     // Configurar listener para mudanças no token
     const unsubscribe = messaging().onTokenRefresh(token => {
-      console.log('FCM Token renovado:', token);
       setFcmToken(token);
       if (userData?.uid) {
         updateTokenInFirestore(token);

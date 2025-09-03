@@ -156,7 +156,6 @@ export function RegisterSellers() {
       const sellersList = await fetchSellersService(userData?.uid);
       setSellers(sellersList);
       setFilteredSellers(sellersList);
-      console.log(sellersList);
     } catch (error) {
       console.error('Erro ao buscar vendedores:', error);
     } finally {
@@ -170,7 +169,6 @@ export function RegisterSellers() {
     try {
       // Recarrega os vendedores
       await fetchSellers();
-      console.log("Vendedores atualizados com sucesso!");
     } catch (error) {
       console.error("Erro ao atualizar vendedores:", error);
     } finally {
@@ -411,11 +409,6 @@ export function RegisterSellers() {
 
       // Remove a máscara do telefone antes de salvar
       const phoneWithoutMask = removePhoneMask(phone);
-      console.log(
-        'Valor da comissão na edição:',
-        commission,
-        typeof commission,
-      );
 
       await updateSellerService(editingSeller.id, {
         fullName,
@@ -688,15 +681,7 @@ export function RegisterSellers() {
 
                       // Valida se o valor está entre 0 e 100
                       if (numValue >= 0 && numValue <= 100) {
-                        console.log(
-                          'Valor da comissão sendo definido:',
-                          numValue,
-                          typeof numValue,
-                        );
                         onChange(numValue);
-                      } else if (normalized !== '') {
-                        // Se o valor estiver fora do range, não atualiza o campo
-                        console.log('Valor fora do range (0-100):', numValue);
                       }
                     }}
                     onBlur={onBlur}

@@ -241,7 +241,6 @@ export function IndicateInBulkScreen() {
     try {
       // Recarrega os contatos
       await loadContacts();
-      console.log("Contatos atualizados com sucesso!");
     } catch (error) {
       console.error("Erro ao atualizar contatos:", error);
     } finally {

@@ -66,11 +66,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     let unsubscribeSnapshot: (() => void) | null = null;
     const unsubscribe = auth().onAuthStateChanged(async (user: any) => {
       try {
-        console.log('Auth: onAuthStateChanged triggered, user:', user ? 'exists' : 'null');
         setIsLoading(true);
-        console.log('Auth: setIsLoading(true)');
-
-        console.log('isLoading', isLoading);
 
         if (unsubscribeSnapshot) {
           unsubscribeSnapshot();
@@ -78,13 +74,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         }
 
         if (user) {
-          console.log('Auth: User exists, processing...');
           try {
             await user.reload(); // Recarrega pq pode ser que o token esteja armazenado no cache.
             const idTokenResult = await user.getIdTokenResult();
 
             if (idTokenResult.claims.disabled) {
-              console.log('Auth: User disabled, signing out');
               await auth().signOut();
               return;
             }
@@ -93,16 +87,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
               throw new Error('Usuário inválido!');
             }
 
-            console.log('Auth: Setting user as authenticated');
             setIsUserAuthenticated(true);
 
             const userRef = doc(db, 'users', user.uid);
-            console.log('Auth: Setting up user data snapshot');
             unsubscribeSnapshot = onSnapshot(
               userRef,
               snapshot => {
                 try {
-                  console.log('Auth: User data snapshot received, exists:', snapshot.exists);
                   if (snapshot.exists) {
                     const data = snapshot.data()!;
                     setregistrationStatus(data.registration_status);
@@ -118,19 +109,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
                       unitName: data.unitName,
                       rule: data.rule,
                     });
-                    console.log('Auth: User data set successfully');
                   }
                 } catch (error) {
                   console.error('Erro ao processar dados do usuário:', error);
                 } finally {
-                  console.log('Auth: Setting isLoading to false (success)');
                   setIsLoading(false);
                   setIsFirebaseInitialized(true);
                 }
               },
               error => {
                 console.error('Erro no snapshot:', error);
-                console.log('Auth: Setting isLoading to false (error)');
                 setIsLoading(false);
                 setIsFirebaseInitialized(true);
               },
@@ -145,16 +133,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
             setIsUserAuthenticated(false);
             setregistrationStatus(false);
             setUserData(null);
-            console.log('Auth: Setting isLoading to false (auth error)');
             setIsLoading(false);
             setIsFirebaseInitialized(true);
           }
         } else {
-          console.log('Auth: No user, setting as not authenticated');
           setIsUserAuthenticated(false);
           setregistrationStatus(false);
           setUserData(null);
-          console.log('Auth: Setting isLoading to false (no user)');
           setIsLoading(false);
           setIsFirebaseInitialized(true);
         }
@@ -163,7 +148,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         setIsUserAuthenticated(false);
         setregistrationStatus(false);
         setUserData(null);
-        console.log('Auth: Setting isLoading to false (general error)');
         setIsLoading(false);
         setIsFirebaseInitialized(true);
       }

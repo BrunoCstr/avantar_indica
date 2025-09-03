@@ -22,7 +22,7 @@ const DashboardChart = () => {
         const data = await getCommissionsByPeriod(userData?.uid);
         setData(data);
       } catch (error) {
-        console.log('error', error);
+        console.error('error', error);
       } finally {
         setIsLoading(false);
       }

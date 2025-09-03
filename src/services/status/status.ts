@@ -7,13 +7,10 @@ const db = getFirestore();
 // Nova função para formatar o tempo com texto apropriado
 const formatStatusTime = (updatedAt: any, createdAt: any) => {
   try {
-    console.log('formatStatusTime - updatedAt:', updatedAt);
-    console.log('formatStatusTime - createdAt:', createdAt);
     
     // Se não há updatedAt, usar createdAt
     if (!updatedAt) {
       const time = formatTimeAgo(createdAt);
-      console.log('formatStatusTime - Sem updatedAt, usando createdAt:', time);
       return `Enviado ${time}`;
     }
 
@@ -41,18 +38,12 @@ const formatStatusTime = (updatedAt: any, createdAt: any) => {
       createdTime = new Date(createdAt).getTime();
     }
     
-    console.log('formatStatusTime - updatedTime:', updatedTime);
-    console.log('formatStatusTime - createdTime:', createdTime);
-    console.log('formatStatusTime - updatedTime > createdTime:', updatedTime > createdTime);
-    
     // Se updatedAt é mais recente que createdAt, mostrar "Atualizado"
     if (updatedTime > createdTime) {
       const time = formatTimeAgo(updatedAt);
-      console.log('formatStatusTime - Atualizado:', time);
       return `Atualizado ${time}`;
     } else {
       const time = formatTimeAgo(createdAt);
-      console.log('formatStatusTime - Enviado:', time);
       return `Enviado ${time}`;
     }
   } catch (error) {
@@ -148,12 +139,6 @@ export const getOpportunitiesByUserId = async (userId: string): Promise<Opportun
       if (!processedIds.has(doc.id)) {
         processedIds.add(doc.id);
         const data = doc.data();
-        console.log('getOpportunitiesByUserId - Dados completos do documento:', doc.id, data);
-        console.log('getOpportunitiesByUserId - Campos de tempo:', {
-          updatedAt: data.updatedAt,
-          updateAt: data.updateAt,
-          createdAt: data.createdAt
-        });
         try {
           opportunities.push({
             id: doc.id,
@@ -187,12 +172,6 @@ export const getOpportunitiesByUserId = async (userId: string): Promise<Opportun
       if (!processedIds.has(doc.id)) {
         processedIds.add(doc.id);
         const data = doc.data();
-        console.log('getOpportunitiesByUserId - Dados completos do documento (userId):', doc.id, data);
-        console.log('getOpportunitiesByUserId - Campos de tempo (userId):', {
-          updatedAt: data.updatedAt,
-          updateAt: data.updateAt,
-          createdAt: data.createdAt
-        });
         try {
           opportunities.push({
             id: doc.id,

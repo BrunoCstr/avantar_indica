@@ -266,7 +266,6 @@ export function HomeScreen() {
         }
       }
       
-      console.log("Dados atualizados com sucesso!");
     } catch (error) {
       console.error("Erro ao atualizar dados:", error);
     } finally {

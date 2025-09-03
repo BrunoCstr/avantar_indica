@@ -122,7 +122,6 @@ export function SignInScreen() {
         }
       }
     } catch (error: any) {
-      console.log(error);
       setModalMessage({
         title: 'Falha ao realizar o login',
         description: 'Erro desconhecido, entre em contato com o suporte!',

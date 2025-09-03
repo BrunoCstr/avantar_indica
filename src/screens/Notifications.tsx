@@ -122,8 +122,6 @@ export function Notifications() {
         setUnreadNotifications(
           notificationsData.filter(notification => !notification.read),
         );
-        
-        console.log("Notificações atualizadas com sucesso!");
       }
     } catch (error) {
       console.error("Erro ao atualizar notificações:", error);
