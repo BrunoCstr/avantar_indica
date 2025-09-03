@@ -42,8 +42,8 @@ const CONTACTS_PERMISSION = Platform.select({
 });
 
 export const versionApp = {
-  version: '1.1.0',
-  date: '2025-08-28',
+  version: '1.1.1',
+  date: '2025-09-03',
 };
 
 export function Settings() {
@@ -676,12 +676,9 @@ export function Settings() {
             </TouchableOpacity>
           </View>
 
-          <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center justify-center">
             <Text className="text-white text-sm font-regular mb-2">
-              Versão do Aplicativo
-            </Text>
-            <Text className="text-white text-sm font-regular mb-2">
-              {versionApp.version} - {versionApp.date}
+              v{versionApp.version} - {versionApp.date}
             </Text>
           </View>
         </View>
