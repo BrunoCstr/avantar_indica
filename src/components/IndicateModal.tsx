@@ -6,6 +6,7 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  TouchableOpacity,
 } from 'react-native';
 import {indicationSchema, IndicationSchema} from '../schemas/validationSchema';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -28,6 +29,7 @@ import {useAuth} from '../contexts/Auth';
 import firestore from '@react-native-firebase/firestore';
 import Dropdown from 'react-native-dropdown-picker';
 import {withDefaultFont} from '../config/fontConfig';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const db = getFirestore();
 
@@ -87,6 +89,7 @@ export function IndicateModal({visible, onClose}: ModalProps) {
       phone: '',
       product: '',
       observations: '',
+      consent: false,
     },
   });
 
@@ -198,14 +201,10 @@ export function IndicateModal({visible, onClose}: ModalProps) {
                 control={control}
                 render={({field: {onChange, value: fieldValue}}) => (
                   <Dropdown
-                    arrowIconStyle={{
-                      tintColor: colors.white,
-                    }}
                     listItemLabelStyle={{
                       color: colors.white,
                     }}
                     searchPlaceholderTextColor={colors.white_opacity}
-                    arrowIconColor={colors.white}
                     dropDownContainerStyle={{
                       backgroundColor: colors.fifth_purple,
                       borderColor: colors.blue,
@@ -281,7 +280,46 @@ export function IndicateModal({visible, onClose}: ModalProps) {
                 name="observations"
               />
 
-              <View className="pt-5 justify-center items-center w-full">
+              {/* Texto de consentimento */}
+              <View className="mt-3 mb-2">
+                <Text className="text-[9px] text-center text-white_opacity leading-4">
+                  Ao informar os dados de terceiros (nome, telefone, etc.), você confirma que possui o consentimento dessa pessoa para compartilhar essas informações com a Avantar.
+                </Text>
+              </View>
+
+              {/* Checkbox de consentimento */}
+              <Controller
+                control={control}
+                render={({field: {onChange, value}}) => (
+                  <TouchableOpacity
+                    onPress={() => onChange(!value)}
+                    className="flex-row items-center mb-3"
+                    activeOpacity={0.8}>
+                    <MaterialCommunityIcons
+                      name={
+                        value ? 'checkbox-marked' : 'checkbox-blank-outline'
+                      }
+                      size={20}
+                      color={errors.consent ? 'red' : colors.white}
+                    />
+                    <Text
+                      className={`text-[9px] flex-1 ml-2 ${
+                        errors.consent ? 'text-red' : 'text-white_opacity'
+                      }`}>
+                      Confirmo que tenho autorização do terceiro para compartilhar seus dados.
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                name="consent"
+              />
+
+              {errors.consent && (
+                <Text className="text-red text-xs mb-2">
+                  *Obrigatório confirmar que possui autorização para compartilhar os dados
+                </Text>
+              )}
+
+              <View className="pt-2 justify-center items-center w-full">
                 <Button
                   onPress={handleSubmit(onSubmit)}
                   text="ENVIAR"

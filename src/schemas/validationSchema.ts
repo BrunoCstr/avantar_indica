@@ -43,6 +43,10 @@ export const indicationSchema = z.object({
   phone: z.string().min(14, "Digite um telefone válido!").max(15, "Digite um telefone válido!").regex(/^\(\d{2}\)\s?\d{4,5}-\d{4}$/, "Formato de telefone inválido!"),
   product: z.string().min(3, "Selecione um produto"),
   observations: z.string().optional(),
+  consent: z.boolean().refine((data) => data === true, {
+    message: "Você deve confirmar que possui autorização para compartilhar os dados",
+    path: ["consent"]
+  })
 })
 
 export type IndicationSchema = z.infer<typeof indicationSchema>;

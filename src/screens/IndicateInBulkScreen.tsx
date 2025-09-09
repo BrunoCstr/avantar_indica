@@ -9,12 +9,15 @@ import {
   ImageBackground,
   Linking,
   RefreshControl,
+  TouchableOpacity,
+  Modal,
 } from 'react-native';
 import {indicationSchema, IndicationSchema} from '../schemas/validationSchema';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useForm} from 'react-hook-form';
 import Contacts from 'react-native-contacts';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import images from '../data/images';
 import {colors} from '../styles/colors';
@@ -48,6 +51,8 @@ export function IndicateInBulkScreen() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [isConfirmationModalVisible, setIsConfirmationModalVisible] = useState(false);
+  const [consentChecked, setConsentChecked] = useState(false);
 
   const askForPermission = async () => {
     if (Platform.OS === 'android') {
@@ -188,8 +193,25 @@ export function IndicateInBulkScreen() {
       return;
     }
 
-    setIsSubmitting(true);
+    // Abrir modal de confirmação
+    setIsConfirmationModalVisible(true);
+  };
 
+  const confirmSubmit = async () => {
+    if (!consentChecked) {
+      setModalMessage({
+        title: 'Confirmação necessária',
+        description:
+          'Você deve confirmar que possui autorização para compartilhar os dados dos contatos selecionados.',
+      });
+      setIsModalVisible(true);
+      return;
+    }
+
+    setIsSubmitting(true);
+    setIsConfirmationModalVisible(false);
+
+    const arrSelecteds = leads.filter(c => c.recordID && selecteds[c.recordID]);
     const indications = arrSelecteds
       .filter(c => c.displayName && c.phoneNumbers?.[0]?.number)
       .map(c => ({
@@ -216,6 +238,7 @@ export function IndicateInBulkScreen() {
         });
         // Limpar seleções após envio bem-sucedido
         setSelecteds({});
+        setConsentChecked(false);
       } else {
         setModalMessage({
           title: 'Erro',
@@ -452,15 +475,14 @@ export function IndicateInBulkScreen() {
 
           <View className="mt-auto mb-10">
             <Button
-              text={
-                isSubmitting ? <Spinner size={32} variant="purple" /> : 'ENVIAR'
-              }
+              text="ENVIAR"
               backgroundColor="blue"
               onPress={submitSelecteds}
               textColor="tertiary_purple"
               fontSize={25}
               fontWeight="bold"
               disabled={isSubmitting || selectedCount === 0}
+              isLoading={isSubmitting}
             />
           </View>
         </View>
@@ -479,6 +501,78 @@ export function IndicateInBulkScreen() {
         description={modalMessage.description}
         buttonText="FECHAR"
       />
+
+      {/* Modal de Confirmação de Consentimento */}
+      <Modal
+        visible={isConfirmationModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsConfirmationModalVisible(false)}>
+        <View style={{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)'}}>
+          <View className="flex-1 justify-center items-center px-5">
+            <View
+              className="w-full max-w-sm bg-fifth_purple rounded-2xl border-2 border-blue px-7 py-7"
+              style={{zIndex: 999}}>
+              <Text className="text-blue font-bold text-2xl text-center mb-4">
+                Confirmar Envio
+              </Text>
+
+              <Text className="text-white_opacity text-sm text-center mb-4 leading-5">
+                Você está prestes a enviar {selectedCount} indicação(ões) para a unidade {userData?.unitName}.
+              </Text>
+
+              {/* Texto de consentimento */}
+              <View className="mb-4">
+                <Text className="text-xs text-center text-white_opacity leading-4 mb-3">
+                  Ao informar os dados de terceiros (nome, telefone, etc.), você confirma que possui o consentimento dessa pessoa para compartilhar essas informações com a Avantar.
+                </Text>
+              </View>
+
+              {/* Checkbox de consentimento */}
+              <TouchableOpacity
+                onPress={() => setConsentChecked(!consentChecked)}
+                className="flex-row items-center mb-4"
+                activeOpacity={0.8}>
+                <MaterialCommunityIcons
+                  name={
+                    consentChecked ? 'checkbox-marked' : 'checkbox-blank-outline'
+                  }
+                  size={20}
+                  color={colors.white}
+                />
+                <Text className="text-[9px] flex-1 ml-2 text-white_opacity">
+                  Confirmo que tenho autorização do terceiro para compartilhar seus dados.
+                </Text>
+              </TouchableOpacity>
+
+              <View className="flex-row gap-3">
+                <Button
+                  text="CANCELAR"
+                  backgroundColor="gray"
+                  textColor="white"
+                  fontWeight="bold"
+                  fontSize={16}
+                  onPress={() => {
+                    setIsConfirmationModalVisible(false);
+                    setConsentChecked(false);
+                  }}
+                  width="48%"
+                />
+                <Button
+                  text="CONFIRMAR"
+                  backgroundColor="blue"
+                  textColor="tertiary_purple"
+                  fontWeight="bold"
+                  fontSize={16}
+                  onPress={confirmSubmit}
+                  width="48%"
+                  disabled={!consentChecked}
+                />
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ImageBackground>
   );
 }
