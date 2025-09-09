@@ -545,27 +545,27 @@ export function IndicateInBulkScreen() {
                 </Text>
               </TouchableOpacity>
 
-              <View className="flex-row gap-3">
+              <View className="flex-row gap-3 justify-center">
                 <Button
                   text="CANCELAR"
-                  backgroundColor="gray"
-                  textColor="white"
+                  backgroundColor="white"
+                  textColor="primary_purple"
                   fontWeight="bold"
                   fontSize={16}
                   onPress={() => {
                     setIsConfirmationModalVisible(false);
                     setConsentChecked(false);
                   }}
-                  width="48%"
+                  width={120}
                 />
                 <Button
-                  text="CONFIRMAR"
+                  text={"CONFIRMAR"}
                   backgroundColor="blue"
                   textColor="tertiary_purple"
                   fontWeight="bold"
                   fontSize={16}
                   onPress={confirmSubmit}
-                  width="48%"
+                  width={120}
                   disabled={!consentChecked}
                 />
               </View>
