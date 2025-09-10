@@ -50,6 +50,8 @@ export function IndicateModal({visible, onClose}: ModalProps) {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState('');
   const [items, setItems] = useState<any[]>([]);
+  const [isConfirmationModalVisible, setIsConfirmationModalVisible] = useState(false);
+  const [consentChecked, setConsentChecked] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -89,7 +91,6 @@ export function IndicateModal({visible, onClose}: ModalProps) {
       phone: '',
       product: '',
       observations: '',
-      consent: false,
     },
   });
 
@@ -119,6 +120,8 @@ export function IndicateModal({visible, onClose}: ModalProps) {
       });
 
       reset();
+      setIsConfirmationModalVisible(false);
+      setConsentChecked(false);
 
       setModalMessage({
         title: 'Indicação enviada!',
@@ -135,6 +138,17 @@ export function IndicateModal({visible, onClose}: ModalProps) {
       console.error('Erro ao enviar a indicação:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const confirmSubmit = () => {
+    if (consentChecked) {
+      handleSubmit((data) => {
+        onSubmit(data).then(() => {
+          // Fechar o modal principal após envio bem-sucedido
+          onClose();
+        });
+      })();
     }
   };
 
@@ -280,48 +294,13 @@ export function IndicateModal({visible, onClose}: ModalProps) {
                 name="observations"
               />
 
-              {/* Texto de consentimento */}
-              <View className="mt-3 mb-2">
-                <Text className="text-[9px] text-center text-white_opacity leading-4">
-                  Ao informar os dados de terceiros (nome, telefone, etc.), você confirma que possui o consentimento dessa pessoa para compartilhar essas informações com a Avantar.
-                </Text>
-              </View>
-
-              {/* Checkbox de consentimento */}
-              <Controller
-                control={control}
-                render={({field: {onChange, value}}) => (
-                  <TouchableOpacity
-                    onPress={() => onChange(!value)}
-                    className="flex-row items-center mb-3"
-                    activeOpacity={0.8}>
-                    <MaterialCommunityIcons
-                      name={
-                        value ? 'checkbox-marked' : 'checkbox-blank-outline'
-                      }
-                      size={20}
-                      color={errors.consent ? 'red' : colors.white}
-                    />
-                    <Text
-                      className={`text-[9px] flex-1 ml-2 ${
-                        errors.consent ? 'text-red' : 'text-white_opacity'
-                      }`}>
-                      Confirmo que tenho autorização do terceiro para compartilhar seus dados.
-                    </Text>
-                  </TouchableOpacity>
-                )}
-                name="consent"
-              />
-
-              {errors.consent && (
-                <Text className="text-red text-xs mb-2">
-                  *Obrigatório confirmar que possui autorização para compartilhar os dados
-                </Text>
-              )}
-
               <View className="pt-2 justify-center items-center w-full">
                 <Button
-                  onPress={handleSubmit(onSubmit)}
+                  onPress={() => {
+                    handleSubmit((data) => {
+                      setIsConfirmationModalVisible(true);
+                    })();
+                  }}
                   text="ENVIAR"
                   backgroundColor="blue"
                   textColor="tertiary_purple"
@@ -335,6 +314,78 @@ export function IndicateModal({visible, onClose}: ModalProps) {
           </View>
         </KeyboardAvoidingView>
       </View>
+
+      {/* Modal de Confirmação de Consentimento */}
+      <Modal
+        visible={isConfirmationModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsConfirmationModalVisible(false)}>
+        <View style={{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)'}}>
+          <View className="flex-1 justify-center items-center px-5">
+            <View
+              className="w-full max-w-sm bg-fifth_purple rounded-2xl border-2 border-blue px-7 py-7"
+              style={{zIndex: 999}}>
+              <Text className="text-blue font-bold text-2xl text-center mb-4">
+                Confirmar Envio
+              </Text>
+
+              <Text className="text-white_opacity text-sm text-center mb-4 leading-5">
+                Você está prestes a enviar 1 indicação para a unidade {userData?.unitName}.
+              </Text>
+
+              {/* Texto de consentimento */}
+              <View className="mb-4">
+                <Text className="text-xs text-center text-white_opacity leading-4 mb-3">
+                  Ao informar os dados de terceiros (nome, telefone, etc.), você confirma que possui o consentimento dessa pessoa para compartilhar essas informações com a Avantar.
+                </Text>
+              </View>
+
+              {/* Checkbox de consentimento */}
+              <TouchableOpacity
+                onPress={() => setConsentChecked(!consentChecked)}
+                className="flex-row items-center mb-4"
+                activeOpacity={0.8}>
+                <MaterialCommunityIcons
+                  name={
+                    consentChecked ? 'checkbox-marked' : 'checkbox-blank-outline'
+                  }
+                  size={20}
+                  color={colors.white}
+                />
+                <Text className="text-[9px] flex-1 ml-2 text-white_opacity">
+                  Confirmo que tenho autorização do terceiro para compartilhar seus dados.
+                </Text>
+              </TouchableOpacity>
+
+              <View className="flex-row gap-3 justify-center">
+                <Button
+                  text="CANCELAR"
+                  backgroundColor="white"
+                  textColor="primary_purple"
+                  fontWeight="bold"
+                  fontSize={16}
+                  onPress={() => {
+                    setIsConfirmationModalVisible(false);
+                    setConsentChecked(false);
+                  }}
+                  width={120}
+                />
+                <Button
+                  text={"CONFIRMAR"}
+                  backgroundColor="blue"
+                  textColor="tertiary_purple"
+                  fontWeight="bold"
+                  fontSize={16}
+                  onPress={confirmSubmit}
+                  width={120}
+                  disabled={!consentChecked}
+                />
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <CustomModal
         visible={isModalVisible}
