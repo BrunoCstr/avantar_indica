@@ -45,6 +45,8 @@ interface AuthContextData {
   isLoading: boolean;
   userData: UserData | null;
   isFirebaseInitialized: boolean;
+  loadingProgress: number;
+  loadingMessage: string;
 }
 
 interface AuthProviderProps {
@@ -61,12 +63,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isFirebaseInitialized, setIsFirebaseInitialized] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingMessage, setLoadingMessage] = useState('Inicializando...');
 
   useEffect(() => {
     let unsubscribeSnapshot: (() => void) | null = null;
     const unsubscribe = auth().onAuthStateChanged(async (user: any) => {
       try {
         setIsLoading(true);
+        setLoadingProgress(10);
+        setLoadingMessage('Verificando autenticação...');
 
         if (unsubscribeSnapshot) {
           unsubscribeSnapshot();
@@ -75,6 +81,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
         if (user) {
           try {
+            setLoadingProgress(30);
+            setLoadingMessage('Validando token...');
             await user.reload(); // Recarrega pq pode ser que o token esteja armazenado no cache.
             const idTokenResult = await user.getIdTokenResult();
 
@@ -87,6 +95,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
               throw new Error('Usuário inválido!');
             }
 
+            setLoadingProgress(50);
+            setLoadingMessage('Carregando dados do usuário...');
             setIsUserAuthenticated(true);
 
             const userRef = doc(db, 'users', user.uid);
@@ -95,6 +105,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
               snapshot => {
                 try {
                   if (snapshot.exists) {
+                    setLoadingProgress(80);
+                    setLoadingMessage('Processando informações...');
                     const data = snapshot.data()!;
                     setregistrationStatus(data.registration_status);
                     setUserData({
@@ -110,11 +122,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
                       rule: data.rule,
                     });
                   }
+                  setLoadingProgress(100);
+                  setLoadingMessage('Concluído!');
                 } catch (error) {
                   console.error('Erro ao processar dados do usuário:', error);
                 } finally {
-                  setIsLoading(false);
-                  setIsFirebaseInitialized(true);
+                  setTimeout(() => {
+                    setIsLoading(false);
+                    setIsFirebaseInitialized(true);
+                  }, 500);
                 }
               },
               error => {
@@ -137,11 +153,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
             setIsFirebaseInitialized(true);
           }
         } else {
+          setLoadingProgress(100);
+          setLoadingMessage('Usuário não autenticado');
           setIsUserAuthenticated(false);
           setregistrationStatus(false);
           setUserData(null);
-          setIsLoading(false);
-          setIsFirebaseInitialized(true);
+          setTimeout(() => {
+            setIsLoading(false);
+            setIsFirebaseInitialized(true);
+          }, 500);
         }
       } catch (error) {
         console.error('Erro geral no contexto de autenticação:', error);
@@ -328,6 +348,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         isLoading,
         userData,
         isFirebaseInitialized,
+        loadingProgress,
+        loadingMessage,
       }}>
       {children}
     </AuthContext.Provider>

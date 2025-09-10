@@ -5,6 +5,7 @@ import BootSplash from 'react-native-bootsplash';
 import {AuthStack} from './AuthStack';
 import {AppStack} from './AppStack';
 import {useAuth} from '../contexts/Auth';
+import LoadingScreen from '../screens/LoadingScreen';
 
 export function Router() {
   const {userAuthenticated, isLoading, isFirebaseInitialized} = useAuth();
@@ -29,6 +30,11 @@ export function Router() {
       hideSplash();
     }
   }, [isFirebaseInitialized, isLoading, splashHidden]);
+
+  // Mostrar LoadingScreen durante a inicialização do Firebase
+  if (isLoading || !isFirebaseInitialized) {
+    return <LoadingScreen />;
+  }
 
   // Renderizar sempre, mas só esconder splash quando o Firebase estiver pronto
   return (

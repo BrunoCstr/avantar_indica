@@ -27,6 +27,7 @@ import {StatusScreen} from '../screens/StatusScreen';
 import {ProfileScreen} from '../screens/ProfileScreen';
 import {colors} from '../styles/colors';
 import {IndicateModal} from './IndicateModal';
+import {OptionsModal} from './OptionsModal';
 import PlusIcon from '../assets/images/plus.svg';
 import { useAuth } from '../contexts/Auth';
 import {WaitingConfirmationScreen} from '../screens/WaitingConfirmationScreen';
@@ -34,9 +35,10 @@ import {WaitingConfirmationScreen} from '../screens/WaitingConfirmationScreen';
 const Tab = createBottomTabNavigator();
 
 export function BottomNavigator() {
-  const { registrationStatus } = useAuth();
+  const { registrationStatus, userData } = useAuth();
   const {horizontalPadding} = useResponsive();
   const [showModal, setShowModal] = useState(false);
+  const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const navigation = useNavigation<NavigationProp>();
 
@@ -161,7 +163,7 @@ export function BottomNavigator() {
                   activeOpacity={0.8}
                   onPress={() => {
                     registrationStatus 
-                      ? setShowModal(true) 
+                      ? setShowOptionsModal(true) 
                       : navigation.navigate('WaitingConfirmationScreen')
                   }}
                   style={{
@@ -192,6 +194,16 @@ export function BottomNavigator() {
       </Tab.Navigator>
 
       <IndicateModal visible={showModal} onClose={() => setShowModal(false)} />
+      
+      <OptionsModal
+        visible={showOptionsModal}
+        onClose={() => setShowOptionsModal(false)}
+        onIndicateIndividual={() => setShowModal(true)}
+        onIndicateBulk={() => navigation.navigate('IndicateInBulk')}
+        onRegisterSeller={() => navigation.navigate('RegisterSellers')}
+        onViewStatus={() => navigation.navigate('Status')}
+        userRule={userData?.rule}
+      />
     </>
   );
 }
