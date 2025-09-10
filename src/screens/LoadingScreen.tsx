@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, Animated, Dimensions, Image } from 'react-native';
+import { View, Text, Animated, Dimensions } from 'react-native';
 import { useAuth } from '../contexts/Auth';
+import AppLogo from '../assets/images/avantar_logo_completa.svg';
 
 const { width } = Dimensions.get('window');
 
@@ -25,12 +26,8 @@ export default function LoadingScreen() {
     <View className="flex-1 bg-[#4A04A5] justify-center items-center px-10">
       {/* Logo */}
       <View className="flex-1 justify-center items-center">
-        <View className="w-30 h-30 bg-white/10 rounded-full justify-center items-center border-2 border-white/30">
-          <Image
-            source={require('../assets/images/appLogo.svg')}
-            style={{ width: 80, height: 80 }}
-            resizeMode="contain"
-          />
+        <View className="justify-center items-center">
+        <AppLogo width={300} height={300} />
         </View>
       </View>
 

@@ -136,7 +136,7 @@ export function OptionsModal({
             activeOpacity={1}
             onPress={(e) => e.stopPropagation()}>
             <View className="w-full items-center mt-5">
-                <View className='bg-gray rounded-2xl px-6 p-1'></View>
+                <View className='bg-white/20 rounded-2xl px-6 p-1'></View>
             </View>
 
             {/* Header */}
