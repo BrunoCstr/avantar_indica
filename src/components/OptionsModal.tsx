@@ -12,8 +12,8 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {colors} from '../styles/colors';
-import IndicarIcon from '../assets/images/indicate_icon_white.svg';
-import IndicarEmMassaIcon from '../assets/images/mass_indication_white.svg';
+import IndicarIcon from '../assets/images/1.svg';
+import IndicarEmMassaIcon from '../assets/images/2.svg';
 
 interface OptionsModalProps {
   visible: boolean;
@@ -39,8 +39,8 @@ export function OptionsModal({
       id: 'individual',
       title: 'Indicar Individualmente',
       description: 'Envie uma indicação mais completa',
-      icon: 'IndicarIcon',
-      iconType: 'SVG' as const,
+      icon: 'person-add',
+      iconType: 'Ionicons' as const,
       color: '#6600CC',
       onPress: onIndicateIndividual,
     },
@@ -48,8 +48,8 @@ export function OptionsModal({
       id: 'bulk',
       title: 'Indicar em Massa',
       description: 'Envie vários contatos de seu celular',
-      icon: 'IndicarEmMassaIcon',
-      iconType: 'SVG' as const,
+      icon: 'people',
+      iconType: 'Ionicons' as const,
       color: '#C352F2',
       onPress: onIndicateBulk,
     },
@@ -57,8 +57,8 @@ export function OptionsModal({
       id: 'register',
       title: 'Cadastrar Vendedor',
       description: 'Adicione uma pessoa a sua equipe',
-      icon: 'account-plus',
-      iconType: 'MaterialCommunityIcons' as const,
+      icon: 'business',
+      iconType: 'Ionicons' as const,
       color: '#E06400',
       onPress: onRegisterSeller,
       hidden: userRule === 'cliente_indicador',
