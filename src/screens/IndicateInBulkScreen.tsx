@@ -11,6 +11,7 @@ import {
   RefreshControl,
   TouchableOpacity,
   Modal,
+  ScrollView,
 } from 'react-native';
 import {indicationSchema, IndicationSchema} from '../schemas/validationSchema';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -179,6 +180,11 @@ export function IndicateInBulkScreen() {
   };
 
   const selectedCount = Object.values(selecteds).filter(Boolean).length;
+
+  // Função para obter os contatos selecionados
+  const getSelectedContacts = () => {
+    return leads.filter(c => c.recordID && selecteds[c.recordID]);
+  };
 
   const submitSelecteds = async () => {
     const arrSelecteds = leads.filter(c => c.recordID && selecteds[c.recordID]);
@@ -518,8 +524,37 @@ export function IndicateInBulkScreen() {
               </Text>
 
               <Text className="text-white_opacity text-sm text-center mb-4 leading-5">
-                Você está prestes a enviar {selectedCount} indicação(ões) para a unidade {userData?.unitName}.
+                Você está prestes a enviar {selectedCount} indicações para a unidade {userData?.unitName}.
               </Text>
+
+              <Text className="text-white font-bold text-base text-center mb-3">
+                Você está prestes a indicar os seguintes contatos:
+              </Text>
+
+              {/* Lista de contatos selecionados */}
+              <ScrollView 
+                className="max-h-40 mb-4"
+                showsVerticalScrollIndicator={true}
+                nestedScrollEnabled={true}>
+                {getSelectedContacts().map((contact, index) => (
+                  <View key={contact.recordID || index} className="flex-row items-center mb-2 p-2 rounded-lg">
+                    <MaterialCommunityIcons
+                      name="account"
+                      size={16}
+                      color={colors.white}
+                      style={{marginRight: 8}}
+                    />
+                    <View className="flex-1">
+                      <Text className="text-white font-medium text-sm">
+                        {contact.displayName || 'Sem nome'}
+                      </Text>
+                      <Text className="text-white_opacity text-xs">
+                        {contact.phoneNumbers?.[0]?.number || 'Sem telefone'}
+                      </Text>
+                    </View>
+                  </View>
+                ))}
+              </ScrollView>
 
               {/* Texto de consentimento */}
               <View className="mb-4">

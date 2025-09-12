@@ -473,8 +473,8 @@ export function ProfileScreen() {
                           keyboardType="phone-pad"
                         />
                       ) : (
-                        <Text className={`font-bold text-black ${fontSize.medium}`}>
-                          {applyMaskTelephone(userData?.phone || '')}
+                        <Text className={`font-bold ${userData?.phone ? 'text-black' : 'text-orange'} ${fontSize.medium}`}>
+                          {userData?.phone ? applyMaskTelephone(userData?.phone) : 'Não cadastrado'}
                         </Text>
                       )}
                     </View>
@@ -527,7 +527,7 @@ export function ProfileScreen() {
                           )}
                         </View>
                       ) : (
-                        <Text className={`font-bold text-black ${fontSize.medium}`}>
+                        <Text className={`font-bold ${userData?.pixKey ? 'text-black' : 'text-orange'}  ${fontSize.medium}`}>
                           {userData?.pixKey == '' || userData?.pixKey == null
                             ? 'Não cadastrado'
                             : userData?.pixKey}
