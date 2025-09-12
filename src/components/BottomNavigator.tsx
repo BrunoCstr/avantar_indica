@@ -201,7 +201,7 @@ export function BottomNavigator() {
         onIndicateIndividual={() => setShowModal(true)}
         onIndicateBulk={() => navigation.navigate('IndicateInBulk')}
         onRegisterSeller={() => navigation.navigate('RegisterSellers')}
-        onViewStatus={() => navigation.navigate('Status')}
+        onViewStatus={() => navigation.navigate('StatusScreen')}
         userRule={userData?.rule}
       />
     </>

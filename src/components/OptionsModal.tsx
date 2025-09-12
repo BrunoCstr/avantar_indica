@@ -50,7 +50,7 @@ export function OptionsModal({
       description: 'Envie vários contatos de seu celular',
       icon: 'people',
       iconType: 'Ionicons' as const,
-      color: '#C352F2',
+      color: '#6600CC',
       onPress: onIndicateBulk,
     },
     {
@@ -59,7 +59,7 @@ export function OptionsModal({
       description: 'Adicione uma pessoa a sua equipe',
       icon: 'business',
       iconType: 'Ionicons' as const,
-      color: '#E06400',
+      color: '#6600CC',
       onPress: onRegisterSeller,
       hidden: userRule === 'cliente_indicador',
     },
@@ -69,7 +69,7 @@ export function OptionsModal({
       description: 'Acompanhe o status das suas indicações',
       icon: 'sync',
       iconType: 'AntDesign' as const,
-      color: '#F1B808',
+      color: '#6600CC',
       onPress: onViewStatus,
     },
   ];
