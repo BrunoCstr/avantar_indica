@@ -230,7 +230,7 @@ export function SignUpScreen() {
 
                 <FormInput
                   name="phone"
-                  placeholder="Telefone"
+                  placeholder="Telefone (Opcional)"
                   control={control}
                   errorMessage={errors.phone?.message}
                   borderColor={colors.blue}
