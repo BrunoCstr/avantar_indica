@@ -98,11 +98,49 @@ export const indicated = functions.firestore.onDocumentCreated(
               },
             };
 
-            try {
-              await admin.messaging().send(payload);
-            } catch (error) {
-              console.error('Erro ao enviar push notification:', error);
-            }
+            // Função para tentar enviar push notification com retry
+            const sendPushWithRetry = async (retries = 2) => {
+              for (let attempt = 0; attempt <= retries; attempt++) {
+                try {
+                  await admin.messaging().send(payload);
+                  console.log(`Push notification enviada com sucesso para usuário ${userId} (tentativa ${attempt + 1})`);
+                  return;
+                } catch (error: any) {
+                  console.error(`Erro ao enviar push notification (tentativa ${attempt + 1}):`, error);
+                  
+                  // Se o token for inválido ou não registrado, limpar o token e não tentar novamente
+                  if (
+                    error?.errorInfo?.code === 'messaging/registration-token-not-registered' ||
+                    error?.errorInfo?.code === 'messaging/invalid-registration-token'
+                  ) {
+                    console.log(`Token FCM inválido para usuário ${userId}, removendo token...`);
+                    try {
+                      await admin
+                        .firestore()
+                        .collection('users')
+                        .doc(userId)
+                        .update({
+                          fcmToken: admin.firestore.FieldValue.delete(),
+                        });
+                      console.log(`Token FCM removido do usuário ${userId}`);
+                    } catch (updateError) {
+                      console.error(`Erro ao remover token FCM do usuário ${userId}:`, updateError);
+                    }
+                    return; // Não tentar novamente se o token for inválido
+                  }
+                  
+                  // Se não é o último retry e é um erro temporário, aguardar antes de tentar novamente
+                  if (attempt < retries && error?.errorInfo?.code === 'messaging/third-party-auth-error') {
+                    console.log(`Aguardando 1 segundo antes da próxima tentativa...`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                  } else if (attempt === retries) {
+                    console.error(`Falha ao enviar push notification após ${retries + 1} tentativas para usuário ${userId}`);
+                  }
+                }
+              }
+            };
+
+            await sendPushWithRetry();
           }
         } catch (error) {
           console.error(
@@ -133,11 +171,14 @@ export const indicated = functions.firestore.onDocumentCreated(
     if (hasEmailEnabled) {
       const transporter = nodemailer.createTransport({
         host: 'smtp.dreamhost.com',
-        port: 465,
-        secure: true,
+        port: 587,
+        secure: false,
         auth: {
           user: EMAIL_USER.value(),
           pass: EMAIL_PASS.value(),
+        },
+        tls: {
+          rejectUnauthorized: false, // Para evitar problemas com certificados
         },
       });
 
@@ -205,9 +246,17 @@ export const indicated = functions.firestore.onDocumentCreated(
       };
 
       try {
-        await transporter.sendMail(mailOptions);
-      } catch (error) {
+        const result = await transporter.sendMail(mailOptions);
+        console.log('Email enviado com sucesso:', result.messageId);
+      } catch (error: any) {
         console.error('Erro ao enviar email:', error);
+        console.error('Código do erro:', error?.code);
+        console.error('Resposta do servidor:', error?.response);
+        
+        // Verificar se é erro de autenticação
+        if (error?.code === 'EAUTH') {
+          console.error('Erro de autenticação SMTP. Verificar credenciais EMAIL_USER e EMAIL_PASS.');
+        }
       }
     }
 

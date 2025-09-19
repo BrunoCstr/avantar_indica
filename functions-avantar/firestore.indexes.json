@@ -1,0 +1,10 @@
+{
+  "indexes": [],
+  "fieldOverrides": [
+    {
+      "collectionGroup": "temp_indications",
+      "fieldPath": "expiresAt",
+      "ttl": true
+    }
+  ]
+}

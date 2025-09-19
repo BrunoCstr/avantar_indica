@@ -21,7 +21,7 @@ import {
 } from '@react-native-firebase/firestore';
 
 import { signUpSchema, SignUpFormData } from '../schemas/validationSchema';
-import { FormInput } from '../components/FormInput';
+import { FormInputOldOld } from '../components/FormInputOldOld';
 import images from '../data/images';
 import { Button } from '../components/Button';
 import { useAuth } from '../contexts/Auth';
@@ -205,7 +205,7 @@ export function SignUpScreen() {
               </View>
 
               <View className="gap-2">
-                <FormInput
+                <FormInputOld
                   name="fullName"
                   placeholder="Nome e Sobrenome"
                   control={control}
@@ -216,7 +216,7 @@ export function SignUpScreen() {
                   height={55}
                   color={colors.white}
                 />
-                <FormInput
+                <FormInputOld
                   name="email"
                   placeholder="E-mail"
                   control={control}
@@ -228,7 +228,7 @@ export function SignUpScreen() {
                   color={colors.white}
                 />
 
-                <FormInput
+                <FormInputOld
                   name="phone"
                   placeholder="Telefone (Opcional)"
                   control={control}
@@ -259,7 +259,7 @@ export function SignUpScreen() {
 
                 <View>
                   <View className="relative">
-                    <FormInput
+                    <FormInputOld
                       name="password"
                       placeholder="Senha"
                       secureTextEntry={showPassword}
@@ -288,7 +288,7 @@ export function SignUpScreen() {
 
                 <View>
                   <View className="relative">
-                    <FormInput
+                    <FormInputOld
                       name="confirmPassword"
                       placeholder="Confirme sua senha"
                       secureTextEntry={showConfirmPassword}

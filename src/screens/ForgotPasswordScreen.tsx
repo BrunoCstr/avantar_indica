@@ -5,7 +5,7 @@ import {zodResolver} from '@hookform/resolvers/zod';
 import {BackButton} from '../components/BackButton';
 
 import images from '../data/images';
-import {FormInput} from '../components/FormInput';
+import {FormInputOld} from '../components/FormInputOld';
 import {
   forgotPasswordSchema,
   ForgotPasswordSchema,
@@ -102,7 +102,7 @@ export function ForgotPasswordScreen() {
             Altere sua senha
           </Text>
         </View>
-        <FormInput
+        <FormInputOld
           name="email"
           placeholder="E-mail"
           control={control}

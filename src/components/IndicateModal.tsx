@@ -15,18 +15,14 @@ import {
   getFirestore,
   collection,
   getDocs,
-  setDoc,
-  doc,
-  serverTimestamp,
 } from '@react-native-firebase/firestore';
 
 import {Button} from './Button';
 import {colors} from '../styles/colors';
-import {FormInput} from '../components/FormInput';
+import {FormInputOld} from '../components/FormInputOld';
 import {BackButton} from '../components/BackButton';
 import {CustomModal} from '../components/CustomModal';
 import {useAuth} from '../contexts/Auth';
-import firestore from '@react-native-firebase/firestore';
 import Dropdown from 'react-native-dropdown-picker';
 import {withDefaultFont} from '../config/fontConfig';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -50,7 +46,8 @@ export function IndicateModal({visible, onClose}: ModalProps) {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState('');
   const [items, setItems] = useState<any[]>([]);
-  const [isConfirmationModalVisible, setIsConfirmationModalVisible] = useState(false);
+  const [isConfirmationModalVisible, setIsConfirmationModalVisible] =
+    useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
 
   useEffect(() => {
@@ -88,6 +85,7 @@ export function IndicateModal({visible, onClose}: ModalProps) {
     resolver: zodResolver(indicationSchema),
     defaultValues: {
       fullName: '',
+      email: '',
       phone: '',
       product: '',
       observations: '',
@@ -99,43 +97,50 @@ export function IndicateModal({visible, onClose}: ModalProps) {
       setIsLoading(true);
       const cleanedPhone = data.phone.replace(/\D/g, '');
 
-      // Sempre quando algum arquivo for criado aqui, mandar um e-mail e uma notificação para a unidade. (Cloud Functions)
-      const indicationRef = doc(collection(db, 'indications'));
-
-      await setDoc(indicationRef, {
+      // Novo fluxo: enviar dados para API de consentimento
+      const consentRequestData = {
         indicator_id: userData?.uid,
         indicator_name: userData?.displayName,
         profilePicture: userData?.profilePicture,
-        indicationId: indicationRef.id,
         unitId: userData?.affiliated_to,
         unitName: userData?.unitName,
-        name: data.fullName,
-        phone: cleanedPhone,
+        indicated_name: data.fullName,
+        indicated_email: data.email,
+        indicated_phone: cleanedPhone,
         product: data.product,
         observations: data.observations,
-        createdAt: serverTimestamp(),
-        status: 'PENDENTE CONTATO',
-        sgcorId: null,
-        updatedAt: firestore.FieldValue.serverTimestamp(),
+      };
+
+      // Chamar Cloud Function para enviar email de consentimento
+      const response = await fetch('https://sendconsentemail-o2z256zv6a-uc.a.run.app', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(consentRequestData),
       });
+
+      if (!response.ok) {
+        throw new Error('Falha ao enviar solicitação de consentimento');
+      }
 
       reset();
       setIsConfirmationModalVisible(false);
       setConsentChecked(false);
 
       setModalMessage({
-        title: 'Indicação enviada!',
-        description: 'Você pode acompanhar sua indicação no menu de status.',
+        title: 'Convite enviado!',
+        description: 'Um e-mail foi enviado para o indicado com uma solicitação de consentimento. A indicação será registrada após a confirmação.',
       });
       setIsModalVisible(true);
     } catch (error) {
       setModalMessage({
-        title: 'Erro ao enviar a indicação!',
-        description: 'Por favor, tente novamente.',
+        title: 'Erro ao enviar o convite!',
+        description: 'Por favor, verifique os dados e tente novamente.',
       });
       setIsModalVisible(true);
 
-      console.error('Erro ao enviar a indicação:', error);
+      console.error('Erro ao enviar solicitação de consentimento:', error);
     } finally {
       setIsLoading(false);
     }
@@ -143,12 +148,7 @@ export function IndicateModal({visible, onClose}: ModalProps) {
 
   const confirmSubmit = () => {
     if (consentChecked) {
-      handleSubmit((data) => {
-        onSubmit(data).then(() => {
-          // Fechar o modal principal após envio bem-sucedido
-          onClose();
-        });
-      })();
+      handleSubmit(onSubmit)();
     }
   };
 
@@ -161,7 +161,7 @@ export function IndicateModal({visible, onClose}: ModalProps) {
           <View
             className="w-full max-w-sm bg-fifth_purple rounded-2xl border-2 border-blue px-7 py-7"
             style={{zIndex: 999}}>
-            <View className="justify-between items-center flex-row">
+            <View className="justify-between items-center flex-row" style={{zIndex: 1001}}>
               <BackButton onPress={onClose} />
               <Text className="text-blue font-bold text-3xl absolute left-1/2 -translate-x-1/2">
                 Indicar
@@ -169,7 +169,7 @@ export function IndicateModal({visible, onClose}: ModalProps) {
             </View>
 
             <View className="flex-col mt-5 gap-2">
-              <FormInput
+              <FormInputOld
                 name="fullName"
                 placeholder="Nome e sobrenome"
                 control={control}
@@ -181,7 +181,21 @@ export function IndicateModal({visible, onClose}: ModalProps) {
                 color={colors.white_opacity}
                 fontSize={13}
               />
-              <FormInput
+              <FormInputOld
+                name="email"
+                placeholder="E-mail"
+                control={control}
+                errorMessage={errors.email?.message}
+                borderColor={colors.blue}
+                backgroundColor={colors.tertiary_purple_opacity}
+                placeholderColor={colors.white_opacity}
+                height={49}
+                color={colors.white_opacity}
+                fontSize={13}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+              <FormInputOld
                 name="phone"
                 placeholder="Telefone"
                 control={control}
@@ -297,7 +311,7 @@ export function IndicateModal({visible, onClose}: ModalProps) {
               <View className="pt-2 justify-center items-center w-full">
                 <Button
                   onPress={() => {
-                    handleSubmit((data) => {
+                    handleSubmit(data => {
                       setIsConfirmationModalVisible(true);
                     })();
                   }}
@@ -327,17 +341,23 @@ export function IndicateModal({visible, onClose}: ModalProps) {
               className="w-full max-w-sm bg-fifth_purple rounded-2xl border-2 border-blue px-7 py-7"
               style={{zIndex: 999}}>
               <Text className="text-blue font-bold text-2xl text-center mb-4">
-                Confirmar Envio
+                Solicitar Consentimento
               </Text>
 
               <Text className="text-white_opacity text-sm text-center mb-4 leading-5">
-                Você está prestes a enviar 1 indicação para a unidade {userData?.unitName}.
+                Você está prestes a solicitar consentimento do indicado.
               </Text>
 
               {/* Texto de consentimento */}
               <View className="mb-4">
                 <Text className="text-xs text-center text-white_opacity leading-4 mb-3">
-                  Ao informar os dados de terceiros (nome, telefone, etc.), você confirma que possui o consentimento dessa pessoa para compartilhar essas informações com a Avantar.
+                  Será enviado um e-mail para <Text className="font-bold text-white">o indicado</Text> com
+                  um link de consentimento. Apenas após ele autorizar o
+                  compartilhamento dos dados, a indicação será registrada.
+                </Text>
+                <Text className="text-xs text-center text-white_opacity leading-4 mb-3">
+                  <Text className="font-bold text-blue">Importante:</Text> Os dados não serão armazenados
+                  até que o consentimento seja dado pelo indicado.
                 </Text>
               </View>
 
@@ -348,13 +368,15 @@ export function IndicateModal({visible, onClose}: ModalProps) {
                 activeOpacity={0.8}>
                 <MaterialCommunityIcons
                   name={
-                    consentChecked ? 'checkbox-marked' : 'checkbox-blank-outline'
+                    consentChecked
+                      ? 'checkbox-marked'
+                      : 'checkbox-blank-outline'
                   }
                   size={20}
                   color={colors.white}
                 />
                 <Text className="text-[9px] flex-1 ml-2 text-white_opacity">
-                  Confirmo que tenho autorização do terceiro para compartilhar seus dados.
+                  Confirmo que tenho autorização do indicado para enviar esta solicitação de consentimento.
                 </Text>
               </TouchableOpacity>
 
@@ -372,7 +394,7 @@ export function IndicateModal({visible, onClose}: ModalProps) {
                   width={120}
                 />
                 <Button
-                  text={"CONFIRMAR"}
+                  text={'ENVIAR'}
                   backgroundColor="blue"
                   textColor="tertiary_purple"
                   fontWeight="bold"
@@ -389,7 +411,13 @@ export function IndicateModal({visible, onClose}: ModalProps) {
 
       <CustomModal
         visible={isModalVisible}
-        onClose={() => setIsModalVisible(false)}
+        onClose={() => {
+          setIsModalVisible(false);
+          // Se for modal de sucesso, fechar o modal principal também
+          if (modalMessage.title === 'Convite enviado!') {
+            onClose();
+          }
+        }}
         title={modalMessage.title}
         description={modalMessage.description}
         buttonText="FECHAR"

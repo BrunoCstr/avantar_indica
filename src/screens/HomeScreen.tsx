@@ -14,10 +14,10 @@ import IndicarIcon from '../assets/images/indicar_icon.svg';
 import IndicarEmMassaIcon from '../assets/images/indicar_em_massa_icon.svg';
 
 type RootStackParamList = {
-  IndicateInBulk: undefined;
   Rules: undefined;
   Status: undefined;
   WaitingConfirmationScreen: undefined;
+  IndicateScreen: undefined;
 };
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
@@ -345,16 +345,22 @@ export function HomeScreen() {
                 <View
                   className={`bg-transparent flex-row border-[1.5px] rounded-lg border-blue justify-center items-center h-full`}>
                   <IndicarIcon />
-                  <Text
-                    className={`text-white font-regular ${isSmallScreen ? 'text-lg' : fontSize.xlarge} ml-1`}>
-                    INDICAR
-                  </Text>
+                  <View>
+                    <Text
+                      className={`text-white font-regular ${isSmallScreen ? 'text-lg' : fontSize.xlarge} ml-1`}>
+                      INDICAR
+                    </Text>
+                  </View>
                 </View>
               </TouchableOpacity>
               <TouchableOpacity
                 className="flex-1"
                 activeOpacity={0.8}
-                onPress={() => navigation.navigate('IndicateInBulk')}>
+                onPress={() => {
+                  registrationStatus
+                    ? navigation.navigate('IndicateScreen')
+                    : navigation.navigate('WaitingConfirmationScreen');
+                }}>
                 <View
                   className={`bg-transparent flex-row border-[1.5px] rounded-lg border-blue justify-center items-center h-full`}>
                   <IndicarEmMassaIcon />
@@ -365,7 +371,7 @@ export function HomeScreen() {
                     </Text>
                     <Text
                       className={`text-white text-bold font-regular ${fontSize.small} ml-1`}>
-                      EM MASSA
+                      MÚLTIPLOS
                     </Text>
                   </View>
                 </View>

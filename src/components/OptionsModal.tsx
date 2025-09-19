@@ -18,54 +18,40 @@ import IndicarEmMassaIcon from '../assets/images/2.svg';
 interface OptionsModalProps {
   visible: boolean;
   onClose: () => void;
-  onIndicateIndividual: () => void;
-  onIndicateBulk: () => void;
-  onRegisterSeller: () => void;
+  onIndicateQuick: () => void;
+  onIndicateDetailed: () => void;
   onViewStatus: () => void;
-  userRule?: string;
 }
 
 export function OptionsModal({
   visible,
   onClose,
-  onIndicateIndividual,
-  onIndicateBulk,
-  onRegisterSeller,
+  onIndicateQuick,
+  onIndicateDetailed,
   onViewStatus,
-  userRule,
 }: OptionsModalProps) {
   const options = [
     {
-      id: 'individual',
-      title: 'Indicar Individualmente',
-      description: 'Envie uma indicação mais completa',
-      icon: 'person-add',
+      id: 'quick',
+      title: 'Indicação Rápida',
+      description: 'Indicação rápida e simples',
+      icon: 'flash',
       iconType: 'Ionicons' as const,
       color: '#6600CC',
-      onPress: onIndicateIndividual,
+      onPress: onIndicateQuick,
     },
     {
-      id: 'bulk',
-      title: 'Indicar em Massa',
-      description: 'Envie vários contatos de seu celular',
+      id: 'detailed',
+      title: 'Indicar',
+      description: 'Indicações detalhadas e múltiplas',
       icon: 'people',
       iconType: 'Ionicons' as const,
       color: '#6600CC',
-      onPress: onIndicateBulk,
-    },
-    {
-      id: 'register',
-      title: 'Cadastrar Vendedor',
-      description: 'Adicione uma pessoa a sua equipe',
-      icon: 'business',
-      iconType: 'Ionicons' as const,
-      color: '#6600CC',
-      onPress: onRegisterSeller,
-      hidden: userRule === 'cliente_indicador',
+      onPress: onIndicateDetailed,
     },
     {
       id: 'status',
-      title: 'Acompanhar as indicações',
+      title: 'Acompanhar o Status',
       description: 'Acompanhe o status das suas indicações',
       icon: 'sync',
       iconType: 'AntDesign' as const,
@@ -162,9 +148,7 @@ export function OptionsModal({
 
             {/* Options List */}
             <View className="px-6 gap-3">
-              {options
-                .filter(option => !option.hidden)
-                .map(option => (
+              {options.map(option => (
                   <TouchableOpacity
                     key={option.id}
                     onPress={() => {

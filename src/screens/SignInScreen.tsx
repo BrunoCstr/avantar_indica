@@ -16,7 +16,7 @@ import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
 import images from '../data/images';
 import {signInSchema, SignInFormData} from '../schemas/validationSchema';
-import {FormInput} from '../components/FormInput';
+import {FormInputOld} from '../components/FormInputOld';
 import {Button} from '../components/Button';
 import {useAuth} from '../contexts/Auth';
 import {colors} from '../styles/colors';
@@ -152,7 +152,7 @@ export function SignInScreen() {
               <Text className="font-semiBold text-2xl text-white mb-3">
                 Faça seu login
               </Text>
-              <FormInput
+              <FormInputOld
                 name="email"
                 placeholder="Login"
                 control={control}
@@ -165,7 +165,7 @@ export function SignInScreen() {
               />
               <View className="w-full">
                 <View className="relative">
-                  <FormInput
+                  <FormInputOld
                     name="password"
                     placeholder="Senha"
                     secureTextEntry={showPassword}

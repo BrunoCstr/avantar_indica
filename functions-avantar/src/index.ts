@@ -19,3 +19,5 @@ export {moveToArchived} from './others/moveToArchived';
 export {registerTermsAcceptance} from './auth/registerTermsAcceptance';
 export * from './auth/updateUserEmail';
 export * from './auth/toggleUserActive';
+export {sendConsentEmail} from './consent/sendConsentEmail';
+export {confirmConsent, validateConsentToken} from './consent/confirmConsent';
