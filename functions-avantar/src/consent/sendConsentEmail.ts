@@ -157,21 +157,27 @@ export const sendConsentEmail = onRequest(
                 <p><strong>Indicado por:</strong> ${data.indicator_name} (${data.unitName})</p>
               </div>
               
-              <p><strong>🔒 Sobre seus dados:</strong></p>
-              <p>Para prosseguir com esta indicação, precisamos do seu consentimento para compartilhar seus dados de contato com nossa equipe comercial. Seus dados serão utilizados exclusivamente para:</p>
+              <p><strong>🔒 Sua Privacidade é Importante:</strong></p>
+              <p>Precisamos do seu <strong>consentimento explícito</strong> para compartilhar seus dados de contato (nome, e-mail e telefone) com nossa equipe comercial. Seus dados serão utilizados exclusivamente para:</p>
               <ul>
-                <li>Entrar em contato sobre o produto de seu interesse</li>
-                <li>Apresentar nossas soluções</li>
-                <li>Acompanhar o processo comercial</li>
+                <li>✅ Entrar em contato sobre o produto de seu interesse</li>
+                <li>✅ Apresentar nossas soluções</li>
+                <li>✅ Acompanhar o processo comercial</li>
               </ul>
               
-              <p><strong>⏰ Importante:</strong> Este link é válido por 24 horas. Após esse período, será necessário solicitar uma nova indicação.</p>
-              
-              <div style="text-align: center;">
-                <a href="${consentLink}" class="button">AUTORIZAR COMPARTILHAMENTO</a>
+              <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
+                <p style="margin: 0;"><strong>⚠️ Você tem total controle:</strong></p>
+                <p style="margin: 5px 0 0 0;">Se você <strong>NÃO autorizou</strong> esta indicação ou não deseja ser contatado, clique em <strong>"RECUSAR"</strong> e seus dados serão <strong>imediatamente excluídos</strong> e nunca serão armazenados.</p>
               </div>
               
-              <p><small>Ao clicar no botão acima, você autoriza o compartilhamento dos seus dados (nome, e-mail e telefone) com a equipe comercial da Avantar para fins de contato comercial relacionado ao produto indicado.</small></p>
+              <p><strong>⏰ Prazo:</strong> Este link é válido por 24 horas. Após esse período, os dados serão automaticamente excluídos se não houver resposta.</p>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${consentLink}&action=confirm" class="button" style="background: #28a745; margin-right: 10px;">✓ ACEITAR E AUTORIZAR</a>
+                <a href="${consentLink}&action=reject" class="button" style="background: #dc3545;">✗ RECUSAR E EXCLUIR</a>
+              </div>
+              
+              <p style="text-align: center;"><small><strong>ACEITAR:</strong> Autoriza o compartilhamento dos seus dados com a Avantar<br><strong>RECUSAR:</strong> Seus dados serão imediatamente excluídos do nosso sistema</small></p>
             </div>
             
             <div class="footer">

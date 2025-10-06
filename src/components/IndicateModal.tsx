@@ -164,7 +164,7 @@ export function IndicateModal({visible, onClose}: ModalProps) {
             <View className="justify-between items-center flex-row" style={{zIndex: 1001}}>
               <BackButton onPress={onClose} />
               <Text className="text-blue font-bold text-3xl absolute left-1/2 -translate-x-1/2">
-                Indicar
+                Enviar Convite
               </Text>
             </View>
 
@@ -341,30 +341,39 @@ export function IndicateModal({visible, onClose}: ModalProps) {
               className="w-full max-w-sm bg-fifth_purple rounded-2xl border-2 border-blue px-7 py-7"
               style={{zIndex: 999}}>
               <Text className="text-blue font-bold text-2xl text-center mb-4">
-                Solicitar Consentimento
+                Confirmar Autorização Prévia
               </Text>
 
               <Text className="text-white_opacity text-sm text-center mb-4 leading-5">
-                Você está prestes a solicitar consentimento do indicado.
+                Este app é uma ferramenta B2B. Você deve obter autorização verbal do cliente ANTES de prosseguir.
               </Text>
 
               {/* Texto de consentimento */}
-              <View className="mb-4">
-                <Text className="text-xs text-center text-white_opacity leading-4 mb-3">
-                  Será enviado um e-mail para <Text className="font-bold text-white">o indicado</Text> com
-                  um link de consentimento. Apenas após ele autorizar o
-                  compartilhamento dos dados, a indicação será registrada.
+              <View className="mb-4 bg-primary_purple/30 p-3 rounded-lg">
+                <Text className="text-xs text-center text-white leading-4 mb-2">
+                  <Text className="font-bold text-blue">PROCESSO DE DUPLO CONSENTIMENTO:</Text>
                 </Text>
-                <Text className="text-xs text-center text-white_opacity leading-4 mb-3">
-                  <Text className="font-bold text-blue">Importante:</Text> Os dados não serão armazenados
-                  até que o consentimento seja dado pelo indicado.
+                <Text className="text-xs text-center text-white_opacity leading-4 mb-2">
+                  1️⃣ Você já deve ter obtido <Text className="font-bold text-white">autorização verbal prévia</Text> do cliente para indicá-lo aos nossos serviços de seguros.
+                </Text>
+                <Text className="text-xs text-center text-white_opacity leading-4 mb-2">
+                  2️⃣ Um <Text className="font-bold text-white">e-mail de confirmação</Text> será enviado ao cliente com um link para ele <Text className="font-bold text-blue">aceitar ou recusar</Text> o compartilhamento dos dados.
+                </Text>
+                <Text className="text-xs text-center text-white_opacity leading-4">
+                  3️⃣ <Text className="font-bold text-white">Os dados só serão armazenados permanentemente</Text> após o cliente clicar em "Aceitar" no e-mail.
+                </Text>
+              </View>
+
+              <View className="mb-4 bg-red-900/20 border border-red p-3 rounded-lg">
+                <Text className="text-xs text-center text-red leading-4">
+                  <Text className="font-bold">⚠️ ATENÇÃO:</Text> Apenas prossiga se o cliente autorizou VERBALMENTE que você envie seus dados para receber contato sobre seguros.
                 </Text>
               </View>
 
               {/* Checkbox de consentimento */}
               <TouchableOpacity
                 onPress={() => setConsentChecked(!consentChecked)}
-                className="flex-row items-center mb-4"
+                className="flex-row items-start mb-4 p-2 bg-fifth_purple/50 rounded-lg"
                 activeOpacity={0.8}>
                 <MaterialCommunityIcons
                   name={
@@ -372,11 +381,12 @@ export function IndicateModal({visible, onClose}: ModalProps) {
                       ? 'checkbox-marked'
                       : 'checkbox-blank-outline'
                   }
-                  size={20}
-                  color={colors.white}
+                  size={22}
+                  color={colors.blue}
+                  style={{marginTop: 2}}
                 />
-                <Text className="text-[9px] flex-1 ml-2 text-white_opacity">
-                  Confirmo que tenho autorização do indicado para enviar esta solicitação de consentimento.
+                <Text className="text-[10px] flex-1 ml-2 text-white leading-4">
+                  <Text className="font-bold">DECLARO que obtive autorização verbal prévia</Text> do cliente para compartilhar seus dados com a Avantar Seguros, e que o cliente está ciente de que receberá um e-mail para confirmar eletronicamente seu consentimento.
                 </Text>
               </TouchableOpacity>
 

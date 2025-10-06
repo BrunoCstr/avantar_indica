@@ -21,7 +21,6 @@ import {
 } from '@react-native-firebase/firestore';
 
 import { signUpSchema, SignUpFormData } from '../schemas/validationSchema';
-import { FormInputOldOld } from '../components/FormInputOldOld';
 import images from '../data/images';
 import { Button } from '../components/Button';
 import { useAuth } from '../contexts/Auth';
@@ -31,6 +30,7 @@ import { BackButton } from '../components/BackButton';
 import { CustomModal } from '../components/CustomModal';
 import Dropdown from 'react-native-dropdown-picker';
 import { withDefaultFont } from '../config/fontConfig';
+import { FormInputOld } from '../components/FormInputOld';
 
 const db = getFirestore();
 
@@ -473,7 +473,7 @@ export function SignUpScreen() {
                       <Text style={{ color: '#fff', fontSize: 15 }}>
                         <Text style={{ fontWeight: 'bold' }}>
                           TERMO DE USO DO APLICATIVO DE INDICAÇÕES – AVANTAR FRANCHISING{`\n`}
-                          Data da última atualização: 09/09/2025{`\n\n`}
+                          Data da última atualização: 06/10/2025{`\n\n`}
                         </Text>
 
                         Este Termo de Uso regula as condições gerais de utilização do aplicativo de indicações (“Aplicativo”), desenvolvido e mantido pela AVANTAR FRANCHISING, doravante denominada “Franqueadora”.{`\n\n`}
@@ -521,41 +521,77 @@ export function SignUpScreen() {
                         suporte@indica.avantar.com.br{`\n\n`}
 
                         <Text style={{ fontWeight: 'bold' }}>
-                          POLÍTICA DE PRIVACIDADE DO APLICATIVO DE INDICAÇÕES – AVANTAR FRANCHISING{`\n`}
-                          Data da última atualização: 09/09/2025{`\n\n`}
+                          POLÍTICA DE PRIVACIDADE – AVANTAR INDICA{`\n`}
+                          Última atualização: 06/10/2025{`\n\n`}
                         </Text>
 
-                        <Text style={{ fontWeight: 'bold' }}>1. DADOS COLETADOS{`\n`}</Text>
-                        Indicadores: Nome, e-mail, telefone, CPF/CNPJ, chave Pix/dados bancários, login/senha/data/hora.{`\n`}
-                        Leads: Nome, telefone, tipo de seguro.{`\n`}
-                        Uso: data/hora indicações, status, histórico de propostas, navegação no app.{`\n\n`}
+                        <Text style={{ fontWeight: 'bold' }}>1. COLETA DE DADOS{`\n`}</Text>
+                        1.1. Dos Indicadores (Usuários do App):{`\n`}
+                        • Nome, e-mail, telefone, CPF ou CNPJ, chave PIX{`\n`}
+                        • Coletados mediante cadastro voluntário e consentimento expresso{`\n\n`}
+                        1.2. Dos Leads (Terceiros Indicados):{`\n`}
+                        • Coleta inicial: apenas e-mail e tipo de seguro de interesse{`\n`}
+                        • Coleta posterior (mediante consentimento do próprio lead): nome completo e telefone{`\n`}
+                        • Método de coleta: o próprio lead fornece seus dados através de formulário após receber e aceitar convite por e-mail{`\n\n`}
+                        1.3. Dados de Uso:{`\n`}
+                        • Data e horário das indicações, status da proposta{`\n\n`}
 
                         <Text style={{ fontWeight: 'bold' }}>2. FINALIDADES{`\n`}</Text>
-                        Encaminhar leads, comunicação, análise de desempenho, pagamentos, obrigações legais, prevenção a fraudes.{`\n\n`}
+                        Os dados são utilizados para:{`\n`}
+                        • Direcionar leads às unidades corretas{`\n`}
+                        • Permitir comunicação entre franqueado, indicador e lead{`\n`}
+                        • Avaliar desempenho de unidades e indicadores{`\n`}
+                        • Processar pagamentos e bonificações{`\n`}
+                        • Cumprir obrigações legais e operacionais{`\n\n`}
 
-                        <Text style={{ fontWeight: 'bold' }}>3. BASE LEGAL{`\n`}</Text>
-                        Consentimento, legítimo interesse, execução de contrato, obrigação legal/regulatória.{`\n\n`}
+                        <Text style={{ fontWeight: 'bold' }}>3. COMPARTILHAMENTO DE DADOS{`\n`}</Text>
+                        3.1. Dados dos Indicadores:{`\n`}
+                        • Compartilhados com unidades franqueadas para identificação da origem da indicação e processamento de bonificações{`\n`}
+                        • Compartilhados com parceiros operacionais (processadores de pagamento, sistemas de auditoria) sob acordos de confidencialidade{`\n\n`}
+                        3.2. Dados dos Leads:{`\n`}
+                        • Nunca são compartilhados sem o consentimento prévio e explícito do próprio lead{`\n`}
+                        • Após o lead confirmar seu interesse e fornecer seus dados voluntariamente, essas informações são compartilhadas exclusivamente com a unidade franqueada responsável pelo atendimento{`\n`}
+                        • O lead é informado previamente sobre qual unidade receberá seus dados{`\n\n`}
+                        Responsabilidade compartilhada:{`\n`}
+                        • O indicador é responsável por garantir autorização verbal prévia para envio do convite ao e-mail do lead{`\n`}
+                        • A Avantar garante que nenhum dado sensível (nome completo, telefone) seja processado antes da confirmação ativa do lead{`\n\n`}
 
-                        <Text style={{ fontWeight: 'bold' }}>4. COMPARTILHAMENTO{`\n`}</Text>
-                        Com franqueados e parceiros (pagamento, marketing, nuvem, suporte), sempre com segurança e confidencialidade.{`\n\n`}
+                        <Text style={{ fontWeight: 'bold' }}>3.1. CONSENTIMENTO DO LEAD (TERCEIRO INDICADO){`\n`}</Text>
+                        Antes que qualquer dado pessoal de um lead seja armazenado:{`\n`}
+                        1) Coleta Inicial Limitada: O indicador fornece apenas o e-mail e o tipo de seguro de interesse do lead{`\n`}
+                        2) Verificação de Consentimento: Enviamos e-mail solicitando (i) confirmação de interesse, (ii) autorização para compartilhar dados com a unidade franqueada e (iii) aceite dos Termos e da Política{`\n`}
+                        3) Fornecimento Voluntário: Somente após o clique de confirmação e o fornecimento voluntário de nome e telefone pelo lead, os dados são armazenados e compartilhados com a unidade{`\n`}
+                        4) Recusa: Se o lead não confirmar ou recusar, nenhum dado adicional além do e-mail é coletado e este é excluído após 7 dias{`\n`}
+                        5) Transparência: O lead é informado sobre (i) quem indica, (ii) qual unidade receberá os dados, (iii) finalidade do contato e (iv) seus direitos sob a LGPD{`\n\n`}
+                        Importante: O app não permite que indicadores insiram dados completos de terceiros sem consentimento ativo do lead via e-mail.{`\n\n`}
 
-                        <Text style={{ fontWeight: 'bold' }}>5. SEGURANÇA DA INFORMAÇÃO{`\n`}</Text>
-                        HTTPS, servidores seguros, controle de acesso, criptografia.{`\n\n`}
+                        <Text style={{ fontWeight: 'bold' }}>4. BASE LEGAL (LGPD){`\n`}</Text>
+                        4.1. Para Indicadores:{`\n`}
+                        • Consentimento expresso no momento do cadastro{`\n`}
+                        • Execução de contrato (programa de indicações){`\n\n`}
+                        4.2. Para Leads:{`\n`}
+                        • Consentimento explícito e verificável via confirmação por e-mail{`\n`}
+                        • O lead fornece seus próprios dados de forma voluntária após ser informado{`\n\n`}
+                        4.3. Legítimo Interesse:{`\n`}
+                        • Processamento de indicações dentro do modelo de franquia{`\n\n`}
 
-                        <Text style={{ fontWeight: 'bold' }}>6. DIREITOS DO TITULAR{`\n`}</Text>
-                        Acesso, correção, exclusão, portabilidade, revogação de consentimento, solicitação via suporte@indica.avantar.com.br{`\n\n`}
+                        <Text style={{ fontWeight: 'bold' }}>5. SEGURANÇA{`\n`}</Text>
+                        • Dados trafegam via HTTPS e são armazenados em banco seguro{`\n`}
+                        • Acesso restrito a usuários autenticados e habilitados{`\n\n`}
 
-                        <Text style={{ fontWeight: 'bold' }}>7. RETENÇÃO{`\n`}</Text>
-                        Mantidos conforme finalidade e obrigação legal. Possível retenção após encerramento para defesa legal.{`\n\n`}
+                        <Text style={{ fontWeight: 'bold' }}>6. DIREITOS DOS USUÁRIOS{`\n`}</Text>
+                        Conforme a LGPD, o usuário tem direito de:{`\n`}
+                        • Acessar, corrigir ou excluir seus dados{`\n`}
+                        • Solicitar portabilidade{`\n`}
+                        • Revogar o consentimento, a qualquer momento, salvo obrigações legais{`\n`}
+                        Solicitações: suporte@indica.avantar.com.br{`\n\n`}
 
-                        <Text style={{ fontWeight: 'bold' }}>8. COOKIES{`\n`}</Text>
-                        Se usados, será informado ao usuário com opção de consentimento.{`\n\n`}
+                        <Text style={{ fontWeight: 'bold' }}>7. ARMAZENAMENTO E RETENÇÃO{`\n`}</Text>
+                        • Dados armazenados em nuvem enquanto durar a relação com o usuário ou conforme exigência legal{`\n`}
+                        • Após esse período, os dados serão anonimizados ou excluídos{`\n\n`}
 
-                        <Text style={{ fontWeight: 'bold' }}>9. ALTERAÇÕES NA POLÍTICA{`\n`}</Text>
-                        Poderá ser atualizada a qualquer momento com aviso no app. Uso contínuo implica aceitação.{`\n\n`}
-
-                        <Text style={{ fontWeight: 'bold' }}>10. DÚVIDAS E CONTATO{`\n`}</Text>
-                        suporte@indica.avantar.com.br{`\n\n`}
+                        <Text style={{ fontWeight: 'bold' }}>8. ATUALIZAÇÕES{`\n`}</Text>
+                        A franqueadora poderá atualizar esta Política a qualquer momento. O aviso será feito via aplicativo, e o uso contínuo após alterações implica aceite automático.{`\n\n`}
                       </Text>
                     </ScrollView>
                     <TouchableOpacity

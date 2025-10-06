@@ -4,7 +4,6 @@ import {
   Text,
   ImageBackground,
   TouchableOpacity,
-  Platform,
   Switch,
   TextInput,
   ScrollView,
@@ -16,13 +15,8 @@ import images from '../data/images';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {
-  check,
-  request,
-  PERMISSIONS,
-  RESULTS,
   openSettings,
 } from 'react-native-permissions';
-import {useFocusEffect} from '@react-navigation/native';
 import {Button} from '../components/Button';
 import Feather from 'react-native-vector-icons/Feather';
 import {useAuth} from '../contexts/Auth';
@@ -36,19 +30,12 @@ import {
 import {CustomModal} from '../components/CustomModal';
 import {Spinner} from '../components/Spinner';
 
-const CONTACTS_PERMISSION = Platform.select({
-  ios: PERMISSIONS.IOS.CONTACTS,
-  android: PERMISSIONS.ANDROID.READ_CONTACTS,
-});
-
 export const versionApp = {
-  version: '1.1.2',
-  date: '2025-09-10',
+  version: '2.0.0',
+  date: '2025-10-06',
 };
 
 export function Settings() {
-  const [contactsStatus, setContactsStatus] = useState('loading');
-  const [contactsEnabled, setContactsEnabled] = useState(false);
   const [campaignsNotification, setCampaignsNotification] = useState(false);
   const [statusNotification, setStatusNotification] = useState(false);
   const [withdrawNotification, setWithdrawNotification] = useState(false);
@@ -76,18 +63,6 @@ export function Settings() {
     useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchPermissions = async () => {
-    if (CONTACTS_PERMISSION) {
-      const cont = await check(CONTACTS_PERMISSION);
-      setContactsStatus(cont);
-      setContactsEnabled(cont === RESULTS.GRANTED);
-    }
-  };
-
-  useEffect(() => {
-    fetchPermissions();
-  }, []);
-
   // Carregar preferências de notificação do usuário
   useEffect(() => {
     const loadNotificationPreferences = async () => {
@@ -110,9 +85,6 @@ export function Settings() {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      // Recarrega as permissões
-      await fetchPermissions();
-
       // Recarrega as preferências de notificação
       if (userData?.uid) {
         const preferences = await getNotificationPreferences(userData.uid);
@@ -127,31 +99,6 @@ export function Settings() {
       setRefreshing(false);
     }
   }, [userData?.uid]);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      fetchPermissions();
-    }, []),
-  );
-
-  const handleContactsToggle = async () => {
-    if (contactsStatus === RESULTS.GRANTED) {
-      setModalMessage({
-        title: 'Desabilitar Contatos',
-        description:
-          'Para desabilitar, você será direcionado para as configurações do sistema.',
-      });
-      setModalButtonText2('CONFIGURAÇÕES');
-      setModalCancelButtonText('CANCELAR');
-      setIsModalVisible(true);
-    } else {
-      if (CONTACTS_PERMISSION) {
-        const result = await request(CONTACTS_PERMISSION);
-        setContactsStatus(result);
-        setContactsEnabled(result === RESULTS.GRANTED);
-      }
-    }
-  };
 
   // Função para salvar preferências no Firestore
   const saveNotificationPreferences = async (
@@ -374,36 +321,6 @@ export function Settings() {
                   color={colors.primary_purple}
                 />
               </TouchableOpacity>
-            </View>
-            {/* Linha Contatos */}
-            <View
-              style={{flexDirection: 'row', alignItems: 'center', padding: 18}}>
-              <MaterialIcons
-                name="contacts"
-                size={28}
-                color={colors.primary_purple}
-                style={{marginRight: 16}}
-              />
-              <View style={{flex: 1}}>
-                <Text
-                  style={{
-                    color: colors.primary_purple,
-                    fontWeight: 'bold',
-                    fontSize: 16,
-                  }}>
-                  Permitir acesso aos contatos
-                </Text>
-                <Text
-                  style={{color: colors.gray_dark, fontSize: 13, marginTop: 2}}>
-                  {contactsEnabled ? 'Ativado' : 'Desativado'}
-                </Text>
-              </View>
-              <Switch
-                value={contactsEnabled}
-                onValueChange={handleContactsToggle}
-                thumbColor={contactsEnabled ? colors.primary_purple : '#ccc'}
-                trackColor={{false: '#ccc', true: colors.primary_purple + '55'}}
-              />
             </View>
           </View>
 

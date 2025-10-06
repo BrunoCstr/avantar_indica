@@ -31,18 +31,8 @@
 			<key>NSAllowsLocalNetworking</key>
 			<true />
 		</dict>
-		<key>NSCameraUsageDescription</key>
-		<string>Preciso de permissão para tirar fotos</string>
-		<key>NSContactsUsageDescription</key>
-		<string>Para que você possa indicar amigos para a unidade franqueada, o app precisa acessar
-			sua agenda. Você poderá selecionar os contatos que deseja indicar. Os nomes e números de
-			telefone dos contatos selecionados serão enviados e armazenados em nosso servidor seguro
-			para que o franqueado possa entrar em contato com suas indicações. Sua lista completa de
-			contatos não será acessada sem a sua seleção prévia.</string>
-		<key>NSLocationWhenInUseUsageDescription</key>
-		<string></string>
 		<key>NSPhotoLibraryUsageDescription</key>
-		<string>Preciso de permissão para acessar sua galeria de fotos</string>
+		<string>Precisamos acessar suas fotos para você selecionar uma imagem de perfil.</string>
 		<key>UIAppFonts</key>
 		<array>
 			<string>FamiljenGrotesk-Bold.ttf</string>

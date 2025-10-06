@@ -151,6 +151,16 @@ export function IndicateScreen() {
   };
 
   const addToList = (data: IndicationSchema) => {
+    // Garantir obrigatoriedade do consentimento mesmo em submits programáticos/teclado
+    if (!consentChecked) {
+      setModalMessage({
+        title: 'Consentimento obrigatório',
+        description:
+          'Para adicionar um convite, você deve confirmar que obteve autorização verbal prévia do indicado.',
+      });
+      setIsModalVisible(true);
+      return;
+    }
     if (editingIndex !== null) {
       // Editando uma indicação existente
       const updatedList = [...indicationsList];
@@ -202,7 +212,7 @@ export function IndicateScreen() {
     if (indicationsList.length === 0) {
       setModalMessage({
         title: 'Atenção',
-        description: 'Adicione pelo menos uma indicação antes de enviar.',
+        description: 'Adicione pelo menos um convite antes de enviar.',
       });
       setIsModalVisible(true);
       return;
@@ -255,7 +265,7 @@ export function IndicateScreen() {
             `${indication.fullName}: ${error instanceof Error ? error.message : 'Erro desconhecido'}`,
           );
           console.error(
-            `Erro ao enviar indicação para ${indication.fullName}:`,
+            `Erro ao enviar convite para ${indication.fullName}:`,
             error,
           );
         }
@@ -287,13 +297,13 @@ export function IndicateScreen() {
         setModalMessage({
           title: 'Erro no envio',
           description:
-            'Não foi possível enviar nenhuma indicação. Verifique os dados e sua conexão, então tente novamente.',
+            'Não foi possível enviar nenhum convite. Verifique os dados e sua conexão, então tente novamente.',
         });
       }
 
       setIsModalVisible(true);
     } catch (error) {
-      console.error('Erro geral ao enviar indicações:', error);
+      console.error('Erro geral ao enviar convites:', error);
       setModalMessage({
         title: 'Erro',
         description:
@@ -358,15 +368,15 @@ export function IndicateScreen() {
               <BackButton onPress={() => navigation.goBack()} />
               <View className="flex-1 items-center">
                 <Text className={`text-white font-bold ${fontSize.xlarge}`}>
-                  Indicações Múltiplas
+                  Convites Múltiplos
                 </Text>
                 {indicationsList.length > 0 && (
                   <View className="bg-blue px-3 py-1 rounded-full mt-1 self-center">
                     <Text className="text-primary_purple font-bold text-sm">
                       {indicationsList.length}{' '}
                       {indicationsList.length === 1
-                        ? 'indicação'
-                        : 'indicações'}
+                        ? 'convite'
+                        : 'convites'}
                     </Text>
                   </View>
                 )}
@@ -390,7 +400,7 @@ export function IndicateScreen() {
               }}
               className="bg-green px-4 py-2 rounded-full">
               <Text className="text-white font-bold text-center">
-                ✓ Indicação adicionada!
+                ✓ Convite adicionado!
               </Text>
             </Animated.View>
           </View>
@@ -416,13 +426,13 @@ export function IndicateScreen() {
               <View className="flex-1">
                 <Text className={`text-white font-bold ${fontSize.large}`}>
                   {editingIndex !== null
-                    ? 'Editar Indicação'
-                    : 'Nova Indicação'}
+                    ? 'Editar Convite'
+                    : 'Novo Convite'}
                 </Text>
                 <Text className="text-white_opacity text-sm">
                   {editingIndex !== null
-                    ? 'Modifique os dados da indicação'
-                    : 'Preencha os dados para adicionar uma nova indicação'}
+                    ? 'Modifique os dados do convite'
+                    : 'Preencha os dados para adicionar um novo convite'}
                 </Text>
               </View>
             </View>
@@ -567,15 +577,21 @@ export function IndicateScreen() {
             </View>
 
             {/* Checkbox de Consentimento */}
+            <View className="mb-4 bg-blue/10 border border-blue p-3 rounded-lg">
+              <Text className="text-xs text-center text-white_opacity leading-4 mb-2">
+                <Text className="font-bold text-blue">ℹ️ PROCESSO B2B:</Text> Você deve ter autorização verbal prévia do cliente. Um e-mail será enviado para confirmação eletrônica do consentimento.
+              </Text>
+            </View>
             <TouchableOpacity
-              className="flex-row items-center mb-6"
+              className="flex-row items-start mb-6 bg-fifth_purple/30 p-3 rounded-lg"
               onPress={() => setConsentChecked(!consentChecked)}>
               <View
                 className={`w-5 h-5 mr-3 justify-center items-center rounded border-2 ${
                   consentChecked
                     ? 'bg-blue border-blue'
                     : 'bg-transparent border-blue'
-                } items-center justify-center`}>
+                } items-center justify-center`}
+                style={{marginTop: 2}}>
                 {consentChecked && (
                   <MaterialCommunityIcons
                     name="check"
@@ -584,9 +600,8 @@ export function IndicateScreen() {
                   />
                 )}
               </View>
-              <Text className="text-white text-sm flex-1">
-                Confirmo que obtive consentimento do indicado para enviar seus
-                dados.
+              <Text className="text-white text-xs flex-1 leading-4">
+                <Text className="font-bold">DECLARO que obtive autorização verbal prévia</Text> do cliente para compartilhar seus dados, e que ele está ciente de que receberá um e-mail de confirmação.
               </Text>
             </TouchableOpacity>
 
@@ -637,13 +652,13 @@ export function IndicateScreen() {
                   <View>
                     <Text
                       className={`text-white font-bold ${fontSize.large}`}>
-                      Indicações Preparadas
+                      Convites Preparados
                     </Text>
                     <Text className="text-white_opacity text-sm">
                       {indicationsList.length}{' '}
                       {indicationsList.length === 1
-                        ? 'indicação pronta'
-                        : 'indicações prontas'}{' '}
+                        ? 'Convite pronto'
+                        : 'Convites prontos'}{' '}
                       para envio
                     </Text>
                   </View>
@@ -773,11 +788,11 @@ export function IndicateScreen() {
                     color={colors.white}
                   />
                   <Text className="text-white font-medium ml-2">
-                    Pronto para enviar suas indicações?
+                    Pronto para enviar seus convites?
                   </Text>
                 </View>
                 <Button
-                  text={`ENVIAR ${indicationsList.length} INDICAÇÃO${indicationsList.length > 1 ? 'ÕES' : ''}`}
+                  text={`ENVIAR ${indicationsList.length} CONVITE${indicationsList.length > 1 ? 'S' : ''}`}
                   backgroundColor="blue"
                   textColor="primary_purple"
                   fontWeight="bold"
@@ -806,11 +821,11 @@ export function IndicateScreen() {
               </View>
               <Text
                 className={`text-white font-bold ${fontSize.large} text-center mb-2`}>
-                Nenhuma indicação adicionada
+                Nenhum convite adicionado
               </Text>
               <Text className="text-gray text-center text-sm">
-                Preencha o formulário acima para adicionar suas primeiras
-                indicações. Você pode adicionar quantas quiser antes de enviar!
+                Preencha o formulário acima para adicionar seus primeiros
+                convites. Você pode adicionar quantas quiser antes de enviar!
               </Text>
             </View>
           )}
@@ -839,8 +854,8 @@ export function IndicateScreen() {
       <CustomModal
         visible={isRemoveModalVisible}
         onClose={() => setIsRemoveModalVisible(false)}
-        title="Remover Indicação"
-        description="Tem certeza que deseja remover esta indicação?"
+        title="Remover Convite"
+        description="Tem certeza que deseja remover este convite?"
         buttonText="REMOVER"
         cancelButtonText="CANCELAR"
         onPress={confirmRemoveIndication}

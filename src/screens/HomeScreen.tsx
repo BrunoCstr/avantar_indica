@@ -348,7 +348,7 @@ export function HomeScreen() {
                   <View>
                     <Text
                       className={`text-white font-regular ${isSmallScreen ? 'text-lg' : fontSize.xlarge} ml-1`}>
-                      INDICAR
+                      CONVIDAR
                     </Text>
                   </View>
                 </View>
@@ -367,7 +367,7 @@ export function HomeScreen() {
                   <View>
                     <Text
                       className={`text-white text-bold font-regular ${isSmallScreen ? 'text-lg' : fontSize.xlarge} ml-0.5`}>
-                      INDICAR
+                      CONVITES
                     </Text>
                     <Text
                       className={`text-white text-bold font-regular ${fontSize.small} ml-1`}>
@@ -401,7 +401,7 @@ export function HomeScreen() {
               <View className="flex-row items-center justify-between">
                 <Text
                   className={`text-primary_purple ${isSmallScreen ? 'text-lg' : fontSize.xlarge} font-bold`}>
-                  Indicações
+                  Convites
                 </Text>
                 <TouchableOpacity
                   className="bg-primary_purple h-10 w-10 rounded-lg items-center justify-center"

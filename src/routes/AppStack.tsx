@@ -7,7 +7,6 @@ import {
 import {BottomNavigator} from '../components/BottomNavigator';
 import {Notifications} from '../screens/Notifications';
 import {Rules} from '../screens/RulesScreen';
-import {IndicateInBulkScreen} from '../screens/IndicateInBulkScreen';
 import {IndicateScreen} from '../screens/IndicateScreen';
 import {WaitingConfirmationScreen} from '../screens/WaitingConfirmationScreen';
 import {useAuth} from '../contexts/Auth';
@@ -15,17 +14,6 @@ import {HomeSkeleton} from '../components/skeletons/HomeSkeleton';
 import {RegisterSellers} from '../screens/RegisterSellers';
 import NoPermission from '../screens/NoPermission';
 import Settings from '../screens/Settings';
-
-// Componente wrapper para lidar com a lógica condicional
-function IndicateInBulkWrapper() {
-  const {registrationStatus} = useAuth();
-
-  if (registrationStatus) {
-    return <IndicateInBulkScreen />;
-  }
-
-  return <WaitingConfirmationScreen />;
-}
 
 const Stack = createStackNavigator();
 
@@ -68,13 +56,6 @@ export function AppStack() {
       <Stack.Screen
         name="IndicateScreen"
         component={IndicateScreen}
-        options={{
-          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-        }}
-      />
-      <Stack.Screen
-        name="IndicateInBulk"
-        component={IndicateInBulkWrapper}
         options={{
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
         }}

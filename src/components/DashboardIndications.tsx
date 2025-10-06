@@ -103,7 +103,7 @@ const DashboardIndicacoes = ({data, isLoading = false}: DashboardIndicacoesProps
         <View className="items-center justify-center py-12">
           <Spinner size={32} variant="purple" />
           <Text className="text-sm text-black text-center mt-4">
-            Carregando indicações...
+            Carregando convites...
           </Text>
         </View>
       ) : indications.length === 0 ? (
@@ -114,11 +114,10 @@ const DashboardIndicacoes = ({data, isLoading = false}: DashboardIndicacoesProps
             style={{marginBottom: 12, opacity: 0.7}}
           />
           <Text className="text-lg font-bold text-fifth_purple mb-1 text-center">
-            Nenhuma indicação ou oportunidade encontrada
+            Nenhuma oportunidade encontrada
           </Text>
           <Text className="text-sm text-black text-center">
-            Você ainda não possui indicações registradas. Quando você indicar
-            alguém, elas aparecerão aqui!
+            Você ainda não possui oportunidades registradas.
           </Text>
         </View>
       ) : (
