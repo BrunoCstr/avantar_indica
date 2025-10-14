@@ -11,14 +11,7 @@ import {
 import {indicationSchema, IndicationSchema} from '../schemas/validationSchema';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useForm, Controller} from 'react-hook-form';
-import {
-  getFirestore,
-  collection,
-  getDocs,
-  setDoc,
-  doc,
-  serverTimestamp,
-} from '@react-native-firebase/firestore';
+import firestore from '@react-native-firebase/firestore';
 
 import {Button} from './Button';
 import {colors} from '../styles/colors';
@@ -26,12 +19,9 @@ import {FormInput} from '../components/FormInput';
 import {BackButton} from '../components/BackButton';
 import {CustomModal} from '../components/CustomModal';
 import {useAuth} from '../contexts/Auth';
-import firestore from '@react-native-firebase/firestore';
 import Dropdown from 'react-native-dropdown-picker';
 import {withDefaultFont} from '../config/fontConfig';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
-const db = getFirestore();
 
 interface ModalProps {
   visible: boolean;
@@ -56,8 +46,9 @@ export function IndicateModal({visible, onClose}: ModalProps) {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const productsCollection = collection(db, 'products');
-        const productsSnapshot = await getDocs(productsCollection);
+        const productsSnapshot = await firestore()
+          .collection('products')
+          .get();
         const productsList = productsSnapshot.docs.map(doc => doc.data());
 
         const sortedProducts = productsList
@@ -78,6 +69,21 @@ export function IndicateModal({visible, onClose}: ModalProps) {
     };
     fetchProducts();
   }, []);
+
+  // Reset completo quando o modal é fechado
+  useEffect(() => {
+    if (!visible) {
+      // Fechar dropdown se estiver aberto
+      setOpen(false);
+      // Resetar formulário
+      reset();
+      // Resetar estados
+      setValue('');
+      setConsentChecked(false);
+      setIsConfirmationModalVisible(false);
+      setIsModalVisible(false);
+    }
+  }, [visible, reset]);
 
   const {
     control,
@@ -100,9 +106,9 @@ export function IndicateModal({visible, onClose}: ModalProps) {
       const cleanedPhone = data.phone.replace(/\D/g, '');
 
       // Sempre quando algum arquivo for criado aqui, mandar um e-mail e uma notificação para a unidade. (Cloud Functions)
-      const indicationRef = doc(collection(db, 'indications'));
+      const indicationRef = firestore().collection('indications').doc();
 
-      await setDoc(indicationRef, {
+      await indicationRef.set({
         indicator_id: userData?.uid,
         indicator_name: userData?.displayName,
         profilePicture: userData?.profilePicture,
@@ -113,16 +119,22 @@ export function IndicateModal({visible, onClose}: ModalProps) {
         phone: cleanedPhone,
         product: data.product,
         observations: data.observations,
-        createdAt: serverTimestamp(),
+        createdAt: firestore.FieldValue.serverTimestamp(),
         status: 'PENDENTE CONTATO',
         sgcorId: null,
         updatedAt: firestore.FieldValue.serverTimestamp(),
       });
 
-      reset();
+      // Fechar modal de confirmação primeiro
       setIsConfirmationModalVisible(false);
+      
+      // Resetar estados
+      reset();
+      setValue('');
       setConsentChecked(false);
+      setOpen(false);
 
+      // Mostrar mensagem de sucesso
       setModalMessage({
         title: 'Indicação enviada!',
         description: 'Você pode acompanhar sua indicação no menu de status.',
@@ -143,26 +155,35 @@ export function IndicateModal({visible, onClose}: ModalProps) {
 
   const confirmSubmit = () => {
     if (consentChecked) {
-      handleSubmit((data) => {
-        onSubmit(data).then(() => {
-          // Fechar o modal principal após envio bem-sucedido
-          onClose();
-        });
-      })();
+      handleSubmit(onSubmit)();
     }
   };
 
+  // Função para fechar o modal de sucesso e o modal principal
+  const handleCloseSuccessModal = () => {
+    setIsModalVisible(false);
+    // Pequeno delay para garantir que o modal de sucesso fecha antes do principal
+    setTimeout(() => {
+      onClose();
+    }, 100);
+  };
+
+  // Função para fechar o modal principal
+  const handleClose = () => {
+    setOpen(false); // Garantir que o dropdown está fechado
+    onClose();
+  };
+
   return (
-    <Modal visible={visible} onRequestClose={onClose} transparent={true}>
+    <Modal visible={visible} onRequestClose={handleClose} transparent={true} animationType="fade">
       <View style={{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)'}}>
         <KeyboardAvoidingView
           className="flex-1 justify-center items-center px-5"
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View
-            className="w-full max-w-sm bg-fifth_purple rounded-2xl border-2 border-blue px-7 py-7"
-            style={{zIndex: 999}}>
+            className="w-full max-w-sm bg-fifth_purple rounded-2xl border-2 border-blue px-7 py-7">
             <View className="justify-between items-center flex-row">
-              <BackButton onPress={onClose} />
+              <BackButton onPress={handleClose} />
               <Text className="text-blue font-bold text-3xl absolute left-1/2 -translate-x-1/2">
                 Indicar
               </Text>
@@ -229,6 +250,7 @@ export function IndicateModal({visible, onClose}: ModalProps) {
                     }}
                     searchTextInputStyle={{
                       borderColor: colors.blue,
+                      color: colors.white
                     }}
                     open={open}
                     value={fieldValue}
@@ -320,12 +342,14 @@ export function IndicateModal({visible, onClose}: ModalProps) {
         visible={isConfirmationModalVisible}
         transparent={true}
         animationType="fade"
-        onRequestClose={() => setIsConfirmationModalVisible(false)}>
-        <View style={{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)'}}>
+        onRequestClose={() => {
+          setIsConfirmationModalVisible(false);
+          setConsentChecked(false);
+        }}>
+        <View style={{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.7)'}}>
           <View className="flex-1 justify-center items-center px-5">
             <View
-              className="w-full max-w-sm bg-fifth_purple rounded-2xl border-2 border-blue px-7 py-7"
-              style={{zIndex: 999}}>
+              className="w-full max-w-sm bg-fifth_purple rounded-2xl border-2 border-blue px-7 py-7">
               <Text className="text-blue font-bold text-2xl text-center mb-4">
                 Confirmar Envio
               </Text>
@@ -389,10 +413,11 @@ export function IndicateModal({visible, onClose}: ModalProps) {
 
       <CustomModal
         visible={isModalVisible}
-        onClose={() => setIsModalVisible(false)}
+        onClose={handleCloseSuccessModal}
         title={modalMessage.title}
         description={modalMessage.description}
         buttonText="FECHAR"
+        onPress={handleCloseSuccessModal}
       />
     </Modal>
   );

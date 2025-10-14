@@ -11,6 +11,8 @@ import {useResponsive} from '../hooks/useResponsive';
 type RootStackParamList = {
   WaitingConfirmationScreen: undefined;
   IndicateInBulk: undefined;
+  IndicateScreen: undefined;
+  StatusScreen: undefined;
   Rules: undefined;
   Status: undefined;
   Settings: undefined;
@@ -200,7 +202,7 @@ export function BottomNavigator() {
         onClose={() => setShowOptionsModal(false)}
         onIndicateIndividual={() => setShowModal(true)}
         onIndicateBulk={() => navigation.navigate('IndicateInBulk')}
-        onRegisterSeller={() => navigation.navigate('RegisterSellers')}
+        onIndicateMultiple={() => navigation.navigate('IndicateScreen')}
         onViewStatus={() => navigation.navigate('StatusScreen')}
         userRule={userData?.rule}
       />

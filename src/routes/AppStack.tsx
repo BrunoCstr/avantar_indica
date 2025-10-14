@@ -8,6 +8,7 @@ import {BottomNavigator} from '../components/BottomNavigator';
 import {Notifications} from '../screens/Notifications';
 import {Rules} from '../screens/RulesScreen';
 import {IndicateInBulkScreen} from '../screens/IndicateInBulkScreen';
+import {IndicateScreen} from '../screens/IndicateScreen';
 import {WaitingConfirmationScreen} from '../screens/WaitingConfirmationScreen';
 import {useAuth} from '../contexts/Auth';
 import {HomeSkeleton} from '../components/skeletons/HomeSkeleton';
@@ -67,6 +68,13 @@ export function AppStack() {
       <Stack.Screen
         name="IndicateInBulk"
         component={IndicateInBulkWrapper}
+        options={{
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        }}
+      />
+      <Stack.Screen
+        name="IndicateScreen"
+        component={IndicateScreen}
         options={{
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
         }}

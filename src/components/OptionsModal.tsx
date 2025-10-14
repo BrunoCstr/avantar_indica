@@ -20,7 +20,7 @@ interface OptionsModalProps {
   onClose: () => void;
   onIndicateIndividual: () => void;
   onIndicateBulk: () => void;
-  onRegisterSeller: () => void;
+  onIndicateMultiple: () => void;
   onViewStatus: () => void;
   userRule?: string;
 }
@@ -30,7 +30,7 @@ export function OptionsModal({
   onClose,
   onIndicateIndividual,
   onIndicateBulk,
-  onRegisterSeller,
+  onIndicateMultiple,
   onViewStatus,
   userRule,
 }: OptionsModalProps) {
@@ -54,14 +54,13 @@ export function OptionsModal({
       onPress: onIndicateBulk,
     },
     {
-      id: 'register',
-      title: 'Cadastrar Vendedor',
-      description: 'Adicione uma pessoa a sua equipe',
+      id: 'indicateMultiple',
+      title: 'Indicar Múltiplos',
+      description: 'Adicione várias pessoas a sua equipe',
       icon: 'business',
       iconType: 'Ionicons' as const,
       color: '#6600CC',
-      onPress: onRegisterSeller,
-      hidden: userRule === 'cliente_indicador',
+      onPress: onIndicateMultiple,
     },
     {
       id: 'status',
@@ -163,7 +162,6 @@ export function OptionsModal({
             {/* Options List */}
             <View className="px-6 gap-3">
               {options
-                .filter(option => !option.hidden)
                 .map(option => (
                   <TouchableOpacity
                     key={option.id}
