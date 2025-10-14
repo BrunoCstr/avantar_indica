@@ -18,7 +18,7 @@ import {useAuth} from '../contexts/Auth';
 import {BackButton} from '../components/BackButton';
 import {FlatList} from 'react-native-gesture-handler';
 import DashboardWallet from '../components/DashboardWallet';
-import {getUserBalance} from '../services/wallet/Dashboard';
+import {formatCurrency, getUserBalance} from '../services/wallet/Dashboard';
 import {getUserWithdrawals} from '../services/wallet/Withdrawals';
 import {WithdrawalRequest} from '../services/wallet/Withdrawals';
 import {WalletSkeleton} from '../components/skeletons/WalletSkeleton';
@@ -28,6 +28,7 @@ import {useBottomNavigationPadding} from '../hooks/useBottomNavigationPadding';
 import {WithdrawalAmountModal} from '../components/WithdrawalAmountModal';
 import {createWithdrawalRequest} from '../services/wallet/Withdrawals';
 import {useResponsive} from '../hooks/useResponsive';
+import {getBonusParameter} from '../services/wallet/bonusParameters';
 
 export function WalletScreen() {
   const {userData} = useAuth();
@@ -46,8 +47,77 @@ export function WalletScreen() {
   const [isLoadingButton, setIsLoadingButton] = useState(false);
   const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [bonusParameters, setBonusParameters] = useState<any>({
+    defaultCommission: 0,
+    defaultCashback: 0,
+    commissionPerProduct: {
+      auto: 0,
+      consorcio: 0,
+      vida: 0,
+      empresarial: 0,
+    },
+    cashbackPerProduct: {
+      auto: 0,
+      consorcio: 0,
+      vida: 0,
+      empresarial: 0,
+    },
+    minWithdrawal: 700,
+  });
 
   const isLoading = isLoadingBalance; // Só depende do balance agora
+
+  useEffect(() => {
+    const fetchPrefs = async () => {
+      const user = userData?.uid;
+      if (!user) return;
+
+      // Buscar configurações de saques do banco de dados
+      if (userData?.affiliated_to) {
+        const bonusParams = await getBonusParameter(userData.affiliated_to);
+        if (bonusParams) {
+          setBonusParameters((prev: any) => ({
+            ...prev,
+            defaultCommission:
+              bonusParams.defaultCommission ?? prev.defaultCommission,
+            defaultCashback:
+              bonusParams.defaultCashback ?? prev.defaultCashback,
+            commissionPerProduct: {
+              auto:
+                bonusParams.commissionPerProduct?.auto ??
+                prev.commissionPerProduct.auto,
+              consorcio:
+                bonusParams.commissionPerProduct?.consorcio ??
+                prev.commissionPerProduct.consorcio,
+              vida:
+                bonusParams.commissionPerProduct?.vida ??
+                prev.commissionPerProduct.vida,
+              empresarial:
+                bonusParams.commissionPerProduct?.empresarial ??
+                prev.commissionPerProduct.empresarial,
+            },
+            cashbackPerProduct: {
+              auto:
+                bonusParams.cashbackPerProduct?.auto ??
+                prev.cashbackPerProduct.auto,
+              consorcio:
+                bonusParams.cashbackPerProduct?.consorcio ??
+                prev.cashbackPerProduct.consorcio,
+              vida:
+                bonusParams.cashbackPerProduct?.vida ??
+                prev.cashbackPerProduct.vida,
+              empresarial:
+                bonusParams.cashbackPerProduct?.empresarial ??
+                prev.cashbackPerProduct.empresarial,
+            },
+            minWithdrawal: bonusParams.minWithdrawal ?? prev.minWithdrawal,
+          }));
+        }
+      }
+    };
+
+    fetchPrefs();
+  }, [userData]);
 
   useEffect(() => {
     if (!userData?.uid) return;
@@ -91,13 +161,13 @@ export function WalletScreen() {
         // Recarrega os dados de saque
         const data = await getUserWithdrawals(userData.uid);
         setData(data);
-        
+
         // Recarrega o saldo
         const balance = await getUserBalance(userData.uid);
         setBalance(balance);
       }
     } catch (error) {
-      console.error("Erro ao atualizar dados da carteira:", error);
+      console.error('Erro ao atualizar dados da carteira:', error);
     } finally {
       setRefreshing(false);
     }
@@ -115,12 +185,12 @@ export function WalletScreen() {
       return;
     }
 
-    if (balance >= 700) {
+    if (balance >= bonusParameters.minWithdrawal) {
       setShowWithdrawalModal(true);
     } else {
       setModalMessage({
         title: 'Saldo insuficiente',
-        description: `O saldo em sua carteira precisa ser no mínimo R$ 700,00 para realizar o saque!`,
+        description: `O saque mínimo é de ${formatCurrency(bonusParameters.minWithdrawal)}!`,
       });
       setIsModalVisible(true);
     }
@@ -200,7 +270,7 @@ export function WalletScreen() {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          colors={["#820AD1"]}
+          colors={['#820AD1']}
           tintColor="#820AD1"
         />
       }

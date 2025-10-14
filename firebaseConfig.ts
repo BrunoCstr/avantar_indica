@@ -1,5 +1,6 @@
 import { initializeApp } from "@react-native-firebase/app";
 import { FIREBASE_PROJECTID, FIREBASE_APPID, FIREBASE_MESSAGINGSENDERID, FIREBASE_STORAGEBUCKET, FIREBASE_APIKEY } from '@env';
+import firestore from "@react-native-firebase/firestore";
 
 const firebaseConfig = {
   apiKey: FIREBASE_APIKEY,
@@ -11,3 +12,4 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export default app;
+export const db = firestore();

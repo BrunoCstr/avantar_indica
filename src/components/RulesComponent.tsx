@@ -57,6 +57,7 @@ export interface CommissioningParameters {
   };
   defaultCashback: number;
   defaultCommission: number;
+  minWithdrawal: number;
 }
 
 interface RulesComponentProps {
@@ -181,6 +182,9 @@ export function RulesComponent({
               )}
               <Text className="text-white font-regular text-base mt-2">
                 <Text className='text-blue font-bold'>Demais ramos (comissão):</Text> {bonusParameters?.defaultCommission}%
+              </Text>
+              <Text className="text-white font-regular text-base mt-2">
+                <Text className='text-blue font-bold'>Saque mínimo:</Text> {formatCurrency(bonusParameters?.minWithdrawal || 700)} 
               </Text>
             </>
           )}
