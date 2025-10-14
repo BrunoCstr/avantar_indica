@@ -223,6 +223,7 @@ export function IndicateInBulkScreen() {
       .map(c => ({
         name: c.displayName || 'Sem nome',
         phone: cleanPhoneForBackend(c.phoneNumbers?.[0]?.number || ''),
+        status: "PENDENTE CONTATO",
       }));
 
     try {
