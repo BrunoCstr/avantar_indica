@@ -107,14 +107,23 @@ export const withdrawalStatus = functions.firestore.onDocumentUpdated(
               },
             },
             apns: {
+              headers: {
+                'apns-push-type': 'alert',
+                'apns-priority': '10',
+                'apns-topic': 'com.avantar.indica',
+              },
               payload: {
                 aps: {
                   badge: 1,
                   sound: 'default',
+                  alert: {
+                    title: title,
+                    body: bodyMessage,
+                  },
                 },
               },
             },
-          };
+          } as admin.messaging.Message;
 
           try {
             await admin.messaging().send(payload);

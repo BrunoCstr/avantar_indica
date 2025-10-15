@@ -99,14 +99,23 @@ export const withdrawRequest = functions.firestore.onDocumentCreated(
                 },
               },
               apns: {
+                headers: {
+                  'apns-push-type': 'alert',
+                  'apns-priority': '10',
+                  'apns-topic': 'com.avantar.indica',
+                },
                 payload: {
                   aps: {
                     badge: 1,
                     sound: 'default',
+                    alert: {
+                      title: '💰 Nova solicitação de saque recebida!',
+                      body: `Você acabou de receber uma nova solicitação de saque. Acesse o painel web para ver os detalhes.`,
+                    },
                   },
                 },
               },
-            };
+            } as admin.messaging.Message;
 
             try {
               await admin.messaging().send(payload);

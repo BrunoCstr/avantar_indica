@@ -89,14 +89,23 @@ export const indicated = functions.firestore.onDocumentCreated(
                 },
               },
               apns: {
+                headers: {
+                  'apns-push-type': 'alert',
+                  'apns-priority': '10',
+                  'apns-topic': 'com.avantar.indica',
+                },
                 payload: {
                   aps: {
                     badge: 1,
                     sound: 'default',
+                    alert: {
+                      title: '👤 Nova indicação recebida!',
+                      body: 'Você acabou de receber uma nova indicação. Acesse o painel web para ver os detalhes e entrar em contato.',
+                    },
                   },
                 },
               },
-            };
+            } as admin.messaging.Message;
 
             try {
               await admin.messaging().send(payload);
