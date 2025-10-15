@@ -89,8 +89,8 @@ export const withdrawRequest = functions.firestore.onDocumentCreated(
             const payload = {
               token: userData.fcmToken,
               notification: {
-                title: '💰Nova solicitação de saque recebida!',
-                body: `Você acabou de receber uma nova solicitação de saque. Acesse o painel para ver os detalhes.`,
+                title: '💰 Nova solicitação de saque recebida!',
+                body: `Você acabou de receber uma nova solicitação de saque. Acesse o painel web para ver os detalhes.`,
               },
               android: {
                 notification: {

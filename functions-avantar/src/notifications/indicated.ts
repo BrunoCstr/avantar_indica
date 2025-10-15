@@ -80,7 +80,7 @@ export const indicated = functions.firestore.onDocumentCreated(
               token: userData.fcmToken,
               notification: {
                 title: '👤 Nova indicação recebida!',
-                body: 'Você acabou de receber uma nova indicação. Acesse o app para ver os detalhes e entrar em contato com o cliente.',
+                body: 'Você acabou de receber uma nova indicação. Acesse o painel web para ver os detalhes e entrar em contato.',
               },
               android: {
                 notification: {

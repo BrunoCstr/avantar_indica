@@ -80,7 +80,7 @@ export const indicatedInBulk = functions.firestore.onDocumentCreated(
               token: userData.fcmToken,
               notification: {
                 title: '📦 Nova indicação em massa recebida!',
-                body: `Você acabou de receber ${newPackagedIndication.indications.length} novas indicações. Acesse o painel para ver os detalhes e entrar em contato com os clientes.`,
+                body: `Você acabou de receber ${newPackagedIndication.indications.length} novas indicações. Acesse o painel web para ver os detalhes e entrar em contato.`,
               },
               android: {
                 notification: {

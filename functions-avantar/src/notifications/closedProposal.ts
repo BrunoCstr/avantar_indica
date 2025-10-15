@@ -86,7 +86,7 @@ export const closedProposal = functions.firestore.onDocumentUpdated(
             token: userData.fcmToken,
             notification: {
               title: '🎉 Sua indicação foi fechada!',
-              body: `Parabéns! A indicação de ${afterData.name} foi fechada com sucesso. Você pode verificar sua comissão na carteira.`,
+              body: `Parabéns! A indicação de ${afterData.name} foi fechada. Você pode verificar sua comissão em sua carteira.`,
             },
             android: {
               notification: {

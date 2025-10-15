@@ -1,7 +1,8 @@
 import {useEffect, useState} from 'react';
+import {Platform} from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 import {useAuth} from '../contexts/Auth';
-import firestore, {doc, updateDoc} from '@react-native-firebase/firestore';
+import firestore from '@react-native-firebase/firestore';
 
 export function useFCM() {
   const [fcmToken, setFcmToken] = useState<string | null>(null);
@@ -10,7 +11,15 @@ export function useFCM() {
 
   const requestPermission = async () => {
     try {
-      const authStatus = await messaging().requestPermission();
+      const authStatus = await messaging().requestPermission({
+        alert: true,
+        badge: true,
+        sound: true,
+        announcement: false,
+        carPlay: false,
+        criticalAlert: false,
+        provisional: true,
+      });
       const enabled =
         authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
         authStatus === messaging.AuthorizationStatus.PROVISIONAL;
@@ -28,6 +37,15 @@ export function useFCM() {
 
   const getToken = async () => {
     try {
+      // iOS precisa estar registrado para notificações remotas antes de pegar o token
+      if (Platform.OS === 'ios') {
+        await messaging().setAutoInitEnabled(true);
+        const isRegistered = await messaging().isDeviceRegisteredForRemoteMessages;
+        if (!isRegistered) {
+          await messaging().registerDeviceForRemoteMessages();
+        }
+      }
+
       const token = await messaging().getToken();
       setFcmToken(token);
       return token;
@@ -44,10 +62,8 @@ export function useFCM() {
     }
 
     try {
-      const userRef = doc(firestore(), 'users', userData.uid);
-      await updateDoc(userRef, {
-        fcmToken: token,
-      });
+      const userRef = firestore().collection('users').doc(userData.uid);
+      await userRef.set({ fcmToken: token }, { merge: true });
       return true;
     } catch (error) {
       console.error('Erro ao atualizar FCM token no Firestore:', error);
@@ -76,10 +92,10 @@ export function useFCM() {
     setupFCM();
 
     // Configurar listener para mudanças no token
-    const unsubscribe = messaging().onTokenRefresh(token => {
+    const unsubscribe = messaging().onTokenRefresh(async token => {
       setFcmToken(token);
       if (userData?.uid) {
-        updateTokenInFirestore(token);
+        await updateTokenInFirestore(token);
       }
     });
 
