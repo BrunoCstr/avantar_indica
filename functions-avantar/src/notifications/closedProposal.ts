@@ -183,7 +183,7 @@ export const closedProposal = functions.firestore.onDocumentUpdated(
                   ${afterData.commission ? `<span><strong>Sua comissão:</strong> R$ ${formatCurrency(afterData.commission)}</span>` : ''}
                 </div>
                 <p></p>
-                <a class='anchorLink' href="https://indica.avantar.com.br">👉 Acesse agora o app para ver sua comissão na carteira!</a>
+                <a class='anchorLink' href="https://adm.avantar.com.br">👉 Acesse agora o app para ver sua comissão na carteira!</a>
                 <br>
                 <span>Parabéns pela indicação! Continue indicando e ganhe mais! 🚀</span>
                 <span style='color:#6600CC'>Equipe Avantar Indica</span>

@@ -31,10 +31,13 @@ export const withdrawalStatus = functions.firestore.onDocumentUpdated(
 
     // Verificar se o status mudou para "PAGO" ou "RECUSADO"
     const statusChanged = beforeData.status !== afterData.status;
-    const isPaidOrRejected = afterData.status === 'PAGO' || afterData.status === 'RECUSADO';
+    const isPaidOrRejected =
+      afterData.status === 'PAGO' || afterData.status === 'RECUSADO';
 
     if (statusChanged && isPaidOrRejected) {
-      console.log(`Status mudou para ${afterData.status}, enviando notificações...`);
+      console.log(
+        `Status mudou para ${afterData.status}, enviando notificações...`,
+      );
 
       // Buscar o usuário que fez a solicitação pelo userId
       if (!afterData.userId) {
@@ -57,19 +60,22 @@ export const withdrawalStatus = functions.firestore.onDocumentUpdated(
       const userId = userDoc.id;
 
       // Verificar se o usuário tem preferências de notificação habilitadas para saque
-      const withdrawNotificationEnabled = userData?.notificationsPreferences?.withdraw !== false;
-      
+      const withdrawNotificationEnabled =
+        userData?.notificationsPreferences?.withdraw !== false;
+
       if (!withdrawNotificationEnabled) {
-        console.log('Usuário tem notificações de saque desabilitadas, pulando envio');
+        console.log(
+          'Usuário tem notificações de saque desabilitadas, pulando envio',
+        );
         return;
       }
 
       // Definir mensagens baseadas no status
       const isPaid = afterData.status === 'PAGO';
-      const title = isPaid 
+      const title = isPaid
         ? '✅ Seu saque foi aprovado!'
         : '❌ Seu saque foi recusado';
-      
+
       const bodyMessage = isPaid
         ? `Ótima notícia! Seu saque de R$ ${formatCurrency(afterData.amount)} foi aprovado e será processado em breve.`
         : `Infelizmente, seu saque de R$ ${formatCurrency(afterData.amount)} foi recusado. Entre em contato com sua unidade para mais informações.`;
@@ -138,7 +144,7 @@ export const withdrawalStatus = functions.firestore.onDocumentUpdated(
 
       // Verificar se o usuário tem email habilitado nas preferências
       const emailEnabled = userData?.notificationsPreferences?.email !== false;
-      
+
       // Enviando email para o usuário (apenas se email estiver habilitado)
       if (userData?.email && emailEnabled) {
         const transporter = nodemailer.createTransport({
@@ -151,11 +157,11 @@ export const withdrawalStatus = functions.firestore.onDocumentUpdated(
           },
         });
 
-        const emailSubject = isPaid 
+        const emailSubject = isPaid
           ? '✅ Seu saque foi aprovado!'
           : '❌ Seu saque foi recusado';
 
-        const emailContent = isPaid 
+        const emailContent = isPaid
           ? `
             <h1 style='color:#6600CC; font-size: 24px'>✅ Seu saque foi aprovado!</h1>
             <p>Olá, ${userData.fullName || 'Usuário'}!</p>
@@ -168,7 +174,6 @@ export const withdrawalStatus = functions.firestore.onDocumentUpdated(
             </div>
             <p></p>
             <p>O valor será transferido para sua chave PIX em breve!</p>
-            <a class='anchorLink' href="https://indica.avantar.com.br>👉 Acesse o app para acompanhar suas transações</a>
             <br>
             <span>Parabéns! Continue indicando e ganhe mais! 🚀</span>
           `
@@ -183,7 +188,6 @@ export const withdrawalStatus = functions.firestore.onDocumentUpdated(
             </div>
             <p></p>
             <p>Para mais informações sobre o motivo da recusa, entre em contato com sua unidade: ${afterData.unitName || 'unidade responsável'}.</p>
-            <a class='anchorLink' href="https://indica.avantar.com.br>👉 Acesse o app para mais detalhes</a>
             <br>
             <span>Continue indicando e tente novamente! 💪</span>
           `;
@@ -243,7 +247,9 @@ export const withdrawalStatus = functions.firestore.onDocumentUpdated(
 
         try {
           await transporter.sendMail(mailOptions);
-          console.log(`E-mail de status de saque enviado com sucesso para ${userData.email}`);
+          console.log(
+            `E-mail de status de saque enviado com sucesso para ${userData.email}`,
+          );
         } catch (error) {
           console.error('Erro ao enviar email:', error);
         }
