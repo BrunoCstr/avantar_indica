@@ -175,7 +175,7 @@ export function WalletScreen() {
 
   async function handleWithdrawalRequest() {
     // Verificar se o usuário tem chave PIX cadastrada
-    if (!userData?.pixKey || userData.pixKey.trim() === '') {
+    if (!userData?.pixKey || userData.pixKey.trim() === '' || userData.pixKey === 'Não cadastrado') {
       setModalMessage({
         title: 'Chave PIX não cadastrada',
         description:

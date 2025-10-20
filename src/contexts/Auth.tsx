@@ -224,7 +224,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
           fcmToken: fcmToken,
           profilePicture: profilePictureUrl,
           phone: phoneCleaned,
-          pixKey: null,
+          pixKey: "Não cadastrado",
           unitName: unitName,
           disabled: false,
           notificationsPreferences: {
