@@ -40,7 +40,11 @@ export function IndicateScreen() {
   const {paddingBottom} = useBottomNavigationPadding();
   const {isSmallScreen, fontSize, horizontalPadding} = useResponsive();
 
-  const [products, setProducts] = useState<string[]>([]);
+  const [products, setProducts] = useState<string[]>([
+    'Seguro',
+    'Consórcio',
+    'Plano de Saúde',
+  ]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState({
     title: '',
@@ -49,7 +53,11 @@ export function IndicateScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState('');
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<any[]>([
+    {label: 'Seguro', value: 'Seguro'},
+    {label: 'Consórcio', value: 'Consórcio'},
+    {label: 'Plano de Saúde', value: 'Plano de Saúde'},
+  ]);
   const [isConfirmationModalVisible, setIsConfirmationModalVisible] =
     useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
@@ -61,31 +69,6 @@ export function IndicateScreen() {
   // Animações para feedback visual
   const scaleAnim = useState(new Animated.Value(1))[0];
   const fadeAnim = useState(new Animated.Value(0))[0];
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const productsSnapshot = await firestore().collection('products').get();
-        const productsList = productsSnapshot.docs.map(doc => doc.data());
-
-        const sortedProducts = productsList
-          .map(product => product.name)
-          .sort((a, b) => a.localeCompare(b, 'pt-BR'));
-
-        setProducts(sortedProducts);
-
-        // Configurar items para o dropdown
-        const dropdownItems = sortedProducts.map(product => ({
-          label: product,
-          value: product,
-        }));
-        setItems(dropdownItems);
-      } catch (error) {
-        console.error('Erro ao buscar os produtos:', error);
-      }
-    };
-    fetchProducts();
-  }, []);
 
   const form = useForm<IndicationSchema>({
     resolver: zodResolver(indicationSchema),
@@ -174,7 +157,7 @@ export function IndicateScreen() {
     setFormValue('phone', indication.phone);
     setFormValue('product', indication.product);
     setFormValue('observations', indication.observations || '');
-    setValue(indication.product);
+    setValue(indication.product || '');
     setConsentChecked(true);
     setEditingIndex(index);
   };
@@ -450,7 +433,7 @@ export function IndicateScreen() {
                         color: colors.white
                       }}
                       open={open}
-                      value={fieldValue}
+                      value={fieldValue || ''}
                       items={items}
                       setOpen={setOpen}
                       setValue={callback => {

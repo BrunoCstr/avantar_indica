@@ -4,6 +4,7 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import IndicationsEmpty from '../assets/images/indications_empty.svg';
 import {Spinner} from './Spinner';
 import {useResponsive} from '../hooks/useResponsive';
+import { BanknoteArrowDown, HeartPulse, Shield } from 'lucide-react-native';
 
 type indicationsData = {
   product: string;
@@ -25,49 +26,23 @@ const DashboardIndicacoes = ({data, isLoading = false}: DashboardIndicacoesProps
 
   const getIconNameByProduct = (product: string) => {
     switch (product) {
-      case 'AERONÁUTICO':
-        return 'plane-up';
-      case 'AGRO - RURAL':
-        return 'sun-plant-wilt';
-      case 'AUTO':
-        return 'car';
-      case 'CAMINHÃO':
-        return 'truck-front';
-      case 'CONDOMÍNIO':
-        return 'house-chimney-user';
-      case 'DEMAIS RAMOS':
-        return 'shield-halved';
-      case 'MOTO':
-        return 'motorcycle';
-      case 'NÁUTICO':
-        return 'ship';
-      case 'RESIDENCIAL':
-        return 'house-chimney';
-      case 'PRODUTOS FINANCEIROS':
-        return 'money-check-dollar';
-      case 'RURAL':
-        return 'plant-wilt';
-      case 'SAÚDE':
-        return 'heart-pulse';
-      case 'SERVICOS':
-        return 'screwdriver-wrench';
-      case 'GARANTIA E RESPONSABILIDADES':
-        return 'shield-halved';
-      case 'CONSÓRCIO':
-        return 'money-check';
+      case 'Seguro':
+        return <Shield width={22} height={22} color="#4A04A5" />;
+      case 'Consórcio':
+        return <BanknoteArrowDown width={22} height={22} color="#4A04A5" />;
+      case 'Plano de Saúde':
+        return <HeartPulse width={22} height={22} color="#4A04A5" />;
+      case "":
+        return <Shield width={22} height={22} color="#4A04A5" />;
       default:
-        return 'shield-halved';
+        return <Shield width={22} height={22} color="#4A04A5" />;
     }
   };
 
   const renderIndicacaoItem = (item: any, index: number) => (
     <View key={index} className="flex-row items-center">
       <View className={`bg-[#E3E3E3] h-10 w-10 rounded-md justify-center items-center mr-4`}>
-        <FontAwesome6
-          name={getIconNameByProduct(item.product)}
-          size={22}
-          color="#4A04A5"
-        />
+        {getIconNameByProduct(item.product)}
       </View>
 
       <View className="flex-1 mr-4">

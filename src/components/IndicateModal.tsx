@@ -30,7 +30,11 @@ interface ModalProps {
 
 export function IndicateModal({visible, onClose}: ModalProps) {
   const {userData} = useAuth();
-  const [products, setProducts] = useState<string[]>([]);
+  const [products, setProducts] = useState<string[]>([
+    'Seguro',
+    'Consórcio',
+    'Plano de Saúde',
+  ]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState({
     title: '',
@@ -39,51 +43,13 @@ export function IndicateModal({visible, onClose}: ModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState('');
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<any[]>([
+    {label: 'Seguro', value: 'Seguro'},
+    {label: 'Consórcio', value: 'Consórcio'},
+    {label: 'Plano de Saúde', value: 'Plano de Saúde'},
+  ]);
   const [isConfirmationModalVisible, setIsConfirmationModalVisible] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const productsSnapshot = await firestore()
-          .collection('products')
-          .get();
-        const productsList = productsSnapshot.docs.map(doc => doc.data());
-
-        const sortedProducts = productsList
-          .map(product => product.name)
-          .sort((a, b) => a.localeCompare(b, 'pt-BR'));
-
-        setProducts(sortedProducts);
-
-        // Configurar items para o dropdown
-        const dropdownItems = sortedProducts.map(product => ({
-          label: product,
-          value: product,
-        }));
-        setItems(dropdownItems);
-      } catch (error) {
-        console.error('Erro ao buscar os produtos:', error);
-      }
-    };
-    fetchProducts();
-  }, []);
-
-  // Reset completo quando o modal é fechado
-  useEffect(() => {
-    if (!visible) {
-      // Fechar dropdown se estiver aberto
-      setOpen(false);
-      // Resetar formulário
-      reset();
-      // Resetar estados
-      setValue('');
-      setConsentChecked(false);
-      setIsConfirmationModalVisible(false);
-      setIsModalVisible(false);
-    }
-  }, [visible, reset]);
 
   const {
     control,
@@ -99,6 +65,21 @@ export function IndicateModal({visible, onClose}: ModalProps) {
       observations: '',
     },
   });
+
+  // Reset completo quando o modal é fechado
+  useEffect(() => {
+    if (!visible) {
+      // Fechar dropdown se estiver aberto
+      setOpen(false);
+      // Resetar formulário
+      reset();
+      // Resetar estados
+      setValue('');
+      setConsentChecked(false);
+      setIsConfirmationModalVisible(false);
+      setIsModalVisible(false);
+    }
+  }, [visible, reset]);
 
   const onSubmit = async (data: IndicationSchema) => {
     try {
@@ -253,7 +234,7 @@ export function IndicateModal({visible, onClose}: ModalProps) {
                       color: colors.white
                     }}
                     open={open}
-                    value={fieldValue}
+                    value={fieldValue || ''}
                     items={items}
                     setOpen={setOpen}
                     setValue={callback => {

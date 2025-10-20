@@ -29,6 +29,7 @@
     "date-fns": "^4.1.0",
     "jetify": "^1.0.2",
     "locale": "^0.1.0",
+    "lucide-react-native": "^0.546.0",
     "metro": "^0.82.1",
     "nativewind": "^4.1.23",
     "nodemailer": "^6.10.0",
