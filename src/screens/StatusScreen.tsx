@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Trash2 } from 'lucide-react-native';
 
 import firestore, {
   getFirestore,
@@ -29,6 +30,7 @@ import {TextInput} from 'react-native-gesture-handler';
 import {BackButton} from '../components/BackButton';
 import {FilterDropdown} from '../components/FilterDropdown';
 import {StatusScreenSkeleton} from '../components/skeletons/StatusScreenSkeleton';
+import {CustomModal} from '../components/CustomModal';
 import {useAuth} from '../contexts/Auth';
 import {
   filterStatusItems,
@@ -54,6 +56,12 @@ export function StatusScreen() {
   const [selectedDetail, setSelectedDetail] = useState<any | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<UnifiedStatusItem | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const filterOptions = [
     // Filtros por tipo
@@ -195,9 +203,10 @@ export function StatusScreen() {
             packagedIndicationId: data.packagedIndicationId,
             unitName: data.unitName,
             archived: data.archived,
+            trash: data.trash,
           };
         })
-        .filter(item => item.archived !== true);
+        .filter(item => item.trash !== true && item.archived !== true);
       updateAndSort();
     });
 
@@ -276,6 +285,85 @@ export function StatusScreen() {
   const limitText = (text: string, maxLength: number = 25) => {
     if (text.length <= maxLength) return text;
     return text.substring(0, maxLength) + '...';
+  };
+
+  // Função para verificar se pode excluir uma indicação/oportunidade
+  const canDeleteIndication = (item: UnifiedStatusItem): boolean => {
+    if (item.type === 'bulk') return false;
+    return item.status === 'PENDENTE CONTATO';
+  };
+
+  // Função para verificar se pode excluir um lote em massa
+  const canDeleteBulk = (item: UnifiedStatusItem): boolean => {
+    if (item.type !== 'bulk') return false;
+    const processed = item.processed || 0;
+    const total = item.total || 0;
+    // Pode excluir se não tiver nenhum item processado e todos estiverem pendentes
+    return processed === 0 && total > 0;
+  };
+
+  // Função para abrir modal de exclusão de indicação/oportunidade
+  const handleDeleteIndication = (item: UnifiedStatusItem) => {
+    if (!canDeleteIndication(item)) return;
+    setItemToDelete(item);
+    setShowDeleteModal(true);
+  };
+
+  // Função para abrir modal de exclusão de lote em massa
+  const handleDeleteBulk = (item: UnifiedStatusItem) => {
+    if (!canDeleteBulk(item) || item.type !== 'bulk') return;
+    setItemToDelete(item);
+    setShowDeleteModal(true);
+  };
+
+  // Função para confirmar exclusão
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
+
+    try {
+      setShowDeleteModal(false);
+
+      if (itemToDelete.type === 'bulk') {
+        await firestore()
+          .collection('packagedIndications')
+          .doc(itemToDelete.id)
+          .update({
+            trash: true,
+            trashedAt: firestore.FieldValue.serverTimestamp(),
+          });
+        setSuccessMessage('Lote em massa excluído com sucesso!');
+      } else {
+        const collectionName =
+          itemToDelete.type === 'opportunity' ? 'opportunities' : 'indications';
+        await firestore()
+          .collection(collectionName)
+          .doc(itemToDelete.id)
+          .update({
+            trash: true,
+            trashedAt: firestore.FieldValue.serverTimestamp(),
+          });
+        setSuccessMessage(
+          `${itemToDelete.type === 'opportunity' ? 'Oportunidade' : 'Indicação'} excluída com sucesso!`,
+        );
+      }
+
+      setItemToDelete(null);
+      setShowSuccessModal(true);
+    } catch (error) {
+      console.error('Erro ao excluir:', error);
+      setItemToDelete(null);
+      setErrorMessage('Não foi possível excluir. Tente novamente.');
+      setShowErrorModal(true);
+    }
+  };
+
+  // Função para obter mensagem de exclusão
+  const getDeleteMessage = () => {
+    if (!itemToDelete) return '';
+    if (itemToDelete.type === 'bulk') {
+      return `Deseja realmente excluir este lote em massa com ${itemToDelete.total} indicações?`;
+    }
+    return `Deseja realmente excluir ${itemToDelete.type === 'opportunity' ? 'a oportunidade' : 'a indicação'} de ${itemToDelete.name}?`;
   };
 
   // Função para obter a cor do status
@@ -1139,42 +1227,134 @@ export function StatusScreen() {
                       relativeDate = formatTimeAgo(sentDate);
                     }
                     return (
-                      <TouchableOpacity
-                        className="bg-white rounded-xl mb-2"
-                        activeOpacity={0.7}
+                      <View className="bg-white rounded-xl mb-2"
                         style={{
                           shadowColor: '#000',
                           shadowOffset: {width: 2, height: 2},
                           shadowOpacity: 0.1,
                           shadowRadius: 4,
                           elevation: 5,
-                        }}
+                        }}>
+                        <TouchableOpacity
+                          activeOpacity={0.7}
+                          onPress={() => {
+                            setSelectedBulk(item);
+                            setShowBulkModal(true);
+                          }}>
+                          <View
+                            className={`flex-row items-center ${isSmallScreen ? 'p-3' : 'p-4'}`}>
+                            {/* Avatar */}
+                            <View
+                              className={`${isSmallScreen ? 'w-10 h-10' : 'w-12 h-12'} rounded-full items-center justify-center mr-4`}
+                              style={{backgroundColor: colors.primary_purple}}>
+                              <FontAwesome6
+                                name="layer-group"
+                                size={isSmallScreen ? 18 : 22}
+                                color={colors.white}
+                              />
+                            </View>
+                            {/* Informações */}
+                            <View className="flex-1">
+                              <View className="flex-row items-center justify-between mb-1">
+                                <Text
+                                  className={`text-black font-bold ${isSmallScreen ? 'text-sm' : 'text-base'} flex-1`}>
+                                  Lote em massa
+                                </Text>
+                                <Text
+                                  className={`${isSmallScreen ? 'text-xs' : 'text-xs'} text-black ml-2`}>
+                                  {relativeDate}
+                                </Text>
+                              </View>
+                              <Text
+                                className={`text-black ${isSmallScreen ? 'text-xs' : 'text-sm'} mb-2`}>
+                                {item.product}
+                              </Text>
+                              <View className="flex-row items-center justify-between">
+                                <View
+                                  className="self-start px-3 py-1 w-auto rounded-full"
+                                  style={{
+                                    backgroundColor:
+                                      item.status === 'Concluído'
+                                        ? '#dcfce7'
+                                        : '#E6DBFF',
+                                  }}>
+                                  <Text
+                                    className={`${isSmallScreen ? 'text-xs' : 'text-xs'} font-semibold`}
+                                    style={{
+                                      color:
+                                        item.status === 'Concluído'
+                                          ? colors.green
+                                          : colors.primary_purple,
+                                    }}>
+                                    {item.status}
+                                  </Text>
+                                </View>
+                                {/* Badge para identificar o tipo */}
+                                <View
+                                  className="px-2 py-1 rounded-md"
+                                  style={{backgroundColor: '#f3e8ff'}}>
+                                  <Text
+                                    className={`${isSmallScreen ? 'text-xs' : 'text-xs'} font-medium`}
+                                    style={{color: colors.primary_purple}}>
+                                    Indicação em massa
+                                  </Text>
+                                </View>
+                              </View>
+                            </View>
+                            {/* Botão de exclusão */}
+                            {canDeleteBulk(item) && (
+                              <TouchableOpacity
+                                onPress={() => handleDeleteBulk(item)}
+                                className="ml-2"
+                                style={{
+                                  padding: 8,
+                                }}>
+                                <Trash2 size={20} color={colors.red} />
+                              </TouchableOpacity>
+                            )}
+                          </View>
+                        </TouchableOpacity>
+                      </View>
+                    );
+                  }
+
+                  return (
+                    <View className="bg-white rounded-xl mb-2"
+                      style={{
+                        shadowColor: '#000',
+                        shadowOffset: {width: 2, height: 2},
+                        shadowOpacity: 0.1,
+                        shadowRadius: 4,
+                        elevation: 5, // necessário para Android
+                      }}>
+                      <TouchableOpacity
+                        activeOpacity={0.7}
                         onPress={() => {
-                          setSelectedBulk(item);
-                          setShowBulkModal(true);
+                          setSelectedDetail(item);
+                          setShowDetailModal(true);
                         }}>
                         <View
                           className={`flex-row items-center ${isSmallScreen ? 'p-3' : 'p-4'}`}>
                           {/* Avatar */}
                           <View
                             className={`${isSmallScreen ? 'w-10 h-10' : 'w-12 h-12'} rounded-full items-center justify-center mr-4`}
-                            style={{backgroundColor: colors.primary_purple}}>
-                            <FontAwesome6
-                              name="layer-group"
-                              size={isSmallScreen ? 18 : 22}
-                              color={colors.white}
-                            />
+                            style={{backgroundColor: colors.tertiary_purple}}>
+                            <Text
+                              className={`text-white font-bold ${isSmallScreen ? 'text-xs' : 'text-sm'}`}>
+                              {getInitials(item.name)}
+                            </Text>
                           </View>
+
                           {/* Informações */}
                           <View className="flex-1">
                             <View className="flex-row items-center justify-between mb-1">
                               <Text
                                 className={`text-black font-bold ${isSmallScreen ? 'text-sm' : 'text-base'} flex-1`}>
-                                Lote em massa
+                                {limitText(item.name)}
                               </Text>
                               <Text
                                 className={`${isSmallScreen ? 'text-xs' : 'text-xs'} text-black ml-2`}>
-                                {relativeDate}
+                                {item.updatedAt}
                               </Text>
                             </View>
                             <Text
@@ -1185,120 +1365,52 @@ export function StatusScreen() {
                               <View
                                 className="self-start px-3 py-1 w-auto rounded-full"
                                 style={{
-                                  backgroundColor:
-                                    item.status === 'Concluído'
-                                      ? '#dcfce7'
-                                      : '#E6DBFF',
+                                  backgroundColor: getStatusBgColor(item.status),
                                 }}>
                                 <Text
                                   className={`${isSmallScreen ? 'text-xs' : 'text-xs'} font-semibold`}
-                                  style={{
-                                    color:
-                                      item.status === 'Concluído'
-                                        ? colors.green
-                                        : colors.primary_purple,
-                                  }}>
+                                  style={{color: getStatusColor(item.status)}}>
                                   {item.status}
                                 </Text>
                               </View>
                               {/* Badge para identificar o tipo */}
                               <View
                                 className="px-2 py-1 rounded-md"
-                                style={{backgroundColor: '#f3e8ff'}}>
+                                style={{
+                                  backgroundColor:
+                                    item.type === 'opportunity'
+                                      ? '#dcfce7'
+                                      : '#dbeafe',
+                                }}>
                                 <Text
                                   className={`${isSmallScreen ? 'text-xs' : 'text-xs'} font-medium`}
-                                  style={{color: colors.primary_purple}}>
-                                  Indicação em massa
+                                  style={{
+                                    color:
+                                      item.type === 'opportunity'
+                                        ? '#16a34a'
+                                        : '#2563eb',
+                                  }}>
+                                  {item.type === 'opportunity'
+                                    ? 'Oportunidade'
+                                    : 'Indicação'}
                                 </Text>
                               </View>
                             </View>
                           </View>
+                          {/* Botão de exclusão */}
+                          {canDeleteIndication(item) && (
+                            <TouchableOpacity
+                              onPress={() => handleDeleteIndication(item)}
+                              className="ml-2"
+                              style={{
+                                padding: 8,
+                              }}>
+                              <Trash2 size={20} color={colors.red} />
+                            </TouchableOpacity>
+                          )}
                         </View>
                       </TouchableOpacity>
-                    );
-                  }
-
-                  return (
-                    <TouchableOpacity
-                      className="bg-white rounded-xl mb-2"
-                      activeOpacity={0.7}
-                      style={{
-                        shadowColor: '#000',
-                        shadowOffset: {width: 2, height: 2},
-                        shadowOpacity: 0.1,
-                        shadowRadius: 4,
-                        elevation: 5, // necessário para Android
-                      }}
-                      onPress={() => {
-                        setSelectedDetail(item);
-                        setShowDetailModal(true);
-                      }}>
-                      <View
-                        className={`flex-row items-center ${isSmallScreen ? 'p-3' : 'p-4'}`}>
-                        {/* Avatar */}
-                        <View
-                          className={`${isSmallScreen ? 'w-10 h-10' : 'w-12 h-12'} rounded-full items-center justify-center mr-4`}
-                          style={{backgroundColor: colors.tertiary_purple}}>
-                          <Text
-                            className={`text-white font-bold ${isSmallScreen ? 'text-xs' : 'text-sm'}`}>
-                            {getInitials(item.name)}
-                          </Text>
-                        </View>
-
-                        {/* Informações */}
-                        <View className="flex-1">
-                          <View className="flex-row items-center justify-between mb-1">
-                            <Text
-                              className={`text-black font-bold ${isSmallScreen ? 'text-sm' : 'text-base'} flex-1`}>
-                              {limitText(item.name)}
-                            </Text>
-                            <Text
-                              className={`${isSmallScreen ? 'text-xs' : 'text-xs'} text-black ml-2`}>
-                              {item.updatedAt}
-                            </Text>
-                          </View>
-                          <Text
-                            className={`text-black ${isSmallScreen ? 'text-xs' : 'text-sm'} mb-2`}>
-                            {item.product}
-                          </Text>
-                          <View className="flex-row items-center justify-between">
-                            <View
-                              className="self-start px-3 py-1 w-auto rounded-full"
-                              style={{
-                                backgroundColor: getStatusBgColor(item.status),
-                              }}>
-                              <Text
-                                className={`${isSmallScreen ? 'text-xs' : 'text-xs'} font-semibold`}
-                                style={{color: getStatusColor(item.status)}}>
-                                {item.status}
-                              </Text>
-                            </View>
-                            {/* Badge para identificar o tipo */}
-                            <View
-                              className="px-2 py-1 rounded-md"
-                              style={{
-                                backgroundColor:
-                                  item.type === 'opportunity'
-                                    ? '#dcfce7'
-                                    : '#dbeafe',
-                              }}>
-                              <Text
-                                className={`${isSmallScreen ? 'text-xs' : 'text-xs'} font-medium`}
-                                style={{
-                                  color:
-                                    item.type === 'opportunity'
-                                      ? '#16a34a'
-                                      : '#2563eb',
-                                }}>
-                                {item.type === 'opportunity'
-                                  ? 'Oportunidade'
-                                  : 'Indicação'}
-                              </Text>
-                            </View>
-                          </View>
-                        </View>
-                      </View>
-                    </TouchableOpacity>
+                    </View>
                   );
                 }}
                 refreshControl={
@@ -1321,6 +1433,42 @@ export function StatusScreen() {
           {renderBulkModal()}
           {/* Modal de detalhes de indicação/oportunidade */}
           {renderDetailModal()}
+          
+          {/* Modal de confirmação de exclusão */}
+          <CustomModal
+            visible={showDeleteModal}
+            onClose={() => {
+              setShowDeleteModal(false);
+              setItemToDelete(null);
+            }}
+            onPress={confirmDelete}
+            title="Confirmar Exclusão"
+            description={getDeleteMessage()}
+            buttonText="Excluir"
+            cancelButtonText="Cancelar"
+            onCancelButtonPress={() => {
+              setShowDeleteModal(false);
+              setItemToDelete(null);
+            }}
+          />
+
+          {/* Modal de sucesso */}
+          <CustomModal
+            visible={showSuccessModal}
+            onClose={() => setShowSuccessModal(false)}
+            title="Sucesso"
+            description={successMessage}
+            buttonText="OK"
+          />
+
+          {/* Modal de erro */}
+          <CustomModal
+            visible={showErrorModal}
+            onClose={() => setShowErrorModal(false)}
+            title="Erro"
+            description={errorMessage}
+            buttonText="OK"
+          />
         </View>
       )}
     </ImageBackground>

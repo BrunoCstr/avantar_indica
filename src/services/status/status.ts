@@ -61,6 +61,8 @@ export interface Opportunity {
   indicator_id: string;
   createdAt: any;
   updatedAtOriginal?: any; // Timestamp original para ordenação
+  trash?: boolean;
+  archived?: boolean;
 }
 
 export interface Indication {
@@ -72,6 +74,8 @@ export interface Indication {
   indicator_id: string;
   createdAt: any;
   updatedAtOriginal?: any; // Timestamp original para ordenação
+  trash?: boolean;
+  archived?: boolean;
 }
 
 // Interface unificada para exibir tanto oportunidades quanto indicações
@@ -85,6 +89,8 @@ export interface StatusItem {
   createdAt: any;
   type: 'opportunity' | 'indication'; // Campo para identificar o tipo
   updatedAtOriginal?: any; // Timestamp original para ordenação
+  trash?: boolean;
+  archived?: boolean;
 }
 
 export interface BulkStatusItem {
@@ -103,6 +109,8 @@ export interface BulkStatusItem {
   processed: number;
   packagedIndicationId: string;
   unitName?: string;
+  trash?: boolean;
+  archived?: boolean;
 }
 
 export type UnifiedStatusItem = StatusItem | BulkStatusItem;
@@ -354,7 +362,19 @@ export const getAllStatusItemsByUserId = async (userId: string): Promise<Unified
 export const getStatusStats = (items: UnifiedStatusItem[]): StatusStats => {
   const stats: StatusStats = {};
   items.forEach(item => {
-    stats[item.status] = (stats[item.status] || 0) + 1;
+    // Se for um lote em massa (bulk), contar as indicações individuais dentro dele
+    if (item.type === 'bulk' && item.indications && Array.isArray(item.indications)) {
+      item.indications.forEach((indication: any) => {
+        // Ignorar indicações que já foram enviadas (sent = true) pois já viraram oportunidades
+        if (indication.sent !== true) {
+          const status = indication.status || 'PENDENTE CONTATO';
+          stats[status] = (stats[status] || 0) + 1;
+        }
+      });
+    } else {
+      // Para indicações e oportunidades normais, contar normalmente
+      stats[item.status] = (stats[item.status] || 0) + 1;
+    }
   });
   return stats;
 };
