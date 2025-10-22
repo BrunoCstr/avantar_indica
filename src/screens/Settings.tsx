@@ -42,8 +42,8 @@ const CONTACTS_PERMISSION = Platform.select({
 });
 
 export const versionApp = {
-  version: '1.1.3',
-  date: '16-10-2025',
+  version: '1.1.5',
+  date: '22-10-2025',
 };
 
 export function Settings() {

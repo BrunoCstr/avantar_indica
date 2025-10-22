@@ -41,8 +41,8 @@ android {
         applicationId "com.avantar_indica"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 8
-        versionName "1.1.4"
+        versionCode 9
+        versionName "1.1.5"
         renderscriptTargetApi 21
         renderscriptSupportModeEnabled true
     }
