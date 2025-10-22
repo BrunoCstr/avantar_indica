@@ -9,6 +9,7 @@ import type {StackNavigationProp} from '@react-navigation/stack';
 import {useResponsive} from '../hooks/useResponsive';
 
 type RootStackParamList = {
+  BottomNavigator: { screen: string } | undefined;
   WaitingConfirmationScreen: undefined;
   IndicateInBulk: undefined;
   IndicateScreen: undefined;
@@ -32,7 +33,6 @@ import {IndicateModal} from './IndicateModal';
 import {OptionsModal} from './OptionsModal';
 import PlusIcon from '../assets/images/plus.svg';
 import { useAuth } from '../contexts/Auth';
-import {WaitingConfirmationScreen} from '../screens/WaitingConfirmationScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -203,7 +203,10 @@ export function BottomNavigator() {
         onIndicateIndividual={() => setShowModal(true)}
         onIndicateBulk={() => navigation.navigate('IndicateInBulk')}
         onIndicateMultiple={() => navigation.navigate('IndicateScreen')}
-        onViewStatus={() => navigation.navigate('StatusScreen')}
+        onViewStatus={() => {
+          // Navegar para o BottomNavigator e depois para a aba Status
+          navigation.navigate('BottomNavigator', { screen: 'Status' });
+        }}
         userRule={userData?.rule}
       />
     </>

@@ -75,6 +75,7 @@ export function IndicateScreen() {
     defaultValues: {
       fullName: '',
       phone: '',
+      email: '',
       product: '',
       observations: '',
     },
@@ -155,6 +156,7 @@ export function IndicateScreen() {
     const indication = indicationsList[index];
     setFormValue('fullName', indication.fullName);
     setFormValue('phone', indication.phone);
+    setFormValue('email', indication.email || '');
     setFormValue('product', indication.product);
     setFormValue('observations', indication.observations || '');
     setValue(indication.product || '');
@@ -208,6 +210,7 @@ export function IndicateScreen() {
             unitName: userData?.unitName,
             name: indication.fullName,
             phone: cleanedPhone,
+            email: indication.email || '',
             product: indication.product,
             observations: indication.observations || '',
             status: 'PENDENTE CONTATO',
@@ -409,6 +412,20 @@ export function IndicateScreen() {
                   /\d/,
                   /\d/,
                 ]}
+              />
+
+              <FormInputOld
+                name="email"
+                placeholder="E-mail (Opcional)"
+                control={control}
+                errorMessage={errors.email?.message}
+                borderColor={colors.blue}
+                backgroundColor={colors.tertiary_purple_opacity}
+                placeholderColor={colors.white_opacity}
+                height={55}
+                color={colors.white}
+                keyboardType="email-address"
+                autoCapitalize="none"
               />
 
               <View>

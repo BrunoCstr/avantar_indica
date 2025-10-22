@@ -41,6 +41,7 @@ export type ForgotPasswordSchema = z.infer<typeof forgotPasswordSchema>;
 export const indicationSchema = z.object({
   fullName: z.string().min(3, "Nome é obrigatório"),
   phone: z.string().min(14, "Digite um telefone válido!").max(15, "Digite um telefone válido!").regex(/^\(\d{2}\)\s?\d{4,5}-\d{4}$/, "Formato de telefone inválido!"),
+  email: z.string().email("E-mail inválido").optional().or(z.literal('')),
   product: z.string().optional(),
   observations: z.string().optional()
 })

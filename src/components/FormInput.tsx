@@ -1,6 +1,6 @@
 import React from 'react';
 import {Controller} from 'react-hook-form';
-import {TextInput} from 'react-native';
+import {TextInput, KeyboardTypeOptions} from 'react-native';
 import MaskInput from 'react-native-mask-input';
 import {withDefaultFont} from '../config/fontConfig';
 
@@ -17,6 +17,8 @@ interface FormInputProps {
   height: number;
   color?: string;
   fontSize?: number;
+  keyboardType?: KeyboardTypeOptions;
+  autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
 }
 
 export const FormInput = ({
@@ -31,7 +33,9 @@ export const FormInput = ({
   placeholderColor,
   height,
   color,
-  fontSize
+  fontSize,
+  keyboardType,
+  autoCapitalize
 }: FormInputProps) => (
   <>
     <Controller
@@ -45,6 +49,8 @@ export const FormInput = ({
             onChangeText={onChange}
             mask={mask} // Aplica a máscara se existir
             placeholderTextColor={errorMessage ? 'red' : placeholderColor}
+            keyboardType={keyboardType}
+            autoCapitalize={autoCapitalize}
             style={withDefaultFont({
               borderWidth: 1,
               borderColor: errorMessage ? 'red' : borderColor,
@@ -67,6 +73,8 @@ export const FormInput = ({
             value={value}
             secureTextEntry={secureTextEntry}
             placeholderTextColor={errorMessage ? 'red' : placeholderColor}
+            keyboardType={keyboardType}
+            autoCapitalize={autoCapitalize}
             style={withDefaultFont({
               borderWidth: 1,
               borderColor: errorMessage ? 'red' : borderColor,

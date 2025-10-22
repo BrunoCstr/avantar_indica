@@ -61,6 +61,7 @@ export function IndicateModal({visible, onClose}: ModalProps) {
     defaultValues: {
       fullName: '',
       phone: '',
+      email: '',
       product: '',
       observations: '',
     },
@@ -98,6 +99,7 @@ export function IndicateModal({visible, onClose}: ModalProps) {
         unitName: userData?.unitName,
         name: data.fullName,
         phone: cleanedPhone,
+        email: data.email || '',
         product: data.product,
         observations: data.observations,
         createdAt: firestore.FieldValue.serverTimestamp(),
@@ -211,6 +213,20 @@ export function IndicateModal({visible, onClose}: ModalProps) {
                   /\d/,
                 ]}
                 fontSize={13}
+              />
+              <FormInput
+                name="email"
+                placeholder="E-mail (Opcional)"
+                control={control}
+                errorMessage={errors.email?.message}
+                borderColor={colors.blue}
+                backgroundColor={colors.tertiary_purple_opacity}
+                placeholderColor={colors.white_opacity}
+                height={49}
+                color={colors.white_opacity}
+                fontSize={13}
+                keyboardType="email-address"
+                autoCapitalize="none"
               />
 
               <Controller
